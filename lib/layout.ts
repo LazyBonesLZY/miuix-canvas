@@ -62,7 +62,9 @@ export function centerItem(it: Item, screen: Screen, axis: "x" | "y" | "both"): 
 }
 
 export function previewScale(w: number, h: number, vw: number, vh: number) {
-  return Math.min(1, (vw - 48) / w, (vh - 120) / h);
+  const padX = vw <= 767 ? 24 : 48;
+  const padY = vw <= 767 ? 72 : 120;
+  return Math.min(1, (vw - padX) / Math.max(w, 1), (vh - padY) / Math.max(h, 1));
 }
 
 export function pinItem(it: Item, screen: Screen, edge: "left" | "right" | "top" | "bottom"): { x: number; y: number } {

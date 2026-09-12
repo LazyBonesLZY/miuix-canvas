@@ -56,6 +56,8 @@ export type Kind =
   | "listPopup"
   | "cascadingPopup"
   | "dropdownMenu"
+  | "iconDropdownMenu"
+  | "iconCascadingMenu"
   | "tooltip"
   | "textField"
   | "switch"
@@ -81,6 +83,7 @@ export type Kind =
   | "sliderPref"
   | "rangeSliderPref"
   | "dropdownPref"
+  | "spinnerPref"
   | "arrowPref";
 
 export type NavTab = { icon: string; label: string; to?: string; transition?: Transition };

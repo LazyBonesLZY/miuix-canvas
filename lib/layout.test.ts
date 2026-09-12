@@ -88,6 +88,12 @@ describe("previewScale", () => {
     expect(previewScale(412, 892, 800, 800)).toBeLessThan(1);
     expect(previewScale(412, 892, 800, 800)).toBeCloseTo((800 - 120) / 892);
   });
+
+  it("fits a desktop frame onto a phone preview", () => {
+    const scale = previewScale(1280, 800, 390, 700);
+    expect(1280 * scale).toBeLessThanOrEqual(390 - 24 + 0.01);
+    expect(800 * scale).toBeLessThanOrEqual(700 - 72 + 0.01);
+  });
 });
 
 describe("pinItem", () => {

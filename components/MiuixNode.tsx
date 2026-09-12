@@ -462,17 +462,34 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "listPopup":
     case "dropdownMenu":
+    case "iconDropdownMenu":
       return (
-        <div style={{ ...style, borderRadius: 16, background: p.surfaceContainer, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "6px 0" }}>
+        <div style={{ ...style, borderRadius: 16, background: p.surfaceContainer, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "6px 0", border: it.variant === "window" ? `1px solid ${p.outline}` : undefined, display: "flex", flexDirection: "column" }}>
+          {it.kind === "iconDropdownMenu" && (
+            <div style={{ display: "flex", justifyContent: "flex-end", padding: "4px 8px 8px" }}>
+              <div style={{ width: 40, height: 40, borderRadius: 20, display: "grid", placeItems: "center" }}>
+                <Symbol name={it.icon || "more_horiz"} size={22} color={p.onSurface} />
+              </div>
+            </div>
+          )}
           {(it.tabs ?? [{ label: it.label, icon: "" }]).map((tab, i) => (
             <div key={i} style={{ padding: "10px 16px", fontSize: 17, color: p.onSurface }}>{tab.label}</div>
           ))}
         </div>
       );
     case "cascadingPopup":
+    case "iconCascadingMenu":
       return (
-        <div style={{ ...style, display: "flex", gap: 8 }}>
-          <div style={{ flex: 1, borderRadius: 16, background: p.surfaceContainer, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "6px 0" }}>
+        <div style={{ ...style, display: "flex", gap: 8, flexDirection: it.kind === "iconCascadingMenu" ? "column" : "row" }}>
+          {it.kind === "iconCascadingMenu" && (
+            <div style={{ display: "flex", justifyContent: "flex-end" }}>
+              <div style={{ width: 40, height: 40, borderRadius: 20, display: "grid", placeItems: "center" }}>
+                <Symbol name={it.icon || "more_vert"} size={22} color={p.onSurface} />
+              </div>
+            </div>
+          )}
+          <div style={{ flex: 1, display: "flex", gap: 8 }}>
+          <div style={{ flex: 1, borderRadius: 16, background: p.surfaceContainer, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "6px 0", border: it.variant === "window" ? `1px solid ${p.outline}` : undefined }}>
             {(it.tabs ?? []).map((tab, i) => (
               <div key={i} style={{ padding: "10px 12px", fontSize: 14, color: p.onSurface, display: "flex", justifyContent: "space-between" }}>
                 <span>{tab.label}</span>
@@ -482,6 +499,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
           </div>
           <div style={{ width: 96, borderRadius: 16, background: p.surfaceContainerHigh, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "10px 12px", fontSize: 13, color: p.onSurfaceVariantSummary }}>
             {t("more", lang)}
+          </div>
           </div>
         </div>
       );
@@ -532,6 +550,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
         </div>
       );
     case "dropdownPref":
+    case "spinnerPref":
     case "arrowPref":
       return <PrefRow it={it} p={p} join={join} trailing={<Symbol name="chevron_right" size={22} color={p.onSurfaceVariantActions} />} />;
     default:

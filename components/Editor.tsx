@@ -20,6 +20,7 @@ import { tidyScreen } from "@/lib/tidy";
 import { KIND_SPEC, defaultPosition, makeItem } from "@/lib/tokens";
 import type { Doc, FramePreset, Guide, Kind, Platform, Screen, Selection } from "@/lib/types";
 import { BEZEL, FRAME_LABEL_H, GESTURE_H, HISTORY_MAX, clamp, frameSize, isTypingTarget, onGrid, uid } from "@/lib/types";
+import { useLayoutMode, type LayoutMode } from "@/lib/viewport";
 
 const GITHUB = "https://github.com/LazyBonesLZY/miuix-canvas";
 const MIN_Z = 0.25;
@@ -29,6 +30,41 @@ type View = { x: number; y: number; z: number };
 type LeftTab = "parts" | "layers";
 type RightTab = "inspect" | "theme" | "prompt";
 type Sheet = LeftTab | RightTab | null;
+
+const RAIL: { tab: NonNullable<Sheet>; icon: string }[] = [
+  { tab: "parts", icon: "widgets" },
+  { tab: "layers", icon: "layers" },
+  { tab: "inspect", icon: "tune" },
+  { tab: "theme", icon: "palette" },
+  { tab: "prompt", icon: "notes" },
+];
+
+function ToolRail({
+  lang,
+  sheet,
+  onPick,
+}: {
+  lang: Lang;
+  sheet: Sheet;
+  onPick: (tab: NonNullable<Sheet>) => void;
+}) {
+  return (
+    <nav className="tablet-rail">
+      {RAIL.map(({ tab, icon }) => (
+        <button
+          key={tab}
+          type="button"
+          data-on={sheet === tab ? "1" : undefined}
+          title={t(tab, lang)}
+          onClick={() => onPick(tab)}
+        >
+          <span className="ms">{icon}</span>
+          <span>{t(tab, lang)}</span>
+        </button>
+      ))}
+    </nav>
+  );
+}
 
 function useHistory(initial: Doc) {
   const [doc, setDocState] = useState(initial);
@@ -100,6 +136,8 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   const [left, setLeft] = useState<LeftTab>("parts");
   const [right, setRight] = useState<RightTab>("inspect");
   const [sheet, setSheet] = useState<Sheet>(null);
+  const layout = useLayoutMode();
+  const fitPad = layout === "phone" ? 20 : layout === "tablet" ? 36 : 56;
   const [preview, setPreview] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareText, setShareText] = useState("");
@@ -168,8 +206,8 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   const fitCanvas = useCallback(() => {
     const rect = canvasSize();
     if (!rect || rect.width < 40 || rect.height < 40) return;
-    setView(fitView(doc.screens, rect.width, rect.height, MIN_Z, MAX_Z));
-  }, [doc.screens]);
+    setView(fitView(doc.screens, rect.width, rect.height, MIN_Z, MAX_Z, fitPad));
+  }, [doc.screens, fitPad]);
 
   const centerSelection = useCallback((axis: "x" | "y" | "both" = "both") => {
     if (selection?.kind === "item") {
@@ -228,6 +266,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     if (!target) return;
     setSelection({ kind: "item", screenId: target, itemId: created });
     setRight("inspect");
+    if (layout === "phone") setSheet(null);
   };
 
   const addScreen = (preset: FramePreset) => {
@@ -257,20 +296,39 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       if (didFit.current) return;
       const rect = el.getBoundingClientRect();
       if (rect.width < 40 || rect.height < 40) return;
-      setView(fitView(doc.screens, rect.width, rect.height, MIN_Z, MAX_Z));
+      setView(fitView(doc.screens, rect.width, rect.height, MIN_Z, MAX_Z, fitPad));
       didFit.current = true;
     };
     run();
     const ro = new ResizeObserver(run);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [doc.screens, shareReady]);
+  }, [doc.screens, fitPad, shareReady]);
+
+  const lastLayout = useRef<LayoutMode | null>(null);
+  useEffect(() => {
+    if (layout === "desktop") setSheet(null);
+    if (lastLayout.current === null) {
+      lastLayout.current = layout;
+      return;
+    }
+    if (lastLayout.current === layout) return;
+    lastLayout.current = layout;
+    const id = requestAnimationFrame(() => {
+      const el = canvasRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 40 || rect.height < 40) return;
+      setView(fitView(doc.screens, rect.width, rect.height, MIN_Z, MAX_Z, fitPad));
+    });
+    return () => cancelAnimationFrame(id);
+  }, [doc.screens, fitPad, layout]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e.target)) return;
       const meta = e.metaKey || e.ctrlKey;
-      const overlay = preview || helpOpen || shareOpen || resetOpen || !!sheet;
+      const overlay = preview || helpOpen || shareOpen || resetOpen || (layout === "phone" && !!sheet);
       if (e.key === "Escape") {
         if (helpOpen) {
           setHelpOpen(false);
@@ -362,7 +420,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onUp);
     };
-  }, [centerSelection, deleteSelection, doc, fitCanvas, helpOpen, pinSelection, preview, redo, resetOpen, selection, shareOpen, sheet, undo]);
+  }, [centerSelection, deleteSelection, doc, fitCanvas, helpOpen, layout, pinSelection, preview, redo, resetOpen, selection, shareOpen, sheet, undo]);
 
   useEffect(() => {
     const el = canvasRef.current;
@@ -503,26 +561,34 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     setShareOpen(true);
   };
 
+  const pickSheet = (tab: NonNullable<Sheet>) => {
+    if (tab === "parts" || tab === "layers") setLeft(tab);
+    else setRight(tab);
+    setSheet((cur) => (cur === tab ? null : tab));
+  };
+
   const side = (kind: "left" | "right", children: React.ReactNode, extra = "") => (
-    <aside className={`desk-aside flex h-full min-h-0 shrink-0 flex-col border-[var(--line)] bg-[var(--surface)] ${kind === "left" ? "w-[272px] border-r" : "w-[300px] border-l"} ${extra}`}>
+    <aside className={`flex h-full min-h-0 shrink-0 flex-col border-[var(--line)] bg-[var(--surface)] ${kind === "left" ? "w-[272px] border-r" : "w-[300px] border-l"} ${extra}`}>
       {children}
     </aside>
   );
 
   const leftBody = (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="p-2">
-        <div className="miuix-tabbar">
-          {(["parts", "layers"] as LeftTab[]).map((tab) => (
-            <button key={tab} type="button" data-on={left === tab ? "1" : undefined} onClick={() => setLeft(tab)}>
-              {t(tab, lang)}
-            </button>
-          ))}
+      {layout === "desktop" && (
+        <div className="p-2">
+          <div className="miuix-tabbar">
+            {(["parts", "layers"] as LeftTab[]).map((tab) => (
+              <button key={tab} type="button" data-on={left === tab ? "1" : undefined} onClick={() => setLeft(tab)}>
+                {t(tab, lang)}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {left === "parts" ? (
-          <PartsPalette lang={lang} onAdd={(k) => { addItem(k); setSheet(null); }} onDragStart={(k) => { dragKind.current = k; }} />
+          <PartsPalette lang={lang} wide={layout === "phone"} onAdd={(k) => { addItem(k); }} onDragStart={(k) => { dragKind.current = k; }} />
         ) : (
           <LayersPanel
             doc={doc}
@@ -538,15 +604,17 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
 
   const rightBody = (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="p-2">
-        <div className="miuix-tabbar">
-          {(["inspect", "theme", "prompt"] as RightTab[]).map((tab) => (
-            <button key={tab} type="button" data-on={right === tab ? "1" : undefined} onClick={() => setRight(tab)}>
-              {t(tab, lang)}
-            </button>
-          ))}
+      {layout === "desktop" && (
+        <div className="p-2">
+          <div className="miuix-tabbar">
+            {(["inspect", "theme", "prompt"] as RightTab[]).map((tab) => (
+              <button key={tab} type="button" data-on={right === tab ? "1" : undefined} onClick={() => setRight(tab)}>
+                {t(tab, lang)}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {right === "inspect" && (
           <Inspector
@@ -574,9 +642,10 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   );
 
   return (
-    <div className="app-root flex flex-col" data-theme={doc.theme.mode} data-lang={lang}>
+    <div className="app-root flex flex-col" data-theme={doc.theme.mode} data-lang={lang} data-layout={layout}>
       <Toolbar
         lang={lang}
+        layout={layout}
         tool={tool}
         canUndo={canUndo}
         canRedo={canRedo}
@@ -616,10 +685,28 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
         }}
       />
       <div className="flex min-h-0 flex-1">
-        {side("left", leftBody)}
+        {layout === "desktop" && side("left", leftBody)}
+        {layout === "tablet" && (
+          <>
+            <ToolRail lang={lang} sheet={sheet} onPick={pickSheet} />
+            {sheet && (
+              <aside className="tablet-panel">
+                <div className="flex items-center justify-between gap-2 border-b border-[var(--line)] px-3 py-2">
+                  <span className="text-[15px] font-medium">{t(sheet, lang)}</span>
+                  <button type="button" className="press text-[13px] text-[var(--accent)]" onClick={() => setSheet(null)}>
+                    {t("hidePanel", lang)}
+                  </button>
+                </div>
+                <div className="min-h-0 flex-1 overflow-hidden">
+                  {sheet === "parts" || sheet === "layers" ? leftBody : rightBody}
+                </div>
+              </aside>
+            )}
+          </>
+        )}
         <div
           ref={canvasRef}
-          className={`relative min-w-0 flex-1 overflow-hidden ${tool === "hand" ? "cursor-grab" : "cursor-default"}`}
+          className={`canvas-stage relative min-w-0 flex-1 overflow-hidden ${tool === "hand" ? "cursor-grab" : "cursor-default"}`}
           style={{ background: "var(--canvas)" }}
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
@@ -747,41 +834,35 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
             })}
           </div>
         </div>
-        {side("right", rightBody)}
+        {layout === "desktop" && side("right", rightBody)}
       </div>
-      <nav className="mobile-bar">
-        {([
-          ["parts", "widgets"],
-          ["layers", "layers"],
-          ["inspect", "tune"],
-          ["theme", "palette"],
-          ["prompt", "notes"],
-        ] as const).map(([tab, icon]) => {
-          const on = sheet === tab;
-          return (
-            <button
-              key={tab}
-              type="button"
-              className={`press flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${on ? "text-[var(--accent)]" : "text-[var(--muted-strong)]"}`}
-              onClick={() => {
-                if (tab === "parts" || tab === "layers") setLeft(tab);
-                else setRight(tab);
-                setSheet(tab);
-              }}
-            >
-              <span className="ms text-[20px]">{icon}</span>
-              {t(tab, lang)}
-            </button>
-          );
-        })}
-      </nav>
-      {sheet && (
+      {layout === "phone" && (
+        <nav className="mobile-bar">
+          {RAIL.map(({ tab, icon }) => {
+            const on = sheet === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                className={`press flex min-h-12 flex-1 flex-col items-center gap-0.5 py-1.5 text-[11px] ${on ? "text-[var(--accent)]" : "text-[var(--muted-strong)]"}`}
+                onClick={() => pickSheet(tab)}
+              >
+                <span className="ms text-[20px]">{icon}</span>
+                {t(tab, lang)}
+              </button>
+            );
+          })}
+        </nav>
+      )}
+      {layout === "phone" && sheet && (
         <div className="preview-root mobile-sheet" onClick={() => setSheet(null)}>
           <div className="mobile-sheet-card" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-2 flex justify-end">
+            <div className="sheet-handle" />
+            <div className="mb-1 flex items-center justify-between px-1">
+              <span className="text-[15px] font-medium">{t(sheet, lang)}</span>
               <button type="button" className="press text-[13px] text-[var(--accent)]" onClick={() => setSheet(null)}>{t("close", lang)}</button>
             </div>
-            <div className="flex h-[70vh] min-h-0 flex-col overflow-hidden">
+            <div className="flex h-[min(70dvh,640px)] min-h-0 flex-col overflow-hidden">
               {sheet === "parts" || sheet === "layers" ? leftBody : rightBody}
             </div>
           </div>

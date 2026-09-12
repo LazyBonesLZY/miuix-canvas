@@ -34,6 +34,42 @@ describe("KIND_SPEC coverage", () => {
     expect(composableOf({ kind: "tabRow", variant: "contour" })).toBe("TabRowWithContour");
     expect(composableOf({ kind: "slider", variant: "vertical" })).toBe("VerticalSlider");
     expect(composableOf({ kind: "progress", variant: "infinite" })).toBe("InfiniteProgressIndicator");
+    expect(composableOf({ kind: "iconDropdownMenu", variant: "overlay" })).toBe("OverlayIconDropdownMenu");
+    expect(composableOf({ kind: "iconDropdownMenu", variant: "window" })).toBe("WindowIconDropdownMenu");
+    expect(composableOf({ kind: "iconCascadingMenu", variant: "window" })).toBe("WindowIconCascadingDropdownMenu");
+    expect(composableOf({ kind: "spinnerPref", variant: "overlay" })).toBe("OverlaySpinnerPreference");
+    expect(composableOf({ kind: "dropdownPref", variant: "window" })).toBe("WindowDropdownPreference");
+    expect(composableOf({ kind: "listPopup", variant: "window" })).toBe("WindowListPopup");
+    expect(composableOf({ kind: "cascadingPopup", variant: "overlay" })).toBe("OverlayCascadingListPopup");
+  });
+
+  it("can name every public composable from the official component index", () => {
+    const named = new Set(
+      KIND_ORDER.flatMap((kind) => {
+        const variants = KIND_SPEC[kind].variants ?? [undefined];
+        return variants.map((variant) => composableOf({ kind, variant }));
+      }),
+    );
+    const official = [
+      "Surface", "TopAppBar", "SmallTopAppBar", "NavigationBar", "FloatingNavigationBar", "NavigationRail",
+      "TabRow", "TabRowWithContour", "BreadcrumbBar", "Card", "BasicComponent", "Button",
+      "IconButton", "Text", "SmallTitle", "TextField", "Switch", "Checkbox", "RadioButton",
+      "Slider", "VerticalSlider", "RangeSlider", "NumberPicker", "LinearProgressIndicator",
+      "CircularProgressIndicator", "InfiniteProgressIndicator", "Snackbar", "Tooltip",
+      "RichTooltipBox", "Badge", "Icon", "FloatingActionButton", "FloatingToolbar",
+      "HorizontalDivider", "VerticalDivider", "PullToRefresh", "SearchBar", "ColorPalette",
+      "ColorPicker", "ArrowPreference", "SwitchPreference", "CheckboxPreference",
+      "RadioButtonPreference", "SliderPreference", "RangeSliderPreference",
+      "OverlayListPopup", "OverlayCascadingListPopup", "OverlayDropdownPreference",
+      "OverlaySpinnerPreference", "OverlayDropdownMenu", "OverlayIconDropdownMenu",
+      "OverlayIconCascadingDropdownMenu", "OverlayBottomSheet", "OverlayDialog",
+      "WindowListPopup", "WindowCascadingListPopup", "WindowDropdownPreference",
+      "WindowSpinnerPreference", "WindowDropdownMenu", "WindowIconDropdownMenu",
+      "WindowIconCascadingDropdownMenu", "WindowBottomSheet", "WindowDialog",
+    ];
+    for (const api of official) {
+      expect(named.has(api), api).toBe(true);
+    }
   });
 
   it("creates a gray default Button like Miuix ButtonDefaults.buttonColors()", () => {

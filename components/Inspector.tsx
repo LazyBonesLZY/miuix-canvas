@@ -176,9 +176,9 @@ export function Inspector({
                 <button type="button" className="self-start text-[11px] text-[var(--accent)]" onClick={() => patch({ selected: i })}>
                   {t("selected", lang)} {i === (it.selected ?? 0) ? "●" : "○"}
                 </button>
-                <div className="flex gap-1">
-                  <input className={input} value={tab.icon} onFocus={onBeginHistory} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)) }, false)} />
-                  <input className={input} value={tab.label} onFocus={onBeginHistory} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) }, false)} />
+                <div className="flex flex-col gap-1">
+                  <input className={input} value={tab.icon} onFocus={onBeginHistory} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)) }, false)} placeholder={t("icon", lang)} />
+                  <input className={input} value={tab.label} onFocus={onBeginHistory} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) }, false)} placeholder={t("label", lang)} />
                 </div>
                 <TargetSelect
                   doc={doc}

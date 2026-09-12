@@ -21,6 +21,7 @@ Browser canvas for sketching [Miuix](https://github.com/compose-miuix-ui/miuix) 
 
 ## Conventions
 
-- Comments and code in English. UI strings go through `lib/i18n.ts` (zh + en).
+- Comments and code in English. UI strings go through `lib/i18n.ts` (zh / en / ja / ko).
+- User-facing docs: `README.md` (English) and `README_CN.md` (Chinese).
 - Parts must map to real Miuix composables (`Button`, `SwitchPreference`, …), not Material 3.
 - Default seed is `#3482FF`. Cards and preferences sit on white `surfaceContainer` over gray `surface`.

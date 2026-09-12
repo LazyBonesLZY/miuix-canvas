@@ -61,9 +61,11 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   snackbar: { kind: "snackbar", category: "containment", icon: "call_to_action", w: full, h: 48, defaultLabel: L("已保存", "Saved", "保存しました", "저장됨"), composable: "Snackbar" },
   dialog: { kind: "dialog", category: "containment", icon: "web_stories", w: () => 320, h: 200, variants: ["overlay", "window"], defaultLabel: L("提示", "Notice", "確認", "알림"), defaultSupporting: L("确认要继续吗？", "Continue?", "続行しますか？", "계속할까요?"), composable: "OverlayDialog" },
   bottomSheet: { kind: "bottomSheet", category: "containment", icon: "bottom_sheets", w: edge, h: 280, edge: "bottom", variants: ["overlay", "window"], defaultLabel: L("更多操作", "More", "その他", "더보기"), defaultSupporting: L("从底部滑出的面板", "Sheet from the bottom", "下から出るシート", "아래에서 올라오는 시트"), composable: "OverlayBottomSheet" },
-  listPopup: { kind: "listPopup", category: "containment", icon: "list", w: () => 200, h: 160, defaultLabel: L("菜单", "Menu", "メニュー", "메뉴"), tabs: [{ icon: "", label: "复制" }, { icon: "", label: "分享" }, { icon: "", label: "删除" }], composable: "ListPopup" },
-  cascadingPopup: { kind: "cascadingPopup", category: "containment", icon: "account_tree", w: () => 280, h: 176, defaultLabel: L("级联菜单", "Cascading menu", "カスケードメニュー", "계단식 메뉴"), tabs: [{ icon: "", label: "编辑" }, { icon: "", label: "分享" }, { icon: "", label: "更多" }], composable: "ListPopup" },
+  listPopup: { kind: "listPopup", category: "containment", icon: "list", w: () => 200, h: 160, variants: ["overlay", "window"], defaultLabel: L("菜单", "Menu", "メニュー", "메뉴"), tabs: [{ icon: "", label: "复制" }, { icon: "", label: "分享" }, { icon: "", label: "删除" }], composable: "OverlayListPopup" },
+  cascadingPopup: { kind: "cascadingPopup", category: "containment", icon: "account_tree", w: () => 280, h: 176, variants: ["overlay", "window"], defaultLabel: L("级联菜单", "Cascading menu", "カスケードメニュー", "계단식 메뉴"), tabs: [{ icon: "", label: "编辑" }, { icon: "", label: "分享" }, { icon: "", label: "更多" }], composable: "OverlayCascadingListPopup" },
   dropdownMenu: { kind: "dropdownMenu", category: "containment", icon: "menu", w: () => 200, h: 168, variants: ["overlay", "window"], defaultLabel: L("下拉菜单", "Dropdown menu", "ドロップダウン", "드롭다운 메뉴"), tabs: [{ icon: "", label: "复制" }, { icon: "", label: "分享" }, { icon: "", label: "删除" }], composable: "OverlayDropdownMenu" },
+  iconDropdownMenu: { kind: "iconDropdownMenu", category: "containment", icon: "more_horiz", w: () => 200, h: 176, variants: ["overlay", "window"], defaultLabel: L("更多", "More", "その他", "더보기"), tabs: [{ icon: "", label: "编辑" }, { icon: "", label: "复制" }, { icon: "", label: "分享" }, { icon: "", label: "删除" }], composable: "OverlayIconDropdownMenu" },
+  iconCascadingMenu: { kind: "iconCascadingMenu", category: "containment", icon: "more_vert", w: () => 280, h: 176, variants: ["overlay", "window"], defaultLabel: L("更多", "More", "その他", "더보기"), tabs: [{ icon: "", label: "排序" }, { icon: "", label: "视图" }, { icon: "", label: "筛选" }], composable: "OverlayIconCascadingDropdownMenu" },
   tooltip: { kind: "tooltip", category: "containment", icon: "tooltip_2", w: () => 140, h: 36, variants: ["plain", "rich"], defaultLabel: L("提示文字", "Tooltip", "ツールチップ", "툴팁"), defaultSupporting: L("补充说明", "More detail", "補足", "추가 설명"), composable: "Tooltip" },
   textField: { kind: "textField", category: "inputs", icon: "edit_note", w: full, h: 50, defaultLabel: L("输入内容", "Enter text", "入力", "입력"), composable: "TextField" },
   switch: { kind: "switch", category: "inputs", icon: "toggle_on", w: () => 49, h: 28, defaultLabel: L("", "", "", ""), checked: true, composable: "Switch" },
@@ -88,7 +90,8 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   radioPref: { kind: "radioPref", category: "preference", icon: "radio_button_checked", w: full, h: 56, defaultLabel: L("标准", "Standard", "標準", "표준"), checked: true, composable: "RadioButtonPreference" },
   sliderPref: { kind: "sliderPref", category: "preference", icon: "tune", w: full, h: 80, defaultLabel: L("字体大小", "Font size", "文字サイズ", "글자 크기"), value: 0.5, composable: "SliderPreference" },
   rangeSliderPref: { kind: "rangeSliderPref", category: "preference", icon: "linear_scale", w: full, h: 80, defaultLabel: L("音量范围", "Volume range", "音量レンジ", "음량 범위"), value: 0.7, composable: "RangeSliderPreference" },
-  dropdownPref: { kind: "dropdownPref", category: "preference", icon: "arrow_drop_down_circle", w: full, h: 64, variants: ["window", "overlay"], defaultLabel: L("语言", "Language", "言語", "언어"), defaultSupporting: L("简体中文", "English", "日本語", "한국어"), composable: "WindowSpinnerPreference" },
+  dropdownPref: { kind: "dropdownPref", category: "preference", icon: "arrow_drop_down_circle", w: full, h: 64, variants: ["window", "overlay"], defaultLabel: L("语言", "Language", "言語", "언어"), defaultSupporting: L("简体中文", "English", "日本語", "한국어"), composable: "WindowDropdownPreference" },
+  spinnerPref: { kind: "spinnerPref", category: "preference", icon: "tune", w: full, h: 64, variants: ["window", "overlay"], defaultLabel: L("排序方式", "Sort by", "並べ替え", "정렬"), defaultSupporting: L("名称", "Name", "名前", "이름"), composable: "WindowSpinnerPreference" },
   arrowPref: { kind: "arrowPref", category: "preference", icon: "chevron_right", w: full, h: 64, defaultLabel: L("关于本机", "About phone", "端末情報", "휴대전화 정보"), defaultSupporting: L("HyperOS 2", "HyperOS 2", "HyperOS 2", "HyperOS 2"), composable: "ArrowPreference" },
 };
 
@@ -150,6 +153,8 @@ export function composableOf(it: Pick<Item, "kind" | "variant">): string {
       return v === "infinite" ? "InfiniteProgressIndicator" : v === "circular" ? "CircularProgressIndicator" : "LinearProgressIndicator";
     case "slider":
       return v === "vertical" ? "VerticalSlider" : "Slider";
+    case "topAppBar":
+      return v === "small" ? "SmallTopAppBar" : "TopAppBar";
     case "tabRow":
       return v === "contour" ? "TabRowWithContour" : "TabRow";
     case "tooltip":
@@ -162,8 +167,18 @@ export function composableOf(it: Pick<Item, "kind" | "variant">): string {
       return v === "window" ? "WindowDropdownPopup" : "Dropdown";
     case "dropdownMenu":
       return v === "window" ? "WindowDropdownMenu" : "OverlayDropdownMenu";
+    case "iconDropdownMenu":
+      return v === "window" ? "WindowIconDropdownMenu" : "OverlayIconDropdownMenu";
+    case "iconCascadingMenu":
+      return v === "window" ? "WindowIconCascadingDropdownMenu" : "OverlayIconCascadingDropdownMenu";
+    case "listPopup":
+      return v === "window" ? "WindowListPopup" : "OverlayListPopup";
+    case "cascadingPopup":
+      return v === "window" ? "WindowCascadingListPopup" : "OverlayCascadingListPopup";
     case "dropdownPref":
-      return v === "overlay" ? "OverlayDropdownPreference" : "WindowSpinnerPreference";
+      return v === "overlay" ? "OverlayDropdownPreference" : "WindowDropdownPreference";
+    case "spinnerPref":
+      return v === "overlay" ? "OverlaySpinnerPreference" : "WindowSpinnerPreference";
     case "scrollBar":
       return v === "horizontal" ? "HorizontalScrollBar" : "VerticalScrollBar";
     default:
@@ -184,7 +199,7 @@ export function defaultPosition(kind: Kind, preset: FramePreset, existing: Item[
   if (kind === "dialog") return { x: Math.round((w - 320) / 2), y: Math.round((h - 200) / 2) };
   if (kind === "bottomSheet") return { x: 0, y: h - 280 };
   if (kind === "scrollBar") return { x: w - 14, y: 120 };
-  if (kind === "cascadingPopup" || kind === "dropdownMenu" || kind === "listPopup") return { x: Math.round((w - spec.w(preset)) / 2), y: 180 };
+  if (kind === "cascadingPopup" || kind === "dropdownMenu" || kind === "listPopup" || kind === "iconDropdownMenu" || kind === "iconCascadingMenu") return { x: Math.round((w - spec.w(preset)) / 2), y: 180 };
   const prefs = existing.filter((it) => it.kind.endsWith("Pref") || it.kind === "card" || it.kind === "smallTitle" || it.kind === "searchBar");
   const last = prefs.at(-1);
   if (last) return { x: MARGIN, y: last.y + last.h };

@@ -75,7 +75,7 @@ export function tidyScreen(screen: Screen): Screen {
     .sort((a, b) => a.y - b.y || a.x - b.x);
   const left = rail ? rail.w + 8 : MARGIN;
   const width = w - left - MARGIN;
-  const hang = new Set(["button", "iconButton", "switch", "checkbox", "radio", "icon", "pullToRefresh", "tooltip", "listPopup", "cascadingPopup", "dropdownMenu", "floatingToolbar"]);
+  const hang = new Set(["button", "iconButton", "switch", "checkbox", "radio", "icon", "pullToRefresh", "tooltip", "listPopup", "cascadingPopup", "dropdownMenu", "iconDropdownMenu", "iconCascadingMenu", "floatingToolbar"]);
   const stretch = (it: Item) =>
     isPref(it.kind) ||
     ["card", "textField", "dropdown", "tabRow", "smallTitle", "slider", "rangeSlider", "progress", "image", "surface", "divider", "breadcrumb", "text", "colorPicker", "colorPalette"].includes(it.kind);

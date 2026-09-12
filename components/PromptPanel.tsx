@@ -26,7 +26,7 @@ export function PromptPanel({ doc, lang }: { doc: Doc; lang: Lang }) {
       <textarea
         readOnly
         value={text}
-        className="miuix-field min-h-[220px] flex-1 resize-none text-[13px] leading-relaxed"
+        className="miuix-field min-h-[140px] flex-1 resize-none text-[13px] leading-relaxed"
       />
       <button
         type="button"

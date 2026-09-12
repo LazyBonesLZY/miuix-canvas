@@ -8,10 +8,12 @@ export function PartsPalette({
   lang,
   onAdd,
   onDragStart,
+  wide = false,
 }: {
   lang: Lang;
   onAdd: (kind: Kind) => void;
   onDragStart: (kind: Kind) => void;
+  wide?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-4 px-3 pb-6 pt-2">
@@ -22,7 +24,7 @@ export function PartsPalette({
             <div className="mb-2 px-2 text-[13px] font-medium text-[var(--muted-strong)]">
               {categoryLabel(cat, lang)}
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className={`grid gap-2 ${wide ? "grid-cols-3" : "grid-cols-2"}`}>
               {kinds.map((kind) => (
                 <button
                   key={kind}
