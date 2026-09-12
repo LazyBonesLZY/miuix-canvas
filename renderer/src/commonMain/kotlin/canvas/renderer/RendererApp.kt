@@ -46,7 +46,7 @@ fun RendererApp(
     }
 
     LaunchedEffect(request) {
-        if (request.screen.id.isBlank() && request.requestId.isBlank()) return@LaunchedEffect
+        if (!hasRenderableRequest(request)) return@LaunchedEffect
         withFrameNanos {}
         withFrameNanos {}
         emit(RendererEvent(type = "rendered", requestId = request.requestId))
@@ -131,6 +131,9 @@ internal fun officialThemeController(
         colorSchemeMode = if (dark) ColorSchemeMode.Dark else ColorSchemeMode.Light,
     )
 }
+
+internal fun hasRenderableRequest(request: RenderRequest): Boolean =
+    request.screen.id.isNotBlank() && request.requestId.isNotBlank()
 
 internal fun officialSchemeMode(mode: String, monet: Boolean): ColorSchemeMode = when {
     monet && mode == "dark" -> ColorSchemeMode.MonetDark

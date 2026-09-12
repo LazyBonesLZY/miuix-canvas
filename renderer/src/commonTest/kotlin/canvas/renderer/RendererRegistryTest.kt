@@ -84,6 +84,13 @@ class RendererRegistryTest {
     }
 
     @Test
+    fun skipsRenderedUntilARealScreenArrives() {
+        assertEquals(false, hasRenderableRequest(RenderRequest()))
+        assertEquals(false, hasRenderableRequest(RenderRequest(requestId = "x")))
+        assertEquals(true, hasRenderableRequest(RenderRequest(requestId = "x", screen = ScreenDto(id = "home"))))
+    }
+
+    @Test
     fun officialThemeUsesHyperOSUnlessMonetIsOn() {
         assertEquals(ColorSchemeMode.Light, officialSchemeMode("light", monet = false))
         assertEquals(ColorSchemeMode.Dark, officialSchemeMode("dark", monet = false))
