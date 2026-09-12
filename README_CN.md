@@ -21,7 +21,7 @@
 - **HyperOS 外观** — 草图按官方尺寸和颜色来（灰色 TextButton、49×28 Switch、只有勾的 RadioButton、16dp Card，没有 Material 色块图标井）。示例首页按官方 jsCanvas demo 的区块来排。
 - **动态草图** — 预览里可以拨开关、拖滑条、切标签、展开搜索、滚数字、点色板和菜单。画布上先选中部件再点一下就会切换；已选中的滑条可以拖数值。无限进度和下拉刷新会一直转。
 - **点击和滑动跳转** — 部件、导航项、屏幕滑动都可以打开另一屏。预览用官方 `miuix-nav`（`NavDisplay` / `NavTransitions.MiuixDefault` 或 `Modal`）；画布上有流程箭头。
-- **主题** — 浅色 / 深色用官方 HyperOS `lightColorScheme()` / `darkColorScheme()`。Monet 是可选的 Material 动态色（`ThemePaletteStyle.Content`），默认关闭。种子色只在打开 Monet 时生效。
+- **主题** — 浅色 / 深色用官方 HyperOS `lightColorScheme()` / `darkColorScheme()`。Monet 是可选的 Material 动态色（官方 `ThemeController` 默认色板），默认关闭。种子色只在打开 Monet 时生效。
 - **提示词** — 中 / 英 / 日 / 韩，会写出真实的 Miuix composable 名（`OverlayDialog`、`SwitchPreference` 等）。目标可以是 Compose Multiplatform（默认）、Android 或 CMP Web。
 - **可选 AI 辅助** — OpenAI / Claude / Gemini / DeepSeek，或自定义 OpenAI / Claude 兼容接口，用来写行为说明。密钥只留在浏览器里。
 - **整理、图层、对齐线、撤销/重做**，4dp 网格，压缩分享链接，JSON 和 PNG。
