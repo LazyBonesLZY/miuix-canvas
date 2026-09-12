@@ -55,15 +55,24 @@ private fun pickFontUrl(srcRaw: String?, baseUrl: String?): String? {
         """url\(\s*['"]?([^'")]+)['"]?\s*\)\s*(?:format\(\s*['"]?([^'")]+)['"]?\s*\))?""",
         RegexOption.IGNORE_CASE,
     )
+    var best: Pair<Int, String>? = null
     for (m in entryRegex.findAll(srcRaw)) {
         val rawUrl = m.groupValues[1].trim()
         val format = m.groupValues.getOrNull(2)?.trim()?.lowercase().orEmpty()
         val url = resolveUrl(rawUrl, baseUrl)
         val ext = url.substringBefore('?').substringAfterLast('.', "").lowercase()
-        val isTtfOrOtf = format == "truetype" || format == "opentype" || ext == "ttf" || ext == "otf"
-        if (isTtfOrOtf) return url
+        val rank = fontFormatRank(format, ext) ?: continue
+        if (best == null || rank < best.first) best = rank to url
     }
-    return null
+    return best?.second
+}
+
+/** Smaller web formats first. TTF is last because the official CSS lists a huge truetype fallback. */
+private fun fontFormatRank(format: String, ext: String): Int? = when {
+    format == "woff2" || ext == "woff2" -> 0
+    format == "woff" || ext == "woff" -> 1
+    format == "truetype" || format == "opentype" || ext == "ttf" || ext == "otf" -> 2
+    else -> null
 }
 
 private fun resolveUrl(href: String, baseUrl: String?): String {

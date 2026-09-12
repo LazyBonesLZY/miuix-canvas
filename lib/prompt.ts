@@ -1,4 +1,4 @@
-import { KIND_TEXT, PLATFORM_TEXT, SWIPE_TEXT, TRANSITION_TEXT, type Lang } from "./i18n";
+import { KIND_TEXT, PLATFORM_TEXT, SWIPE_TEXT, TRANSITION_TEXT, variantLabel, type Lang } from "./i18n";
 import { composableOf } from "./tokens";
 import type { Doc, Item, Platform, Screen } from "./types";
 import { BACK_TARGET, SWIPE_DIRS, frameSize } from "./types";
@@ -71,7 +71,10 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
   if (it.label.trim()) bits.push({ zh: `标题${q(it.label, lang)}`, en: `title ${q(it.label, lang)}`, ja: `タイトル${q(it.label, lang)}`, ko: `제목 ${q(it.label, lang)}` }[lang]);
   if (it.supporting?.trim()) bits.push({ zh: `摘要${q(it.supporting, lang)}`, en: `summary ${q(it.supporting, lang)}`, ja: `要約${q(it.supporting, lang)}`, ko: `요약 ${q(it.supporting, lang)}` }[lang]);
   if (it.icon) bits.push({ zh: `图标 ${it.icon}`, en: `icon ${it.icon}`, ja: `アイコン ${it.icon}`, ko: `아이콘 ${it.icon}` }[lang]);
-  if (it.variant) bits.push({ zh: `样式 ${it.variant}`, en: `${it.variant} style`, ja: `スタイル ${it.variant}`, ko: `스타일 ${it.variant}` }[lang]);
+  if (it.variant) {
+    const style = variantLabel(it.variant, lang);
+    bits.push({ zh: `样式 ${style}`, en: `${style} style`, ja: `スタイル ${style}`, ko: `스타일 ${style}` }[lang]);
+  }
   if (typeof it.checked === "boolean" && (it.kind.includes("switch") || it.kind.includes("checkbox") || it.kind.includes("radio"))) {
     bits.push(it.checked
       ? { zh: "默认开启", en: "on by default", ja: "初期値はオン", ko: "기본 켜짐" }[lang]

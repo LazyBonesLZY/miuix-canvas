@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LANGS } from "./types";
-import { KIND_TEXT, kindShort } from "./i18n";
+import { KIND_TEXT, directionLabel, effectLabel, kindShort, textStyleLabel, variantLabel } from "./i18n";
 import { KIND_ORDER, KIND_SPEC, KIND_SET, composableOf, makeItem } from "./tokens";
 
 describe("KIND_SPEC coverage", () => {
@@ -108,10 +108,30 @@ describe("KIND_SPEC coverage", () => {
     expect(item.icon).toBeUndefined();
   });
 
-  it("shortens long palette names without dropping the composable", () => {
+  it("localizes kind, variant, style and effect names without leftover API tokens", () => {
     expect(kindShort("iconCascadingMenu", "zh")).toBe("图标级联");
     expect(kindShort("iconCascadingMenu", "en")).toBe("Icon cascade");
-    expect(KIND_TEXT.en.iconCascadingMenu).toContain("OverlayIconCascadingDropdownMenu");
+    expect(KIND_TEXT.zh.button).toBe("按钮");
+    expect(KIND_TEXT.zh.switchPref).toBe("开关设置");
+    expect(KIND_TEXT.en.iconCascadingMenu).toBe("Icon cascade");
+    expect(KIND_TEXT.zh.blur).toBe("模糊");
+    expect(variantLabel("secondary", "zh")).toBe("次要");
+    expect(variantLabel("iconAndText", "zh")).toBe("图标和文字");
+    expect(variantLabel("overlay", "ja")).toBe("オーバーレイ");
+    expect(textStyleLabel("body1", "zh")).toBe("正文 1");
+    expect(effectLabel("textureBlur", "zh")).toBe("纹理模糊");
+    expect(effectLabel("progressiveTextureBlur", "ko")).toBe("점진 블러");
+    expect(directionLabel("top", "zh")).toBe("上");
+    for (const { key } of LANGS) {
+      expect(KIND_TEXT[key].button).not.toMatch(/按钮 Button|ボタン Button|버튼 Button/);
+      expect(KIND_TEXT[key].blur).not.toContain("Modifier");
+      expect(KIND_TEXT[key].iconCascadingMenu).not.toContain("Overlay");
+    }
+    for (const kind of KIND_ORDER) {
+      for (const variant of KIND_SPEC[kind].variants ?? []) {
+        expect(variantLabel(variant, "zh")).not.toBe(variant);
+      }
+    }
   });
 
   it("does not put the palette glyph on preference rows", () => {

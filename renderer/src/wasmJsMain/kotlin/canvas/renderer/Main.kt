@@ -27,7 +27,7 @@ private var acceptedRender = false
 
 private const val MI_SANS_CSS =
     "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify&display=swap"
-private const val LOADING_FONT_TIMEOUT_MS = 10_000L
+private const val LOADING_FONT_TIMEOUT_MS = 3_000L
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalWasmJsInterop::class)
 fun main() {

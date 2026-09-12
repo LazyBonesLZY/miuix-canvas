@@ -3,8 +3,16 @@
 import { useMemo, useState } from "react";
 import { PartName } from "@/components/PartName";
 import { KIND_TEXT, categoryLabel, kindShort, t, type Lang } from "@/lib/i18n";
-import { CATEGORIES, KIND_SPEC } from "@/lib/tokens";
+import { CATEGORIES, KIND_SPEC, composableOf } from "@/lib/tokens";
 import type { Kind } from "@/lib/types";
+
+function kindMatches(kind: Kind, needle: string, lang: Lang) {
+  if (KIND_TEXT[lang][kind].toLowerCase().includes(needle)) return true;
+  if (kind.toLowerCase().includes(needle)) return true;
+  const spec = KIND_SPEC[kind];
+  if (spec.composable.toLowerCase().includes(needle)) return true;
+  return (spec.variants ?? [undefined]).some((variant) => composableOf({ kind, variant }).toLowerCase().includes(needle));
+}
 
 export function PartsPalette({
   lang,
@@ -23,9 +31,7 @@ export function PartsPalette({
       const kinds = (Object.keys(KIND_SPEC) as Kind[]).filter((kind) => {
         if (KIND_SPEC[kind].category !== cat) return false;
         if (!needle) return true;
-        const full = KIND_TEXT[lang][kind].toLowerCase();
-        const short = kindShort(kind, lang).toLowerCase();
-        return full.includes(needle) || short.includes(needle) || kind.toLowerCase().includes(needle);
+        return kindMatches(kind, needle, lang);
       });
       return { cat, kinds };
     }).filter((group) => group.kinds.length);
