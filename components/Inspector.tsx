@@ -163,6 +163,11 @@ export function Inspector({
           <ChromeSwitch on={it.checked} onChange={(checked) => patch({ checked })} />
         </div>
       )}
+      {(it.kind === "rangeSlider" || it.kind === "rangeSliderPref") && (
+        <Field label={t("rangeStart", lang)}>
+          <input type="range" min={0} max={1} step={0.05} value={it.from ?? 0.2} onPointerDown={onBeginHistory} onChange={(e) => patch({ from: Number(e.target.value) }, false)} />
+        </Field>
+      )}
       {typeof it.value === "number" && (
         <Field label={t("value", lang)}>
           <input type="range" min={0} max={1} step={0.05} value={it.value} onPointerDown={onBeginHistory} onChange={(e) => patch({ value: Number(e.target.value) }, false)} />

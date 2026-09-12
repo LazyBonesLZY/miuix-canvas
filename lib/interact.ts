@@ -1,3 +1,4 @@
+import { rangeEnd, rangeStart } from "./slider";
 import { applyVariant } from "./tokens";
 import type { Item, Kind } from "./types";
 
@@ -45,7 +46,11 @@ export function livePatch(it: Item, nx: number, ny: number): Partial<Item> | nul
     return { value: it.variant === "vertical" ? 1 - y : x };
   }
   if (it.kind === "rangeSlider" || it.kind === "rangeSliderPref") {
-    return { value: Math.max(0.25, x) };
+    const from = rangeStart(it);
+    const to = rangeEnd(it);
+    const mid = (from + to) / 2;
+    if (x < mid) return { from: Math.min(x, to - 0.05) };
+    return { value: Math.max(x, from + 0.05) };
   }
   if (it.kind === "progress" && it.variant !== "infinite") {
     return { value: it.variant === "circular" ? x : x };

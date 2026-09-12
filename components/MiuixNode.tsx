@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 import type { Palette } from "@/lib/color";
 import { withAlpha } from "@/lib/color";
 import { t, type Lang } from "@/lib/i18n";
+import { SLIDER_SIZE, SLIDER_THUMB, fillLengthCalc, rangeEnd, rangeFillLeftCalc, rangeFillWidthCalc, rangeStart, thumbCenterCalc } from "@/lib/slider";
 import type { Item, Join, NavTab } from "@/lib/types";
 
 function Symbol({ name, size = 20, color, fill = false }: { name?: string | null; size?: number; color?: string; fill?: boolean }) {
@@ -74,29 +75,72 @@ function Check({ on, p, radio = false }: { on: boolean; p: Palette; radio?: bool
   );
 }
 
-function thumbLeft(value: number) {
-  const v = Math.max(0, Math.min(1, value));
-  return `clamp(4px, calc(${v * 100}% - 10px), calc(100% - 24px))`;
+function SliderThumb({ color, left, bottom }: { color: string; left?: string; bottom?: string }) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        top: bottom ? undefined : "50%",
+        left,
+        bottom,
+        width: SLIDER_THUMB,
+        height: SLIDER_THUMB,
+        marginTop: bottom ? undefined : -SLIDER_THUMB / 2,
+        marginLeft: left ? -SLIDER_THUMB / 2 : undefined,
+        marginBottom: bottom ? -SLIDER_THUMB / 2 : undefined,
+        borderRadius: 999,
+        background: color,
+        zIndex: 2,
+      }}
+    />
+  );
 }
 
-function SliderBar({ p, value }: { p: Palette; value: number }) {
-  const v = Math.max(0, Math.min(1, value));
+function SliderBar({ p, value, disabled = false, steps = false }: { p: Palette; value: number; disabled?: boolean; steps?: boolean }) {
+  const fg = disabled ? p.disabledPrimaryButton : p.primary;
+  const thumb = disabled ? p.disabledOnPrimaryButton : p.onPrimary;
   return (
-    <div style={{ flex: 1, height: 28, borderRadius: 999, background: p.sliderBackground, position: "relative" }}>
-      <div style={{ width: `${v * 100}%`, height: "100%", background: p.primary, borderRadius: 999, transition: "width 80ms linear" }} />
-      <div style={{ position: "absolute", top: 4, left: thumbLeft(v), width: 20, height: 20, borderRadius: 10, background: p.onPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.16)", transition: "left 80ms linear" }} />
+    <div style={{ flex: 1, height: SLIDER_SIZE, borderRadius: 999, background: p.sliderBackground, position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, top: 0, height: SLIDER_SIZE, width: fillLengthCalc(value), borderRadius: 999, background: fg }} />
+      {steps && [0, 0.25, 0.5, 0.75, 1].map((k) => (
+        <div
+          key={k}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: thumbCenterCalc(k),
+            width: 7.7,
+            height: 7.7,
+            marginTop: -3.85,
+            marginLeft: -3.85,
+            borderRadius: 999,
+            background: k <= value ? withAlpha("#fff", 0.55) : "rgba(0,0,0,0.18)",
+            zIndex: 1,
+          }}
+        />
+      ))}
+      <SliderThumb color={thumb} left={thumbCenterCalc(value)} />
     </div>
   );
 }
 
-function RangeBar({ p, high }: { p: Palette; high: number }) {
-  const hi = Math.max(0, Math.min(1, high));
-  const lo = Math.max(0, hi - 0.35);
+function VerticalSliderBar({ p, value, disabled = false }: { p: Palette; value: number; disabled?: boolean }) {
+  const fg = disabled ? p.disabledPrimaryButton : p.primary;
+  const thumb = disabled ? p.disabledOnPrimaryButton : p.onPrimary;
   return (
-    <div style={{ flex: 1, height: 28, borderRadius: 999, background: p.sliderBackground, position: "relative" }}>
-      <div style={{ position: "absolute", left: `${lo * 100}%`, width: `${Math.max((hi - lo) * 100, 8)}%`, height: "100%", background: p.primary, borderRadius: 999 }} />
-      <div style={{ position: "absolute", top: 4, left: thumbLeft(lo), width: 20, height: 20, borderRadius: 10, background: p.onPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.16)" }} />
-      <div style={{ position: "absolute", top: 4, left: thumbLeft(hi), width: 20, height: 20, borderRadius: 10, background: p.onPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.16)" }} />
+    <div style={{ width: SLIDER_SIZE, height: "100%", borderRadius: 999, background: p.sliderBackground, position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", left: 0, bottom: 0, width: SLIDER_SIZE, height: fillLengthCalc(value), borderRadius: 999, background: fg }} />
+      <SliderThumb color={thumb} left="50%" bottom={thumbCenterCalc(value)} />
+    </div>
+  );
+}
+
+function RangeBar({ p, from, to }: { p: Palette; from: number; to: number }) {
+  return (
+    <div style={{ flex: 1, height: SLIDER_SIZE, borderRadius: 999, background: p.sliderBackground, position: "relative", overflow: "hidden" }}>
+      <div style={{ position: "absolute", top: 0, height: SLIDER_SIZE, left: rangeFillLeftCalc(from), width: rangeFillWidthCalc(from, to), borderRadius: 999, background: p.primary }} />
+      <SliderThumb color={p.onPrimary} left={thumbCenterCalc(from)} />
+      <SliderThumb color={p.onPrimary} left={thumbCenterCalc(to)} />
     </div>
   );
 }
@@ -145,11 +189,11 @@ function Tabs({ tabs, selected, p, vertical = false, iconsOnly = false }: { tabs
     <div style={{ display: "flex", flexDirection: vertical ? "column" : "row", justifyContent: "space-around", height: "100%", padding: vertical ? "16px 8px" : "8px 4px 6px" }}>
       {tabs.map((tab, i) => {
         const on = i === (selected ?? 0);
-        const color = on ? p.primary : p.onSurfaceVariantActions;
+        const color = p.onSurfaceContainer;
         return (
-          <div key={`${tab.label}-${i}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, color, flex: 1 }}>
-            <Symbol name={tab.icon} size={24} color={color} fill={on} />
-            {!iconsOnly && tab.label && <span style={{ fontSize: 11, fontWeight: on ? 700 : 400 }}>{tab.label}</span>}
+          <div key={`${tab.label}-${i}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, color, flex: 1, opacity: on ? 1 : 0.4 }}>
+            <Symbol name={tab.icon} size={26} color={color} fill={on} />
+            {!iconsOnly && tab.label && <span style={{ fontSize: 12, fontWeight: on ? 700 : 400 }}>{tab.label}</span>}
           </div>
         );
       })}
@@ -242,18 +286,69 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
           {it.label}
         </div>
       );
-    case "navigationBar":
+    case "navigationBar": {
+      const blur = it.variant === "blur";
       return (
-        <div style={{ ...style, background: p.surface }}>
-          <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} />
+        <div style={{ ...style, background: blur ? withAlpha(p.surface, 0.72) : p.surface, backdropFilter: blur ? "blur(28px) saturate(1.3)" : undefined, WebkitBackdropFilter: blur ? "blur(28px) saturate(1.3)" : undefined, display: "flex", flexDirection: "column" }}>
+          <div style={{ height: 0.5, background: p.dividerLine }} />
+          <div style={{ flex: 1 }}>
+            <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} />
+          </div>
         </div>
       );
-    case "floatingNav":
+    }
+    case "floatingNav": {
+      if (it.variant === "glass") {
+        const tabs = it.tabs ?? [];
+        const n = Math.max(tabs.length, 1);
+        const sel = it.selected ?? 0;
+        return (
+          <div
+            style={{
+              ...style,
+              borderRadius: 999,
+              background: withAlpha(p.surfaceContainer, 0.4),
+              backdropFilter: "blur(20px) saturate(1.6)",
+              WebkitBackdropFilter: "blur(20px) saturate(1.6)",
+              boxShadow: `0 10px 24px ${withAlpha("#000", 0.12)}, inset 0 0.6px 0 rgba(255,255,255,0.5)`,
+              padding: 4,
+              display: "flex",
+              alignItems: "stretch",
+              position: "relative",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 4,
+                bottom: 4,
+                left: `calc(4px + ${sel} * (100% - 8px) / ${n})`,
+                width: `calc((100% - 8px) / ${n})`,
+                borderRadius: 999,
+                background: withAlpha(p.onSurface, 0.08),
+                boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,0.4)",
+                transition: "left 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+              }}
+            />
+            {tabs.map((tab, i) => (
+              <div key={i} style={{ flex: 1, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1, color: p.onSurface, opacity: i === sel ? 1 : 0.42 }}>
+                <Symbol name={tab.icon} size={22} color={p.onSurface} fill={i === sel} />
+                {tab.label && <span style={{ fontSize: 11 }}>{tab.label}</span>}
+              </div>
+            ))}
+          </div>
+        );
+      }
       return (
-        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainerHighest, boxShadow: `0 10px 28px ${p.windowDimming}`, padding: "4px 12px" }}>
-          <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} iconsOnly />
+        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainer, boxShadow: "0 10px 20px rgba(0,0,0,0.12)", padding: "0 12px", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
+          {(it.tabs ?? []).map((tab, i) => (
+            <div key={i} style={{ padding: 10, opacity: i === (it.selected ?? 0) ? 1 : 0.4 }}>
+              <Symbol name={tab.icon} size={28} color={p.onSurfaceContainer} fill={i === (it.selected ?? 0)} />
+            </div>
+          ))}
         </div>
       );
+    }
     case "navigationRail":
       return (
         <div style={{ ...style, background: p.surface }}>
@@ -390,25 +485,21 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "slider":
       if (it.variant === "vertical") {
-        const v = Math.round((it.value ?? 0.5) * 100);
         return (
           <div style={{ ...style, display: "grid", placeItems: "center" }}>
-            <div style={{ width: 28, height: "100%", borderRadius: 999, background: p.sliderBackground, position: "relative" }}>
-              <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: `${v}%`, background: p.primary, borderRadius: 999 }} />
-              <div style={{ position: "absolute", left: 4, bottom: `clamp(4px, calc(${v}% - 10px), calc(100% - 24px))`, width: 20, height: 20, borderRadius: 10, background: p.onPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.16)" }} />
-            </div>
+            <VerticalSliderBar p={p} value={it.value ?? 0.5} />
           </div>
         );
       }
       return (
         <div style={{ ...style, display: "flex", alignItems: "center" }}>
-          <SliderBar p={p} value={it.value ?? 0.5} />
+          <SliderBar p={p} value={it.value ?? 0.5} disabled={it.variant === "disabled"} steps={it.variant === "steps"} />
         </div>
       );
     case "rangeSlider":
       return (
         <div style={{ ...style, display: "flex", alignItems: "center" }}>
-          <RangeBar p={p} high={it.value ?? 0.7} />
+          <RangeBar p={p} from={rangeStart(it)} to={rangeEnd(it)} />
         </div>
       );
     case "dropdown":
@@ -625,7 +716,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
           <div style={{ fontSize: 17, fontWeight: 500, color: p.onSurfaceContainer }}>{it.label}</div>
           {it.supporting && <div style={{ fontSize: 14, color: p.onSurfaceVariantSummary, marginTop: 2 }}>{it.supporting}</div>}
           <div style={{ marginTop: 12 }}>
-            {it.kind === "rangeSliderPref" ? <RangeBar p={p} high={it.value ?? 0.7} /> : <SliderBar p={p} value={it.value ?? 0.5} />}
+            {it.kind === "rangeSliderPref" ? <RangeBar p={p} from={rangeStart(it)} to={rangeEnd(it)} /> : <SliderBar p={p} value={it.value ?? 0.5} />}
           </div>
         </div>
       );

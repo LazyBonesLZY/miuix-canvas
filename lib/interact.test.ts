@@ -39,6 +39,12 @@ describe("livePatch", () => {
     expect(livePatch(base({ kind: "colorPalette" }), 0.9, 0.5)).toEqual({ selected: 7 });
   });
 
+  it("moves the nearer RangeSlider thumb", () => {
+    const it = base({ kind: "rangeSlider", from: 0.2, value: 0.8 });
+    expect(livePatch(it, 0.1, 0.5)).toEqual({ from: 0.1 });
+    expect(livePatch(it, 0.9, 0.5)?.value).toBeCloseTo(0.9);
+  });
+
   it("cycles a dropdown from its tabs", () => {
     const it = base({
       kind: "dropdownPref",

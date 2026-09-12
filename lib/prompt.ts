@@ -78,7 +78,14 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
       : { zh: "默认关闭", en: "off by default", ja: "初期値はオフ", ko: "기본 꺼짐" }[lang]);
   }
   if (typeof it.value === "number" && (it.kind === "slider" || it.kind === "rangeSlider" || it.kind === "sliderPref" || it.kind === "rangeSliderPref" || it.kind === "progress")) {
-    bits.push({ zh: `值 ${Math.round(it.value * 100)}%`, en: `value ${Math.round(it.value * 100)}%`, ja: `値 ${Math.round(it.value * 100)}%`, ko: `값 ${Math.round(it.value * 100)}%` }[lang]);
+    const start = typeof it.from === "number" ? `${Math.round(it.from * 100)}%–` : "";
+    bits.push({ zh: `值 ${start}${Math.round(it.value * 100)}%`, en: `value ${start}${Math.round(it.value * 100)}%`, ja: `値 ${start}${Math.round(it.value * 100)}%`, ko: `값 ${start}${Math.round(it.value * 100)}%` }[lang]);
+  }
+  if (it.kind === "floatingNav" && it.variant === "glass") {
+    bits.push({ zh: "用 Modifier.textureBlur / layerBackdrop 做液态玻璃底栏", en: "liquid-glass bar via Modifier.textureBlur / layerBackdrop", ja: "Modifier.textureBlur / layerBackdrop でリキッドガラス下バー", ko: "Modifier.textureBlur / layerBackdrop로 리퀴드 글래스 하단바" }[lang]);
+  }
+  if (it.kind === "navigationBar" && it.variant === "blur") {
+    bits.push({ zh: "底栏用 Modifier.textureBlur", en: "frost the bar with Modifier.textureBlur", ja: "下バーは Modifier.textureBlur", ko: "하단바는 Modifier.textureBlur" }[lang]);
   }
   if (it.tabs?.length) {
     const names = it.tabs.map((tab) => {

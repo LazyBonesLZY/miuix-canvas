@@ -102,6 +102,7 @@ export type Item = {
   variant?: string;
   checked?: boolean;
   value?: number;
+  from?: number;
   tabs?: NavTab[];
   selected?: number;
   note?: string;

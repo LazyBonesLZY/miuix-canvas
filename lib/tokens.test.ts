@@ -25,6 +25,8 @@ describe("KIND_SPEC coverage", () => {
     expect(KIND_SPEC.searchBar.h).toBe(45);
     expect(KIND_SPEC.tabRow.h).toBe(42);
     expect(KIND_SPEC.slider.h).toBe(28);
+    expect(KIND_SPEC.floatingNav.h).toBe(52);
+    expect(KIND_SPEC.rangeSlider.from).toBe(0.2);
     expect(KIND_SPEC.button.variants?.[0]).toBe("secondary");
   });
 

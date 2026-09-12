@@ -21,6 +21,7 @@ export type KindSpec = {
   tabs?: NavTab[];
   checked?: boolean;
   value?: number;
+  from?: number;
   composable: string;
 };
 
@@ -61,8 +62,8 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   floatingToolbar: { kind: "floatingToolbar", category: "actions", icon: "construction", w: () => 220, h: 52, defaultLabel: L("工具", "Tools", "ツール", "도구"), tabs: [{ icon: "edit", label: "" }, { icon: "content_copy", label: "" }, { icon: "delete", label: "" }], composable: "FloatingToolbar" },
   topAppBar: { kind: "topAppBar", category: "navigation", icon: "web_asset", w: edge, h: 88, edge: "top", variants: ["small", "large"], defaultLabel: L("标题", "Title", "タイトル", "제목"), composable: "TopAppBar" },
   smallTitle: { kind: "smallTitle", category: "navigation", icon: "title", w: full, h: 36, defaultLabel: L("常用功能", "Shortcuts", "ショートカット", "바로가기"), composable: "SmallTitle" },
-  navigationBar: { kind: "navigationBar", category: "navigation", icon: "dock_to_bottom", w: edge, h: 64, edge: "bottom", defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationBar" },
-  floatingNav: { kind: "floatingNav", category: "navigation", icon: "dock_to_bottom", w: () => 280, h: 56, defaultLabel: L("悬浮导航", "Floating nav", "フローティングナビ", "플로팅 탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "FloatingNavigationBar" },
+  navigationBar: { kind: "navigationBar", category: "navigation", icon: "dock_to_bottom", w: edge, h: 64, edge: "bottom", variants: ["default", "blur"], defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationBar" },
+  floatingNav: { kind: "floatingNav", category: "navigation", icon: "dock_to_bottom", w: () => 280, h: 52, variants: ["default", "glass"], defaultLabel: L("悬浮导航", "Floating nav", "フローティングナビ", "플로팅 탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "FloatingNavigationBar" },
   navigationRail: { kind: "navigationRail", category: "navigation", icon: "view_sidebar", w: () => 80, h: 400, edge: "start", defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationRail" },
   tabRow: { kind: "tabRow", category: "navigation", icon: "tabs", w: full, h: 42, variants: ["default", "contour"], defaultLabel: L("标签", "Tabs", "タブ", "탭"), tabs: [{ icon: "", label: "推荐" }, { icon: "", label: "关注" }, { icon: "", label: "热门" }], composable: "TabRow" },
   searchBar: { kind: "searchBar", category: "navigation", icon: "search", w: full, h: 45, variants: ["field", "expanded"], defaultLabel: L("搜索", "Search", "検索", "검색"), composable: "SearchBar" },
@@ -83,8 +84,8 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   switch: { kind: "switch", category: "inputs", icon: "toggle_on", w: () => 49, h: 28, defaultLabel: L("", "", "", ""), checked: true, composable: "Switch" },
   checkbox: { kind: "checkbox", category: "inputs", icon: "check_box", w: () => 26, h: 26, defaultLabel: L("", "", "", ""), checked: true, composable: "Checkbox" },
   radio: { kind: "radio", category: "inputs", icon: "radio_button_checked", w: () => 26, h: 26, defaultLabel: L("", "", "", ""), checked: true, composable: "RadioButton" },
-  slider: { kind: "slider", category: "inputs", icon: "tune", w: full, h: 28, variants: ["horizontal", "vertical"], defaultLabel: L("", "", "", ""), value: 0.6, composable: "Slider" },
-  rangeSlider: { kind: "rangeSlider", category: "inputs", icon: "linear_scale", w: full, h: 28, defaultLabel: L("", "", "", ""), value: 0.7, composable: "RangeSlider" },
+  slider: { kind: "slider", category: "inputs", icon: "tune", w: full, h: 28, variants: ["horizontal", "vertical", "steps", "disabled"], defaultLabel: L("", "", "", ""), value: 0.6, composable: "Slider" },
+  rangeSlider: { kind: "rangeSlider", category: "inputs", icon: "linear_scale", w: full, h: 28, defaultLabel: L("", "", "", ""), value: 0.8, from: 0.2, composable: "RangeSlider" },
   dropdown: { kind: "dropdown", category: "inputs", icon: "arrow_drop_down_circle", w: full, h: 50, variants: ["overlay", "window"], defaultLabel: L("请选择", "Choose", "選択", "선택"), tabs: [{ icon: "", label: "选项一" }, { icon: "", label: "选项二" }, { icon: "", label: "选项三" }], composable: "Dropdown" },
   numberPicker: { kind: "numberPicker", category: "inputs", icon: "pin", w: () => 160, h: 140, defaultLabel: L("12", "12", "12", "12"), composable: "NumberPicker" },
   colorPicker: { kind: "colorPicker", category: "inputs", icon: "palette", w: full, h: 180, defaultLabel: L("取色", "Color", "カラー", "색상"), composable: "ColorPicker" },
@@ -102,7 +103,7 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   checkboxPref: { kind: "checkboxPref", category: "preference", icon: "check_box", w: full, h: 64, defaultLabel: L("同步数据", "Sync data", "データを同期", "데이터 동기화"), defaultSupporting: L("使用移动网络时同步", "Sync on mobile data", "モバイル通信でも同期", "모바일 데이터에서도 동기화"), checked: false, composable: "CheckboxPreference" },
   radioPref: { kind: "radioPref", category: "preference", icon: "radio_button_checked", w: full, h: 56, defaultLabel: L("标准", "Standard", "標準", "표준"), checked: true, composable: "RadioButtonPreference" },
   sliderPref: { kind: "sliderPref", category: "preference", icon: "tune", w: full, h: 80, defaultLabel: L("字体大小", "Font size", "文字サイズ", "글자 크기"), value: 0.5, composable: "SliderPreference" },
-  rangeSliderPref: { kind: "rangeSliderPref", category: "preference", icon: "linear_scale", w: full, h: 80, defaultLabel: L("音量范围", "Volume range", "音量レンジ", "음량 범위"), value: 0.7, composable: "RangeSliderPreference" },
+  rangeSliderPref: { kind: "rangeSliderPref", category: "preference", icon: "linear_scale", w: full, h: 80, defaultLabel: L("音量范围", "Volume range", "音量レンジ", "음량 범위"), value: 0.8, from: 0.2, composable: "RangeSliderPreference" },
   dropdownPref: { kind: "dropdownPref", category: "preference", icon: "arrow_drop_down_circle", w: full, h: 64, variants: ["window", "overlay"], defaultLabel: L("语言", "Language", "言語", "언어"), defaultSupporting: L("简体中文", "English", "日本語", "한국어"), tabs: [{ icon: "", label: "中文" }, { icon: "", label: "英文" }, { icon: "", label: "日文" }], composable: "WindowDropdownPreference" },
   spinnerPref: { kind: "spinnerPref", category: "preference", icon: "tune", w: full, h: 64, variants: ["window", "overlay"], defaultLabel: L("排序方式", "Sort by", "並べ替え", "정렬"), defaultSupporting: L("名称", "Name", "名前", "이름"), tabs: [{ icon: "", label: "名称" }, { icon: "", label: "日期" }, { icon: "", label: "大小" }], composable: "WindowSpinnerPreference" },
   arrowPref: { kind: "arrowPref", category: "preference", icon: "chevron_right", w: full, h: 64, defaultLabel: L("关于本机", "About phone", "端末情報", "휴대전화 정보"), defaultSupporting: L("HyperOS 2", "HyperOS 2", "HyperOS 2", "HyperOS 2"), composable: "ArrowPreference" },
@@ -130,6 +131,7 @@ export function makeItem(kind: Kind, preset: FramePreset, lang: Lang, x: number,
     variant: spec.variants?.[0],
     checked: spec.checked,
     value: spec.value,
+    from: spec.from,
     tabs: spec.tabs
       ? spec.tabs.map((tab) => ({ ...tab, label: TAB_I18N[tab.label]?.[lang] ?? tab.label }))
       : undefined,
@@ -144,6 +146,9 @@ export function applyVariant(it: Item, variant: string): Partial<Item> {
   }
   if (it.kind === "slider") {
     return variant === "vertical" ? { ...patch, w: 28, h: Math.max(it.h, 160) } : { ...patch, w: Math.max(it.w, 200), h: 28 };
+  }
+  if (it.kind === "floatingNav") {
+    return variant === "glass" ? { ...patch, w: Math.max(it.w, 364), h: 64 } : { ...patch, w: 280, h: 52 };
   }
   if (it.kind === "progress") {
     return variant === "linear" ? { ...patch, w: Math.max(it.w, 200), h: 6 } : { ...patch, w: 30, h: 30 };
@@ -216,7 +221,7 @@ export function defaultPosition(kind: Kind, preset: FramePreset, existing: Item[
   if (spec.edge === "bottom") return { x: 0, y: h - spec.h };
   if (spec.edge === "start") return { x: 0, y: 88 };
   if (kind === "fab") return { x: w - MARGIN - 60, y: h - 64 - MARGIN - 60 };
-  if (kind === "floatingNav") return { x: Math.round((w - 280) / 2), y: h - 64 - MARGIN - 56 };
+  if (kind === "floatingNav") return { x: Math.round((w - 280) / 2), y: h - 64 - MARGIN - 52 };
   if (kind === "snackbar") return { x: MARGIN, y: h - 64 - MARGIN - 48 };
   if (kind === "dialog") return { x: Math.round((w - 320) / 2), y: Math.round((h - 200) / 2) };
   if (kind === "bottomSheet") return { x: 0, y: h - 280 };
