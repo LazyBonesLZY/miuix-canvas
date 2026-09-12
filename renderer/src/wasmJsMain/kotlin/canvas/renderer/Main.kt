@@ -20,7 +20,6 @@ private val json = rendererJson
 
 private var request by mutableStateOf(RenderRequest())
 private var acceptedRender = false
-private var readyTries = 0
 
 private const val MI_SANS_CSS =
     "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify&display=swap"
@@ -39,7 +38,7 @@ fun main() {
             LaunchedEffect(fontFamilyResolver) {
                 withFrameNanos {}
                 fonts.launch {
-                    preloadWebFonts(MI_SANS_CSS, fontFamilyResolver)
+                    runCatching { preloadWebFonts(MI_SANS_CSS, fontFamilyResolver) }
                     post(RendererEvent(type = "fonts"))
                 }
             }
@@ -57,6 +56,7 @@ private fun accept(payload: String) {
             if (it.type == "render") {
                 acceptedRender = true
                 request = it
+                post(RendererEvent(type = "rendered", requestId = it.requestId))
             }
         }
         .onFailure {
@@ -67,8 +67,7 @@ private fun accept(payload: String) {
 @OptIn(ExperimentalWasmJsInterop::class)
 private fun announceReady() {
     post(RendererEvent(type = "ready"))
-    if (!acceptedRender && readyTries < 12) {
-        readyTries += 1
+    if (!acceptedRender) {
         window.setTimeout({
             if (!acceptedRender) announceReady()
             null

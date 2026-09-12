@@ -46,6 +46,7 @@ fun RendererApp(
     }
 
     LaunchedEffect(request) {
+        if (request.screen.id.isBlank() && request.requestId.isBlank()) return@LaunchedEffect
         withFrameNanos {}
         withFrameNanos {}
         emit(RendererEvent(type = "rendered", requestId = request.requestId))

@@ -15,8 +15,7 @@ Browser canvas for sketching [Miuix](https://github.com/compose-miuix-ui/miuix) 
 
 - `lib/types.ts`, `lib/tokens.ts` — document model and part specs
 - `renderer/` — actual Miuix Compose Web/Wasm renderer
-- `components/OfficialMiuixFrame.tsx` — live preview iframe
-- `components/OfficialMiuixStills.tsx` — one Wasm iframe for editor stills
+- `components/OfficialMiuixFrame.tsx` — renderer bridge
 - `lib/color.ts` — editor chrome colors only; rendered screens use MiuixTheme
 - `lib/layout.ts` — magnetic preference joins, guides, phone/desktop conversion
 - `lib/prompt.ts` — natural-language export (zh / en)
