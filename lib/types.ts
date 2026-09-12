@@ -20,7 +20,13 @@ export const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.ma
 export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 export const onGrid = (v: number, origin = 0) => origin + Math.round((v - origin) / GRID) * GRID;
 
-export type Lang = "zh" | "en";
+export type Lang = "zh" | "en" | "ja" | "ko";
+export const LANGS: { key: Lang; label: string }[] = [
+  { key: "zh", label: "中文" },
+  { key: "en", label: "English" },
+  { key: "ja", label: "日本語" },
+  { key: "ko", label: "한국어" },
+];
 export type Platform = "cmp" | "android" | "web";
 export type FramePreset = "phone" | "desktop";
 export type ThemeMode = "light" | "dark";
@@ -36,6 +42,7 @@ export type Kind =
   | "topAppBar"
   | "smallTitle"
   | "navigationBar"
+  | "floatingNav"
   | "navigationRail"
   | "tabRow"
   | "searchBar"
@@ -47,12 +54,15 @@ export type Kind =
   | "dialog"
   | "bottomSheet"
   | "listPopup"
+  | "cascadingPopup"
+  | "dropdownMenu"
   | "tooltip"
   | "textField"
   | "switch"
   | "checkbox"
   | "radio"
   | "slider"
+  | "rangeSlider"
   | "dropdown"
   | "numberPicker"
   | "colorPicker"
@@ -64,10 +74,12 @@ export type Kind =
   | "progress"
   | "pullToRefresh"
   | "scrollBar"
+  | "basicPref"
   | "switchPref"
   | "checkboxPref"
   | "radioPref"
   | "sliderPref"
+  | "rangeSliderPref"
   | "dropdownPref"
   | "arrowPref";
 
@@ -139,6 +151,8 @@ export function frameSize(preset: FramePreset) {
 export function contentWidth(preset: FramePreset) {
   return frameSize(preset).w - MARGIN * 2;
 }
+
+export type Localized = Record<Lang, string>;
 
 export function isPref(kind: Kind) {
   return kind.endsWith("Pref");

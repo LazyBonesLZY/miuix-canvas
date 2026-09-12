@@ -37,6 +37,12 @@ export function tidyScreen(screen: Screen): Screen {
     fab.y = (nav ? nav.y : h) - MARGIN - fab.h;
     used.add(fab.id);
   }
+  const floating = items.find((i) => i.kind === "floatingNav");
+  if (floating) {
+    floating.x = Math.round((w - floating.w) / 2);
+    floating.y = (nav ? nav.y : h) - MARGIN - floating.h;
+    used.add(floating.id);
+  }
   const snack = items.find((i) => i.kind === "snackbar");
   if (snack) {
     snack.x = MARGIN;
@@ -69,11 +75,14 @@ export function tidyScreen(screen: Screen): Screen {
     .sort((a, b) => a.y - b.y || a.x - b.x);
   const left = rail ? rail.w + 8 : MARGIN;
   const width = w - left - MARGIN;
-  const hang = new Set(["button", "iconButton", "switch", "checkbox", "radio", "icon", "pullToRefresh", "tooltip", "listPopup"]);
+  const hang = new Set(["button", "iconButton", "switch", "checkbox", "radio", "icon", "pullToRefresh", "tooltip", "listPopup", "cascadingPopup", "dropdownMenu", "floatingToolbar"]);
+  const stretch = (it: Item) =>
+    isPref(it.kind) ||
+    ["card", "textField", "dropdown", "tabRow", "smallTitle", "slider", "rangeSlider", "progress", "image", "surface", "divider", "breadcrumb", "text", "colorPicker", "colorPalette"].includes(it.kind);
   for (const it of rest) {
     if (!hang.has(it.kind)) {
       it.x = left;
-      if (isPref(it.kind) || ["card", "textField", "dropdown", "tabRow", "smallTitle", "slider", "progress", "image", "surface", "divider", "breadcrumb", "text", "colorPicker", "colorPalette"].includes(it.kind)) {
+      if (stretch(it) && it.variant !== "vertical" && it.variant !== "circular" && it.variant !== "infinite") {
         it.w = width;
       }
     }

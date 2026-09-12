@@ -9,11 +9,11 @@ import { PartsPalette } from "@/components/PartsPalette";
 import { Preview } from "@/components/Preview";
 import { PromptPanel } from "@/components/PromptPanel";
 import { ThemePanel } from "@/components/ThemePanel";
-import { Logo, Toolbar } from "@/components/Toolbar";
+import { ConfirmDialog, Logo, Toolbar } from "@/components/Toolbar";
 import { schemeFromSeed } from "@/lib/color";
 import { cloneDoc, defaultDoc, emptyScreen, loadDoc, nextScreenOrigin, saveDoc, screenOf, UI_KEY } from "@/lib/doc";
-import { detectLang, setGlobalLang, t, type Lang } from "@/lib/i18n";
-import { convertPreset, duplicateItem, flowLinks, moveLayer, prefJoin, snapMove } from "@/lib/layout";
+import { detectLang, isLang, setGlobalLang, SHORTCUTS, t, type Lang } from "@/lib/i18n";
+import { centerItem, centerViewOnScreen, convertPreset, duplicateItem, fitView, flowLinks, moveLayer, pinItem, prefJoin, snapMove, zoomAt } from "@/lib/layout";
 import { readProject, saveProject } from "@/lib/project";
 import { consumeShareHash, hasShareHash, readShareHash, shareUrl } from "@/lib/share";
 import { tidyScreen } from "@/lib/tidy";
@@ -38,7 +38,12 @@ function useHistory(initial: Doc) {
   const now = useRef(initial);
   now.current = doc;
 
+  const skipSave = useRef(true);
   useEffect(() => {
+    if (skipSave.current) {
+      skipSave.current = false;
+      return;
+    }
     saveDoc(doc);
   }, [doc]);
 
@@ -99,7 +104,11 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   const [shareOpen, setShareOpen] = useState(false);
   const [shareText, setShareText] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
   const [guide, setGuide] = useState<Guide | null>(null);
+  const didFit = useRef(false);
+  const [shareReady, setShareReady] = useState(() => !hasShareHash());
   const dragKind = useRef<Kind | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const screenRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -124,9 +133,13 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           setDoc(shared, false);
           setSelection(shared.screens[0] ? { kind: "screen", screenId: shared.screens[0].id } : null);
           consumeShareHash();
+          didFit.current = false;
         }
       }
-      if (!cancelled) onReady();
+      if (!cancelled) {
+        setShareReady(true);
+        onReady();
+      }
     })();
     return () => {
       cancelled = true;
@@ -150,11 +163,56 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     setDoc((d) => ({ ...d, screens: d.screens.map((s) => (s.id === screenId ? fn(s) : s)) }), record);
   };
 
+  const canvasSize = () => canvasRef.current?.getBoundingClientRect();
+
+  const fitCanvas = useCallback(() => {
+    const rect = canvasSize();
+    if (!rect || rect.width < 40 || rect.height < 40) return;
+    setView(fitView(doc.screens, rect.width, rect.height, MIN_Z, MAX_Z));
+  }, [doc.screens]);
+
+  const centerSelection = useCallback((axis: "x" | "y" | "both" = "both") => {
+    if (selection?.kind === "item") {
+      const screen = screenOf(doc, selection.screenId);
+      const it = screen?.items.find((i) => i.id === selection.itemId);
+      if (!screen || !it) return;
+      const next = centerItem(it, screen, axis);
+      updateScreen(selection.screenId, (s) => ({
+        ...s,
+        items: s.items.map((row) => (row.id === it.id ? { ...row, ...next } : row)),
+      }));
+      return;
+    }
+    const screen = screenOf(doc, selection?.screenId ?? selectedScreenId);
+    const rect = canvasSize();
+    if (!screen || !rect) return;
+    setView((v) => centerViewOnScreen(screen, rect.width, rect.height, v.z));
+  }, [doc, selection, selectedScreenId, setDoc]);
+
+  const pinSelection = useCallback((edge: "left" | "right" | "top" | "bottom") => {
+    if (selection?.kind !== "item") return;
+    const screen = screenOf(doc, selection.screenId);
+    const it = screen?.items.find((i) => i.id === selection.itemId);
+    if (!screen || !it) return;
+    const next = pinItem(it, screen, edge);
+    updateScreen(selection.screenId, (s) => ({
+      ...s,
+      items: s.items.map((row) => (row.id === it.id ? { ...row, ...next } : row)),
+    }));
+  }, [doc, selection, setDoc]);
+
   const addItem = (kind: Kind, screenId = selectedScreenId, at?: { x: number; y: number }) => {
-    if (!screenId) return;
     const created = uid();
+    let target = screenId;
     setDoc((d) => {
-      const screen = screenOf(d, screenId);
+      let screens = d.screens;
+      if (!target) {
+        const origin = nextScreenOrigin(d);
+        const fresh = { ...emptyScreen("phone", screens.length, lang), ...origin, id: uid() };
+        screens = [...screens, fresh];
+        target = fresh.id;
+      }
+      const screen = screenOf({ ...d, screens }, target);
       if (!screen || screen.items.some((it) => it.id === created)) return d;
       const made = makeItem(kind, screen.preset, lang, at?.x ?? 0, at?.y ?? 0);
       made.id = created;
@@ -165,9 +223,10 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       }
       const size = frameSize(screen.preset);
       if (KIND_SPEC[kind].edge === "top" || KIND_SPEC[kind].edge === "bottom") made.w = size.w;
-      return { ...d, screens: d.screens.map((s) => (s.id === screenId ? { ...s, items: [...s.items, made] } : s)) };
+      return { ...d, screens: screens.map((s) => (s.id === target ? { ...s, items: [...s.items, made] } : s)) };
     });
-    setSelection({ kind: "item", screenId, itemId: created });
+    if (!target) return;
+    setSelection({ kind: "item", screenId: target, itemId: created });
     setRight("inspect");
   };
 
@@ -191,23 +250,81 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   }, [selection, doc.screens, setDoc]);
 
   useEffect(() => {
+    if (!shareReady) return;
+    const el = canvasRef.current;
+    if (!el) return;
+    const run = () => {
+      if (didFit.current) return;
+      const rect = el.getBoundingClientRect();
+      if (rect.width < 40 || rect.height < 40) return;
+      setView(fitView(doc.screens, rect.width, rect.height, MIN_Z, MAX_Z));
+      didFit.current = true;
+    };
+    run();
+    const ro = new ResizeObserver(run);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [doc.screens, shareReady]);
+
+  useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isTypingTarget(e.target)) return;
       const meta = e.metaKey || e.ctrlKey;
+      const overlay = preview || helpOpen || shareOpen || resetOpen || !!sheet;
       if (e.key === "Escape") {
-        setPreview(false);
-        setSheet(null);
+        if (helpOpen) {
+          setHelpOpen(false);
+          return;
+        }
+        if (shareOpen) {
+          setShareOpen(false);
+          return;
+        }
+        if (resetOpen) {
+          setResetOpen(false);
+          return;
+        }
+        if (sheet) {
+          setSheet(null);
+          return;
+        }
+        if (preview) {
+          setPreview(false);
+          return;
+        }
       }
+      if (overlay) return;
       if (e.key === " " && !meta) {
         e.preventDefault();
         setTool("hand");
       }
       if (e.key === "v" || e.key === "V") setTool("select");
-      if (e.key === "h" || e.key === "H") setTool("hand");
+      if ((e.key === "h" || e.key === "H") && !meta) setTool("hand");
       if (e.key === "p" || e.key === "P") setPreview(true);
-      if (meta && e.key === "z") {
+      if ((e.key === "f" || e.key === "F" || e.key === "0") && !meta) {
         e.preventDefault();
-        e.shiftKey ? redo() : undo();
+        fitCanvas();
+      }
+      if (e.key === "1" && !meta) {
+        const rect = canvasSize();
+        if (rect) setView((v) => zoomAt(v, 1, rect.width / 2, rect.height / 2));
+      }
+      if ((e.key === "c" || e.key === "C") && !meta) {
+        e.preventDefault();
+        centerSelection(e.altKey ? "y" : e.shiftKey ? "x" : "both");
+      }
+      if ((e.key === "[" || e.key === "]") && !meta) {
+        e.preventDefault();
+        pinSelection(e.shiftKey ? (e.key === "[" ? "top" : "bottom") : e.key === "[" ? "left" : "right");
+      }
+      if (e.key === "?" || (e.key === "/" && e.shiftKey)) {
+        e.preventDefault();
+        setHelpOpen((open) => !open);
+      }
+      if (meta && (e.key === "z" || e.key === "Z" || e.key === "y" || e.key === "Y")) {
+        e.preventDefault();
+        if (e.key === "y" || e.key === "Y" || e.shiftKey) redo();
+        else undo();
       }
       if (meta && (e.key === "d" || e.key === "D") && selection?.kind === "item") {
         e.preventDefault();
@@ -235,7 +352,6 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       }
       if (e.key === "+" || e.key === "=") setView((v) => ({ ...v, z: clamp(v.z * 1.1, MIN_Z, MAX_Z) }));
       if (e.key === "-" || e.key === "_") setView((v) => ({ ...v, z: clamp(v.z / 1.1, MIN_Z, MAX_Z) }));
-      if (e.key === "0") setView({ x: 80, y: 64, z: 0.72 });
     };
     const onUp = (e: KeyboardEvent) => {
       if (e.key === " " && !isTypingTarget(e.target)) setTool("select");
@@ -246,7 +362,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onUp);
     };
-  }, [deleteSelection, doc, redo, selection, undo]);
+  }, [centerSelection, deleteSelection, doc, fitCanvas, helpOpen, pinSelection, preview, redo, resetOpen, selection, shareOpen, sheet, undo]);
 
   useEffect(() => {
     const el = canvasRef.current;
@@ -254,7 +370,9 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     const onWheel = (e: WheelEvent) => {
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
-        setView((v) => ({ ...v, z: clamp(v.z * (e.deltaY > 0 ? 0.92 : 1.08), MIN_Z, MAX_Z) }));
+        const rect = el.getBoundingClientRect();
+        const z = (v: View) => clamp(v.z * (e.deltaY > 0 ? 0.92 : 1.08), MIN_Z, MAX_Z);
+        setView((v) => zoomAt(v, z(v), e.clientX - rect.left, e.clientY - rect.top));
         return;
       }
       setView((v) => ({ ...v, x: v.x - e.deltaX, y: v.y - e.deltaY }));
@@ -278,9 +396,9 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
 
   const onPointerDown = (e: React.PointerEvent) => {
     if (e.button !== 0) return;
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
     if (tool === "hand" || e.altKey) {
       drag.current = { type: "pan", sx: e.clientX, sy: e.clientY, ox: view.x, oy: view.y };
-      (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
       return;
     }
     const hit = screenAt(e.clientX, e.clientY);
@@ -329,12 +447,13 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       return;
     }
     if (d.type === "item" && d.screenId && d.itemId) {
+      let guideNext: Guide | null = null;
       setDoc((cur) => {
         const screen = screenOf(cur, d.screenId);
         const moving = screen?.items.find((it) => it.id === d.itemId);
         if (!screen || !moving) return cur;
         const snapped = snapMove(moving, screen.items.filter((it) => it.id !== moving.id), d.ox + dx, d.oy + dy);
-        setGuide(snapped.guide);
+        guideNext = snapped.guide;
         return {
           ...cur,
           screens: cur.screens.map((s) =>
@@ -344,6 +463,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           ),
         };
       }, false);
+      setGuide(guideNext);
     }
   };
 
@@ -384,21 +504,23 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   };
 
   const side = (kind: "left" | "right", children: React.ReactNode, extra = "") => (
-    <aside className={`desk-aside flex shrink-0 flex-col border-[var(--line)] bg-[var(--chrome)] ${kind === "left" ? "w-[260px] border-r" : "w-[300px] border-l"} ${extra}`}>
+    <aside className={`desk-aside flex h-full min-h-0 shrink-0 flex-col border-[var(--line)] bg-[var(--surface)] ${kind === "left" ? "w-[272px] border-r" : "w-[300px] border-l"} ${extra}`}>
       {children}
     </aside>
   );
 
   const leftBody = (
-    <>
-      <div className="flex gap-1 p-2">
-        {(["parts", "layers"] as LeftTab[]).map((tab) => (
-          <button key={tab} type="button" onClick={() => setLeft(tab)} className={`press flex-1 rounded-[10px] py-1.5 text-[12px] ${left === tab ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--muted)]"}`}>
-            {t(tab, lang)}
-          </button>
-        ))}
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="p-2">
+        <div className="miuix-tabbar">
+          {(["parts", "layers"] as LeftTab[]).map((tab) => (
+            <button key={tab} type="button" data-on={left === tab ? "1" : undefined} onClick={() => setLeft(tab)}>
+              {t(tab, lang)}
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {left === "parts" ? (
           <PartsPalette lang={lang} onAdd={(k) => { addItem(k); setSheet(null); }} onDragStart={(k) => { dragKind.current = k; }} />
         ) : (
@@ -411,44 +533,48 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           />
         )}
       </div>
-    </>
+    </div>
   );
 
   const rightBody = (
-    <>
-      <div className="flex gap-1 p-2">
-        {(["inspect", "theme", "prompt"] as RightTab[]).map((tab) => (
-          <button key={tab} type="button" onClick={() => setRight(tab)} className={`press flex-1 rounded-[10px] py-1.5 text-[12px] ${right === tab ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--muted)]"}`}>
-            {t(tab, lang)}
-          </button>
-        ))}
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="p-2">
+        <div className="miuix-tabbar">
+          {(["inspect", "theme", "prompt"] as RightTab[]).map((tab) => (
+            <button key={tab} type="button" data-on={right === tab ? "1" : undefined} onClick={() => setRight(tab)}>
+              {t(tab, lang)}
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
         {right === "inspect" && (
           <Inspector
             doc={doc}
             lang={lang}
             selection={selection}
-            onChangeTitle={(title) => setDoc((d) => ({ ...d, title }))}
-            onChangeScreen={(id, patch) => updateScreen(id, (s) => ({ ...s, ...patch }))}
-            onChangeItem={(sid, iid, patch) => updateScreen(sid, (s) => ({ ...s, items: s.items.map((it) => (it.id === iid ? { ...it, ...patch } : it)) }))}
+            onBeginHistory={beginHistory}
+            onChangeTitle={(title, record = true) => setDoc((d) => ({ ...d, title }), record)}
+            onChangeScreen={(id, patch, record = true) => updateScreen(id, (s) => ({ ...s, ...patch }), record)}
+            onChangeItem={(sid, iid, patch, record = true) => updateScreen(sid, (s) => ({ ...s, items: s.items.map((it) => (it.id === iid ? { ...it, ...patch } : it)) }), record)}
           />
         )}
         {right === "theme" && (
           <ThemePanel
             doc={doc}
             lang={lang}
-            onTheme={(patch) => setDoc((d) => ({ ...d, theme: { ...d.theme, ...patch } }))}
+            onBeginHistory={beginHistory}
+            onTheme={(patch, record = true) => setDoc((d) => ({ ...d, theme: { ...d.theme, ...patch } }), record)}
             onPlatform={(platform: Platform) => setDoc((d) => ({ ...d, platform }))}
           />
         )}
         {right === "prompt" && <PromptPanel doc={doc} lang={lang} />}
       </div>
-    </>
+    </div>
   );
 
   return (
-    <div className="app-root flex flex-col" data-theme={doc.theme.mode}>
+    <div className="app-root flex flex-col" data-theme={doc.theme.mode} data-lang={lang}>
       <Toolbar
         lang={lang}
         tool={tool}
@@ -465,6 +591,10 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
         onLoad={() => fileRef.current?.click()}
         onShare={openShare}
         onPng={exportPng}
+        onFit={fitCanvas}
+        onCenter={() => centerSelection("both")}
+        onHelp={() => setHelpOpen(true)}
+        onReset={() => setResetOpen(true)}
         onLang={setLang}
         github={GITHUB}
       />
@@ -481,6 +611,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           if (next) {
             setDoc(next);
             setSelection(next.screens[0] ? { kind: "screen", screenId: next.screens[0].id } : null);
+            didFit.current = false;
           }
         }}
       />
@@ -493,9 +624,42 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
+          onPointerCancel={onPointerUp}
+          onDoubleClick={(e) => {
+            if ((e.target as HTMLElement).closest("button")) return;
+            const hit = screenAt(e.clientX, e.clientY);
+            const rect = canvasSize();
+            if (!hit) {
+              fitCanvas();
+              return;
+            }
+            if (rect) setView(centerViewOnScreen(hit, rect.width, rect.height, view.z));
+          }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={onDrop}
         >
+          {!doc.screens.length && (
+            <div className="pointer-events-none absolute inset-0 grid place-items-center px-8 text-center text-[15px] text-[var(--muted-strong)]">
+              {t("emptyCanvas", lang)}
+            </div>
+          )}
+          <div className="miuix-zoom absolute bottom-3 left-3 z-10">
+            <button type="button" className="press miuix-icon-btn h-8 min-w-8" title={t("zoomOut", lang)} onClick={() => {
+              const rect = canvasSize();
+              if (rect) setView((v) => zoomAt(v, clamp(v.z / 1.1, MIN_Z, MAX_Z), rect.width / 2, rect.height / 2));
+            }}>
+              <span className="ms text-[18px]">remove</span>
+            </button>
+            <button type="button" className="press miuix-chip" title={t("fit", lang)} onClick={fitCanvas}>
+              {Math.round(view.z * 100)}%
+            </button>
+            <button type="button" className="press miuix-icon-btn h-8 min-w-8" title={t("zoomIn", lang)} onClick={() => {
+              const rect = canvasSize();
+              if (rect) setView((v) => zoomAt(v, clamp(v.z * 1.1, MIN_Z, MAX_Z), rect.width / 2, rect.height / 2));
+            }}>
+              <span className="ms text-[18px]">add</span>
+            </button>
+          </div>
           <div style={{ position: "absolute", left: view.x, top: view.y, transform: `scale(${view.z})`, transformOrigin: "0 0" }}>
             <svg style={{ position: "absolute", left: -2000, top: -2000, width: 8000, height: 4000, overflow: "visible", pointerEvents: "none" }}>
               {doc.screens.flatMap((screen) =>
@@ -521,7 +685,8 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                     <span className="font-medium">{screen.name}</span>
                     <button
                       type="button"
-                      className="press rounded-full bg-[var(--tile)] px-2 py-0.5 text-[11px] text-[var(--ink)]"
+                      className="press miuix-chip"
+                      onPointerDown={(e) => e.stopPropagation()}
                       onClick={(e) => {
                         e.stopPropagation();
                         updateScreen(screen.id, (s) => convertPreset(s, s.preset === "phone" ? "desktop" : "phone"));
@@ -585,20 +750,30 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
         {side("right", rightBody)}
       </div>
       <nav className="mobile-bar">
-        {(["parts", "layers", "inspect", "theme", "prompt"] as const).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            className="press flex-1 py-2 text-[11px]"
-            onClick={() => {
-              if (tab === "parts" || tab === "layers") setLeft(tab);
-              else setRight(tab);
-              setSheet(tab);
-            }}
-          >
-            {t(tab, lang)}
-          </button>
-        ))}
+        {([
+          ["parts", "widgets"],
+          ["layers", "layers"],
+          ["inspect", "tune"],
+          ["theme", "palette"],
+          ["prompt", "notes"],
+        ] as const).map(([tab, icon]) => {
+          const on = sheet === tab;
+          return (
+            <button
+              key={tab}
+              type="button"
+              className={`press flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] ${on ? "text-[var(--accent)]" : "text-[var(--muted-strong)]"}`}
+              onClick={() => {
+                if (tab === "parts" || tab === "layers") setLeft(tab);
+                else setRight(tab);
+                setSheet(tab);
+              }}
+            >
+              <span className="ms text-[20px]">{icon}</span>
+              {t(tab, lang)}
+            </button>
+          );
+        })}
       </nav>
       {sheet && (
         <div className="preview-root mobile-sheet" onClick={() => setSheet(null)}>
@@ -606,8 +781,46 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
             <div className="mb-2 flex justify-end">
               <button type="button" className="press text-[13px] text-[var(--accent)]" onClick={() => setSheet(null)}>{t("close", lang)}</button>
             </div>
-            <div className="flex h-[70vh] flex-col overflow-hidden">
+            <div className="flex h-[70vh] min-h-0 flex-col overflow-hidden">
               {sheet === "parts" || sheet === "layers" ? leftBody : rightBody}
+            </div>
+          </div>
+        </div>
+      )}
+      {resetOpen && (
+        <ConfirmDialog
+          title={t("reset", lang)}
+          body={t("resetHint", lang)}
+          cancel={t("cancel", lang)}
+          confirm={t("resetConfirm", lang)}
+          onCancel={() => setResetOpen(false)}
+          onConfirm={() => {
+            const next = defaultDoc(lang);
+            setDoc(next);
+            setSelection(next.screens[0] ? { kind: "screen", screenId: next.screens[0].id } : null);
+            setTool("select");
+            setSheet(null);
+            didFit.current = false;
+            setResetOpen(false);
+          }}
+        />
+      )}
+      {helpOpen && (
+        <div className="preview-root" onClick={() => setHelpOpen(false)}>
+          <div className="miuix-dialog w-[min(440px,92vw)]" onClick={(e) => e.stopPropagation()}>
+            <div className="miuix-dialog-title">{t("shortcutsTitle", lang)}</div>
+            <div className="mt-3 flex max-h-[60vh] flex-col gap-2 overflow-y-auto">
+              {SHORTCUTS[lang].map((row) => (
+                <div key={row.keys} className="flex items-start justify-between gap-4 text-[14px]">
+                  <kbd className="shrink-0 rounded-[12px] bg-[var(--tile)] px-2 py-1 font-mono text-[12px]">{row.keys}</kbd>
+                  <span className="flex-1 text-[var(--muted-strong)]">{row.action}</span>
+                </div>
+              ))}
+            </div>
+            <div className="miuix-dialog-actions">
+              <button type="button" className="press miuix-text-btn" data-accent="1" onClick={() => setHelpOpen(false)}>
+                {t("close", lang)}
+              </button>
             </div>
           </div>
         </div>
@@ -615,21 +828,25 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       {preview && <Preview doc={doc} lang={lang} startId={selectedScreenId} onClose={() => setPreview(false)} />}
       {shareOpen && (
         <div className="preview-root" onClick={() => setShareOpen(false)}>
-          <div className="w-[min(440px,92vw)] rounded-[18px] bg-[var(--chrome)] p-5 text-[var(--ink)] shadow-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="mb-2 text-[16px] font-semibold">{t("share", lang)}</div>
-            <p className="mb-3 text-[12px] text-[var(--muted)]">{t("shareHint", lang)}</p>
-            <div className="mb-3 break-all rounded-[12px] bg-[var(--tile)] p-3 text-[11px]">{shareText}</div>
-            <button
-              type="button"
-              className="press w-full rounded-[12px] bg-[var(--accent)] py-2.5 text-[13px] text-white"
-              onClick={async () => {
-                await navigator.clipboard.writeText(shareText);
-                setShareCopied(true);
-                setTimeout(() => setShareCopied(false), 1400);
-              }}
-            >
-              {shareCopied ? t("linkCopied", lang) : t("copy", lang)}
-            </button>
+          <div className="miuix-dialog w-[min(440px,92vw)]" onClick={(e) => e.stopPropagation()}>
+            <div className="miuix-dialog-title">{t("share", lang)}</div>
+            <p className="miuix-dialog-body">{t("shareHint", lang)}</p>
+            <div className="mt-3 break-all rounded-[16px] bg-[var(--tile)] p-3 text-[12px]">{shareText}</div>
+            <div className="miuix-dialog-actions">
+              <button type="button" className="press miuix-text-btn" onClick={() => setShareOpen(false)}>{t("close", lang)}</button>
+              <button
+                type="button"
+                className="press miuix-text-btn"
+                data-accent="1"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(shareText);
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 1400);
+                }}
+              >
+                {shareCopied ? t("linkCopied", lang) : t("copy", lang)}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -648,7 +865,7 @@ export function BootMark({ done }: { done: boolean }) {
 export function readInitialLang(): Lang {
   try {
     const ui = JSON.parse(localStorage.getItem(UI_KEY) ?? "null");
-    if (ui?.lang === "zh" || ui?.lang === "en") return ui.lang;
+    if (isLang(ui?.lang)) return ui.lang;
   } catch {
     /* ignore */
   }

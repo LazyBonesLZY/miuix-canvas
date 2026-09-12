@@ -17,4 +17,10 @@ describe("buildPrompt", () => {
     expect(text).toContain("About");
     expect(text).not.toContain("Screen “Home”");
   });
+
+  it("writes Japanese without Material 3", () => {
+    const text = buildPrompt(defaultDoc("ja"), "ja");
+    expect(text).toContain("画面「ホーム」");
+    expect(text).toContain("Material 3 は使わない");
+  });
 });

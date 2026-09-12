@@ -1,4 +1,4 @@
-import { isProject } from "./project";
+import { isProject, migrateDoc } from "./project";
 import type { Doc } from "./types";
 
 const DOC = "d";
@@ -33,7 +33,7 @@ export function decodeShare(raw: string): Doc | null {
   try {
     const json = new TextDecoder().decode(fromBase64Url(raw));
     const doc = JSON.parse(json) as unknown;
-    return isProject(doc) ? doc : null;
+    return isProject(doc) ? migrateDoc(doc) : null;
   } catch {
     return null;
   }
@@ -52,12 +52,12 @@ export async function readShareHash(hash = typeof location === "undefined" ? "" 
     if (packed && typeof DecompressionStream !== "undefined") {
       const bytes = await pipe(fromBase64Url(packed), new DecompressionStream("deflate-raw"));
       const value: unknown = JSON.parse(new TextDecoder().decode(bytes));
-      return isProject(value) ? value : null;
+      return isProject(value) ? migrateDoc(value) : null;
     }
     const plain = params.get(DOC);
     if (plain) {
       const value: unknown = JSON.parse(plain.startsWith("{") ? plain : decodeURIComponent(plain));
-      return isProject(value) ? value : null;
+      return isProject(value) ? migrateDoc(value) : null;
     }
     const legacy = raw.split("&").find((part) => part.startsWith("d=") && !part.startsWith("dz="));
     if (legacy) return decodeShare(legacy.slice(2));

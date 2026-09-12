@@ -14,11 +14,11 @@ export function PromptPanel({ doc, lang }: { doc: Doc; lang: Lang }) {
     <div className="flex h-full flex-col gap-2 px-3 py-3">
       <p className="text-[11px] leading-relaxed text-[var(--muted)]">{t("promptHint", lang)}</p>
       <select
-        className="rounded-[10px] bg-[var(--tile)] px-2.5 py-2 text-[13px] outline-none"
+        className="miuix-field"
         value={only}
         onChange={(e) => setOnly(e.target.value)}
       >
-        <option value="">{lang === "zh" ? "全部屏幕" : "All screens"}</option>
+        <option value="">{t("allScreens", lang)}</option>
         {doc.screens.map((s) => (
           <option key={s.id} value={s.id}>{s.name}</option>
         ))}
@@ -26,11 +26,11 @@ export function PromptPanel({ doc, lang }: { doc: Doc; lang: Lang }) {
       <textarea
         readOnly
         value={text}
-        className="min-h-[220px] flex-1 resize-none rounded-[12px] bg-[var(--tile)] p-3 text-[12px] leading-relaxed text-[var(--ink)] outline-none"
+        className="miuix-field min-h-[220px] flex-1 resize-none text-[13px] leading-relaxed"
       />
       <button
         type="button"
-        className="press rounded-[12px] bg-[var(--accent)] py-2.5 text-[13px] font-medium text-white"
+        className="press rounded-[16px] bg-[var(--accent)] py-2.5 text-[16px] font-medium text-white"
         onClick={async () => {
           await navigator.clipboard.writeText(text);
           setCopied(true);

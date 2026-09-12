@@ -10,14 +10,15 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 
 ## What it does
 
-- **Drag-and-drop Miuix parts** — Button, IconButton, FAB, FloatingToolbar, TopAppBar, SmallTitle, NavigationBar, NavigationRail, TabRow, SearchBar, BreadcrumbBar, Card, Surface, Divider, Snackbar, OverlayDialog, OverlayBottomSheet, ListPopup, Tooltip, TextField, Switch, Checkbox, RadioButton, Slider, Dropdown, NumberPicker, ColorPicker, ColorPalette, Text, Image, Badge, Icon, ProgressIndicator, PullToRefresh, ScrollBar.
-- **Preference rows** — SwitchPreference, CheckboxPreference, RadioButtonPreference, SliderPreference, SpinnerPreference, ArrowPreference. Adjacent rows magnetically join into one HyperOS Card.
+- **Drag-and-drop Miuix parts** — Button, IconButton, FAB, FloatingToolbar, TopAppBar, SmallTitle, NavigationBar, FloatingNavigationBar, NavigationRail, TabRow / TabRowWithContour, SearchBar, BreadcrumbBar, Card, Surface, HorizontalDivider / VerticalDivider, Snackbar, OverlayDialog / WindowDialog, OverlayBottomSheet / WindowBottomSheet, ListPopup, cascading ListPopup, OverlayDropdownMenu / WindowDropdownMenu, Tooltip / RichTooltipBox, TextField, Switch, Checkbox, RadioButton, Slider / VerticalSlider, RangeSlider, Dropdown, NumberPicker, ColorPicker, ColorPalette, Text, Image, Badge, Icon, Linear / Circular / Infinite ProgressIndicator, PullToRefresh, Vertical / Horizontal ScrollBar.
+- **Preference rows** — BasicComponent, SwitchPreference, CheckboxPreference, RadioButtonPreference, SliderPreference, RangeSliderPreference, SpinnerPreference / OverlayDropdownPreference, ArrowPreference. Adjacent rows magnetically join into one HyperOS Card.
 - **Phone and desktop screens** — 412×892 phone and 1280×800 desktop. Switching size converts NavigationBar ↔ NavigationRail.
 - **Tap and swipe to navigate** — parts, nav destinations and screen swipes can open another screen. Preview plays the transition; canvas arrows show the flow.
 - **Theme** — light / dark, a seed color (default `#3482FF`), Monet flag. Surfaces stay HyperOS; primary roles shift with the seed.
-- **Prompt output** — Chinese or English brief naming real Miuix composables (`OverlayDialog`, `SwitchPreference`, …). Target Compose Multiplatform (default), Android, or CMP Web.
+- **Prompt output** — Chinese, English, Japanese or Korean brief naming real Miuix composables (`OverlayDialog`, `SwitchPreference`, …). Target Compose Multiplatform (default), Android, or CMP Web.
 - **Optional AI helper** — your own OpenAI / Claude / Gemini / DeepSeek key writes a part or screen note. The key stays in the browser.
 - **Tidy, layers, guides, undo/redo**, 4dp grid, compressed share links, JSON and PNG.
+- **Reset canvas** — replace the current design with the sample (undo brings it back).
 - **Phone-friendly** — the side panels collapse into a bottom sheet under 900px.
 
 ## Keyboard
@@ -26,11 +27,20 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 | --- | --- |
 | `V` / `H` | Select / hand tool (hold `Space` to pan) |
 | Wheel, `Ctrl` + wheel | Pan, zoom |
-| `+` `-` `0` | Zoom in, zoom out, reset |
+| `F` / `0` | Fit all screens in the viewport |
+| Double-click canvas | Fit all, or center the screen you click |
+| `1` | Zoom 100% |
+| `C` | Center the selected part, or center the current screen |
+| `Shift+C` / `Alt+C` | Center horizontally / vertically |
+| `[` / `]` | Pin to 16dp left / right margins |
+| `Shift+[` / `]` | Pin to top / bottom margins |
+| `+` `-` | Zoom in / out |
 | `Ctrl+Z` / `Ctrl+Shift+Z` | Undo / redo |
+| `Ctrl+D` | Duplicate part |
 | `Delete` | Delete part or screen |
 | `P` | Preview |
-| `Esc` | Leave preview |
+| `?` | Shortcuts |
+| `Esc` | Close preview, help, or sheets |
 
 ## Develop
 
@@ -68,12 +78,13 @@ Miuix itself is Apache-2.0. This project reimplements the look in the browser fo
 
 ### 功能
 
-- 拖放完整 Miuix 基础部件（含 OverlayDialog、OverlayBottomSheet、ColorPicker、ListPopup 等）
+- 拖放完整 Miuix 基础部件（含 FloatingNavigationBar、RangeSlider、WindowDialog、RichTooltipBox、DropdownMenu 等）以及 Preference 行
 - HyperOS 设置项可磁吸拼成一组 Card
 - 手机 / 桌面互转时导航栏会变成 NavigationRail
 - 点击、导航项、屏幕滑动都可以跳转；画布上有流程箭头
 - 浅色 / 深色、种子色、Monet；可选填自己的 API key 写行为说明
-- 中 / 英提示词会写出真实的 Miuix composable 名
+- 中 / 英 / 日 / 韩提示词会写出真实的 Miuix composable 名
+- `F` 适应画布，`C` 居中，`?` 看快捷键
 - 整理、图层、对齐线、压缩分享链接、JSON、PNG；窄屏用底部面板
 
 ### 开发

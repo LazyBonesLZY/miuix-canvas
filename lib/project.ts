@@ -7,7 +7,6 @@ const validItem = (value: unknown): value is Item =>
   isRecord(value) &&
   typeof value.id === "string" &&
   typeof value.kind === "string" &&
-  KIND_SET.has(value.kind) &&
   typeof value.label === "string" &&
   Number.isFinite(value.x) &&
   Number.isFinite(value.y) &&

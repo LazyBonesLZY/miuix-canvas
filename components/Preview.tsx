@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { MiuixNode, StatusBar } from "@/components/MiuixNode";
 import { schemeFromSeed } from "@/lib/color";
 import { t, type Lang } from "@/lib/i18n";
-import { prefJoin } from "@/lib/layout";
+import { prefJoin, previewScale } from "@/lib/layout";
 import type { Doc, Item, Transition } from "@/lib/types";
 import { BACK_TARGET, GESTURE_H, frameSize } from "@/lib/types";
 
@@ -31,11 +31,12 @@ export function Preview({
   const [anim, setAnim] = useState("");
   const [local, setLocal] = useState<Record<string, Partial<Item>>>({});
   const swipe = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
   const currentId = stack.at(-1);
   const screen = doc.screens.find((s) => s.id === currentId) ?? doc.screens[0];
   const palette = schemeFromSeed(doc.theme.seed, doc.theme.mode === "dark");
   const { w, h, r } = frameSize(screen?.preset ?? "phone");
-  const scale = Math.min(1, Math.min(typeof window !== "undefined" ? window.innerWidth - 48 : 412, typeof window !== "undefined" ? window.innerHeight - 120 : 800) / Math.max(w, h * 0.55));
+  const scale = previewScale(w, h, typeof window !== "undefined" ? window.innerWidth : 412, typeof window !== "undefined" ? window.innerHeight : 800);
 
   const go = (to: string | undefined, transition?: Transition) => {
     if (!to) return;
@@ -71,6 +72,7 @@ export function Preview({
             const dx = e.clientX - start.x;
             const dy = e.clientY - start.y;
             if (Math.hypot(dx, dy) < 48) return;
+            swiped.current = true;
             const dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? "left" : "right") : dy < 0 ? "up" : "down";
             go(screen.swipe?.[dir], dir === "left" ? "slide" : dir === "right" ? "slideLeft" : "slideUp");
           }}
@@ -85,6 +87,10 @@ export function Preview({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
+                  if (swiped.current) {
+                    swiped.current = false;
+                    return;
+                  }
                   if (it.tabs?.length) {
                     const box = e.currentTarget.getBoundingClientRect();
                     const t0 = it.kind === "navigationRail"
@@ -122,9 +128,9 @@ export function Preview({
             <div style={{ width: 96, height: 4, borderRadius: 4, background: doc.theme.mode === "dark" ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.28)" }} />
           </div>
         </div>
-        <div className="flex items-center gap-2 text-[12px] text-white/80">
+        <div className="flex items-center gap-2 rounded-[16px] bg-[var(--chrome)] px-3 py-1.5 text-[13px] text-[var(--ink)]">
           <span>{t("ready", lang)}</span>
-          <button type="button" className="press rounded-full bg-white/15 px-3 py-1 text-white" onClick={onClose}>Esc</button>
+          <button type="button" className="press miuix-text-btn" data-accent="1" onClick={onClose}>{t("close", lang)}</button>
         </div>
       </div>
     </div>

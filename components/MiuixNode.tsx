@@ -20,8 +20,9 @@ function Symbol({ name, size = 20, color, fill = false }: { name?: string | null
 }
 
 function SwitchTrack({ on, p, compact = false }: { on: boolean; p: Palette; compact?: boolean }) {
-  const w = compact ? 38 : 42;
-  const h = compact ? 22 : 24;
+  const w = compact ? 44 : 49;
+  const h = compact ? 26 : 28;
+  const thumb = compact ? 18 : 20;
   return (
     <div
       style={{
@@ -36,10 +37,10 @@ function SwitchTrack({ on, p, compact = false }: { on: boolean; p: Palette; comp
       <div
         style={{
           position: "absolute",
-          top: 3,
-          left: on ? w - h + 3 : 3,
-          width: h - 6,
-          height: h - 6,
+          top: (h - thumb) / 2,
+          left: on ? w - thumb - 4 : 4,
+          width: thumb,
+          height: thumb,
           borderRadius: 999,
           background: on ? p.onPrimary : p.onSecondary,
         }}
@@ -49,20 +50,53 @@ function SwitchTrack({ on, p, compact = false }: { on: boolean; p: Palette; comp
 }
 
 function Check({ on, p, radio = false }: { on: boolean; p: Palette; radio?: boolean }) {
+  if (radio) {
+    return (
+      <div style={{ width: 26, height: 26, display: "grid", placeItems: "center", flexShrink: 0 }}>
+        {on && <Symbol name="check" size={20} color={p.primary} />}
+      </div>
+    );
+  }
   return (
     <div
       style={{
-        width: 22,
-        height: 22,
-        borderRadius: radio ? 999 : 6,
-        border: on ? "none" : `1.5px solid ${p.outline}`,
-        background: on ? p.primary : "transparent",
+        width: 26,
+        height: 26,
+        borderRadius: 999,
+        background: on ? p.primary : p.secondary,
         display: "grid",
         placeItems: "center",
         flexShrink: 0,
       }}
     >
-      {on && <Symbol name={radio ? "circle" : "check"} size={14} color={p.onPrimary} fill />}
+      {on && <Symbol name="check" size={16} color={p.onPrimary} />}
+    </div>
+  );
+}
+
+function thumbLeft(value: number) {
+  const v = Math.max(0, Math.min(1, value));
+  return `clamp(4px, calc(${v * 100}% - 10px), calc(100% - 24px))`;
+}
+
+function SliderBar({ p, value }: { p: Palette; value: number }) {
+  const v = Math.max(0, Math.min(1, value));
+  return (
+    <div style={{ flex: 1, height: 28, borderRadius: 999, background: p.sliderBackground, position: "relative" }}>
+      <div style={{ width: `${v * 100}%`, height: "100%", background: p.primary, borderRadius: 999 }} />
+      <div style={{ position: "absolute", top: 4, left: thumbLeft(v), width: 20, height: 20, borderRadius: 10, background: p.onPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.18)" }} />
+    </div>
+  );
+}
+
+function RangeBar({ p, high }: { p: Palette; high: number }) {
+  const hi = Math.max(0, Math.min(1, high));
+  const lo = Math.max(0, hi - 0.35);
+  return (
+    <div style={{ flex: 1, height: 28, borderRadius: 999, background: p.sliderBackground, position: "relative" }}>
+      <div style={{ position: "absolute", left: `${lo * 100}%`, width: `${Math.max((hi - lo) * 100, 8)}%`, height: "100%", background: p.primary, borderRadius: 999 }} />
+      <div style={{ position: "absolute", top: 4, left: thumbLeft(lo), width: 20, height: 20, borderRadius: 10, background: p.onPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.18)" }} />
+      <div style={{ position: "absolute", top: 4, left: thumbLeft(hi), width: 20, height: 20, borderRadius: 10, background: p.onPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.18)" }} />
     </div>
   );
 }
@@ -86,9 +120,9 @@ function PrefRow({ it, p, trailing, join }: { it: Item; p: Palette; trailing?: R
       {it.icon && (
         <div
           style={{
-            width: 36,
-            height: 36,
-            borderRadius: 10,
+            width: 40,
+            height: 40,
+            borderRadius: 12,
             background: p.tertiaryContainer,
             display: "grid",
             placeItems: "center",
@@ -99,9 +133,9 @@ function PrefRow({ it, p, trailing, join }: { it: Item; p: Palette; trailing?: R
         </div>
       )}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 16, color: p.onSurfaceContainer, lineHeight: "22px", fontWeight: 400 }}>{it.label}</div>
+        <div style={{ fontSize: 17, color: p.onSurfaceContainer, lineHeight: "22px", fontWeight: 500 }}>{it.label}</div>
         {it.supporting && (
-          <div style={{ fontSize: 13, color: p.onSurfaceVariantSummary, lineHeight: "18px", marginTop: 2 }}>{it.supporting}</div>
+          <div style={{ fontSize: 14, color: p.onSurfaceVariantSummary, lineHeight: "18px", marginTop: 2 }}>{it.supporting}</div>
         )}
       </div>
       {trailing}
@@ -136,9 +170,9 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
 
   switch (it.kind) {
     case "button": {
-      const variant = it.variant ?? "primary";
-      const bg = variant === "primary" ? p.primary : variant === "secondary" ? p.secondaryVariant : "transparent";
-      const fg = variant === "primary" ? p.onPrimary : variant === "secondary" ? p.onSecondaryVariant : p.primary;
+      const variant = it.variant ?? "secondary";
+      const bg = variant === "primary" ? p.primary : variant === "text" ? "transparent" : p.secondaryVariant;
+      const fg = variant === "primary" ? p.onPrimary : variant === "text" ? p.primary : p.onSecondaryVariant;
       return (
         <div style={{ ...style, display: "grid", placeItems: "center" }}>
           <div
@@ -153,8 +187,8 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
               alignItems: "center",
               justifyContent: "center",
               gap: 6,
-              fontSize: 16,
-              fontWeight: 500,
+              fontSize: 17,
+              fontWeight: 400,
             }}
           >
             {it.icon && <Symbol name={it.icon} size={18} color={fg} />}
@@ -174,14 +208,14 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "fab":
       return (
         <div style={{ ...style, display: "grid", placeItems: "center" }}>
-          <div style={{ width: 56, height: 56, borderRadius: 18, background: p.primary, display: "grid", placeItems: "center", boxShadow: `0 8px 20px ${withAlpha(p.primary, 0.35)}` }}>
+          <div style={{ width: "100%", height: "100%", borderRadius: 999, background: p.primary, display: "grid", placeItems: "center", boxShadow: `0 4px 12px ${withAlpha(p.primary, 0.28)}` }}>
             <Symbol name={it.icon || "add"} size={26} color={p.onPrimary} />
           </div>
         </div>
       );
     case "floatingToolbar":
       return (
-        <div style={{ ...style, borderRadius: 26, background: p.surfaceContainerHighest, display: "flex", alignItems: "center", justifyContent: "space-evenly", padding: "0 8px" }}>
+        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainerHighest, display: "flex", alignItems: "center", justifyContent: "space-evenly", padding: "0 8px" }}>
           {(it.tabs ?? []).map((tab, i) => (
             <Symbol key={i} name={tab.icon} size={22} color={p.onSurface} />
           ))}
@@ -193,7 +227,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
         <div style={{ ...style, background: p.surface, padding: large ? "28px 16px 12px" : "28px 8px 8px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 4, minHeight: 40 }}>
             {it.icon && <Symbol name={it.icon} size={22} color={p.onSurface} />}
-            <div style={{ flex: 1, fontSize: large ? 28 : 20, fontWeight: 600, color: p.onSurface, letterSpacing: large ? -0.4 : 0 }}>{it.label}</div>
+            <div style={{ flex: 1, fontSize: large ? 32 : 20, fontWeight: large ? 400 : 500, color: p.onSurface, letterSpacing: large ? -0.4 : 0 }}>{it.label}</div>
             <Symbol name="more_horiz" size={22} color={p.onSurface} />
           </div>
         </div>
@@ -201,13 +235,19 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     }
     case "smallTitle":
       return (
-        <div style={{ ...style, display: "flex", alignItems: "flex-end", padding: "0 4px 4px", fontSize: 14, color: p.onSurfaceVariantSummary, fontWeight: 500 }}>
+        <div style={{ ...style, display: "flex", alignItems: "flex-end", padding: "0 12px 4px", fontSize: 14, color: p.onBackgroundVariant, fontWeight: 700 }}>
           {it.label}
         </div>
       );
     case "navigationBar":
       return (
-        <div style={{ ...style, background: p.surfaceContainer, borderTop: `1px solid ${p.dividerLine}` }}>
+        <div style={{ ...style, background: p.surface, borderTop: `1px solid ${p.dividerLine}` }}>
+          <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} />
+        </div>
+      );
+    case "floatingNav":
+      return (
+        <div style={{ ...style, borderRadius: 999, background: p.surfaceContainerHighest, boxShadow: `0 10px 28px ${p.windowDimming}`, padding: "4px 10px" }}>
           <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} />
         </div>
       );
@@ -217,9 +257,10 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
           <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} vertical />
         </div>
       );
-    case "tabRow":
+    case "tabRow": {
+      const contour = it.variant === "contour";
       return (
-        <div style={{ ...style, background: p.secondaryVariant, borderRadius: 12, padding: 3, display: "flex", gap: 3 }}>
+        <div style={{ ...style, background: contour ? "transparent" : p.surface, borderRadius: 12, padding: 3, display: "flex", gap: 9, border: contour ? `1px solid ${p.outline}` : undefined }}>
           {(it.tabs ?? []).map((tab, i) => {
             const on = i === (it.selected ?? 0);
             return (
@@ -227,13 +268,13 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
                 key={i}
                 style={{
                   flex: 1,
-                  borderRadius: 10,
+                  borderRadius: contour ? 8 : 12,
                   background: on ? p.surfaceContainer : "transparent",
-                  color: on ? p.onSurface : p.onSurfaceVariantSummary,
+                  color: on ? p.onBackground : p.onSurfaceVariantSummary,
                   display: "grid",
                   placeItems: "center",
                   fontSize: 14,
-                  fontWeight: on ? 600 : 400,
+                  fontWeight: on ? 700 : 400,
                 }}
               >
                 {tab.label}
@@ -242,11 +283,12 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
           })}
         </div>
       );
+    }
     case "searchBar":
       return (
-        <div style={{ ...style, borderRadius: 18, background: p.surfaceContainerHigh, display: "flex", alignItems: "center", gap: 8, padding: "0 14px", color: p.onSurfaceContainerVariant }}>
+        <div style={{ ...style, borderRadius: 999, background: p.surfaceContainerHigh, display: "flex", alignItems: "center", gap: 8, padding: "0 16px", color: p.onSurfaceContainerVariant }}>
           <Symbol name="search" size={20} color={p.onSurfaceVariantActions} />
-          <span style={{ fontSize: 15, color: p.onSurfaceVariantSummary }}>{it.label}</span>
+          <span style={{ fontSize: 17, fontWeight: 500, color: p.onSurfaceVariantSummary }}>{it.label}</span>
         </div>
       );
     case "breadcrumb":
@@ -264,7 +306,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
                 <Symbol name={it.icon} size={22} color={p.onTertiaryContainer} />
               </div>
             )}
-            <div style={{ fontSize: 17, fontWeight: 600, color: p.onSurfaceContainer }}>{it.label}</div>
+            <div style={{ fontSize: 17, fontWeight: 500, color: p.onSurfaceContainer }}>{it.label}</div>
           </div>
           {it.supporting && <div style={{ fontSize: 14, color: p.onSurfaceVariantSummary, lineHeight: 1.45 }}>{it.supporting}</div>}
         </div>
@@ -272,27 +314,29 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "surface":
       return <div style={{ ...style, borderRadius: 16, background: p.surfaceContainer }} />;
     case "divider":
-      return <div style={{ ...style, background: p.dividerLine, height: 1, alignSelf: "center" }} />;
+      return it.variant === "vertical"
+        ? <div style={{ ...style, background: p.dividerLine, width: 1, margin: "0 auto" }} />
+        : <div style={{ ...style, background: p.dividerLine, height: 1, alignSelf: "center" }} />;
     case "snackbar":
       return (
-        <div style={{ ...style, borderRadius: 16, background: "#323232", color: "#fff", display: "flex", alignItems: "center", padding: "0 16px", fontSize: 14 }}>
+        <div style={{ ...style, borderRadius: 16, background: p.onSecondaryVariant, color: p.secondaryVariant, display: "flex", alignItems: "center", padding: "0 12px", fontSize: 14 }}>
           {it.label}
         </div>
       );
     case "dialog":
       return (
-        <div style={{ ...style, borderRadius: 18, background: p.surfaceContainer, padding: 22, display: "flex", flexDirection: "column", boxShadow: `0 16px 40px ${p.windowDimming}` }}>
-          <div style={{ fontSize: 18, fontWeight: 600, color: p.onSurface }}>{it.label}</div>
-          {it.supporting && <div style={{ fontSize: 14, color: p.onSurfaceVariantSummary, marginTop: 8, lineHeight: 1.5 }}>{it.supporting}</div>}
+        <div style={{ ...style, borderRadius: 32, background: p.background, padding: 24, display: "flex", flexDirection: "column", boxShadow: `0 16px 40px ${p.windowDimming}` }}>
+          <div style={{ fontSize: 18, fontWeight: 500, color: p.onBackground }}>{it.label}</div>
+          {it.supporting && <div style={{ fontSize: 17, color: p.onSurfaceSecondary, marginTop: 8, lineHeight: 1.5 }}>{it.supporting}</div>}
           <div style={{ marginTop: "auto", display: "flex", justifyContent: "flex-end", gap: 8 }}>
-            <span style={{ color: p.onSurfaceVariantSummary, fontSize: 15, padding: "6px 10px" }}>{t("cancel", lang)}</span>
-            <span style={{ color: p.primary, fontSize: 15, fontWeight: 600, padding: "6px 10px" }}>{t("confirm", lang)}</span>
+            <span style={{ color: p.onSurfaceVariantSummary, fontSize: 17, padding: "8px 14px" }}>{t("cancel", lang)}</span>
+            <span style={{ color: p.primary, fontSize: 17, fontWeight: 600, padding: "8px 14px" }}>{t("confirm", lang)}</span>
           </div>
         </div>
       );
     case "textField":
       return (
-        <div style={{ ...style, borderRadius: 16, background: p.surfaceContainerHigh, display: "flex", alignItems: "center", padding: "0 14px", fontSize: 15, color: p.onSurfaceVariantSummary }}>
+        <div style={{ ...style, borderRadius: 16, background: p.secondaryContainer, display: "flex", alignItems: "center", padding: "0 16px", fontSize: 17, color: p.onSecondaryContainer }}>
           {it.label}
         </div>
       );
@@ -315,27 +359,42 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
         </div>
       );
     case "slider":
+      if (it.variant === "vertical") {
+        const v = Math.round((it.value ?? 0.5) * 100);
+        return (
+          <div style={{ ...style, display: "grid", placeItems: "center" }}>
+            <div style={{ width: 28, height: "100%", borderRadius: 999, background: p.sliderBackground, position: "relative" }}>
+              <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: `${v}%`, background: p.primary, borderRadius: 999 }} />
+              <div style={{ position: "absolute", left: 4, bottom: `clamp(4px, calc(${v}% - 10px), calc(100% - 24px))`, width: 20, height: 20, borderRadius: 10, background: p.onPrimary, boxShadow: "0 1px 2px rgba(0,0,0,0.18)" }} />
+            </div>
+          </div>
+        );
+      }
       return (
         <div style={{ ...style, display: "flex", alignItems: "center" }}>
-          <div style={{ flex: 1, height: 4, borderRadius: 4, background: p.sliderBackground, position: "relative" }}>
-            <div style={{ width: `${Math.round((it.value ?? 0.5) * 100)}%`, height: "100%", background: p.primary, borderRadius: 4 }} />
-            <div style={{ position: "absolute", top: -6, left: `${Math.round((it.value ?? 0.5) * 100)}%`, width: 16, height: 16, marginLeft: -8, borderRadius: 8, background: p.primary }} />
-          </div>
+          <SliderBar p={p} value={it.value ?? 0.5} />
+        </div>
+      );
+    case "rangeSlider":
+      return (
+        <div style={{ ...style, display: "flex", alignItems: "center" }}>
+          <RangeBar p={p} high={it.value ?? 0.7} />
         </div>
       );
     case "dropdown":
       return (
         <div style={{ ...style, borderRadius: 16, background: p.surfaceContainer, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 14px" }}>
-          <span style={{ fontSize: 15, color: p.onSurface }}>{it.label}</span>
+          <span style={{ fontSize: 17, color: p.onSurface }}>{it.label}</span>
           <Symbol name="expand_more" size={20} color={p.onSurfaceVariantActions} />
         </div>
       );
     case "numberPicker":
       return (
-        <div style={{ ...style, borderRadius: 16, background: p.surfaceContainer, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: p.onSurfaceVariantSummary, fontSize: 16 }}>
-          <div>11</div>
-          <div style={{ fontSize: 28, fontWeight: 600, color: p.onSurface, lineHeight: 1.2 }}>{it.label || "12"}</div>
-          <div>13</div>
+        <div style={{ ...style, position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: p.onSurfaceSecondary }}>
+          <div style={{ position: "absolute", left: 8, right: 8, height: 45, borderRadius: 12, background: p.secondaryVariant }} />
+          <div style={{ fontSize: 16, opacity: 0.45, zIndex: 1 }}>11</div>
+          <div style={{ fontSize: 32, fontWeight: 400, color: p.onSurface, lineHeight: "45px", zIndex: 1 }}>{it.label || "12"}</div>
+          <div style={{ fontSize: 16, opacity: 0.45, zIndex: 1 }}>13</div>
         </div>
       );
     case "text":
@@ -363,10 +422,18 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
         </div>
       );
     case "progress":
-      if (it.variant === "circular") {
+      if (it.variant === "circular" || it.variant === "infinite") {
         return (
           <div style={{ ...style, display: "grid", placeItems: "center" }}>
-            <div style={{ width: 28, height: 28, borderRadius: 999, border: `3px solid ${p.sliderBackground}`, borderTopColor: p.primary }} />
+            {it.variant === "infinite" ? (
+              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                {[0, 1, 2].map((i) => (
+                  <div key={i} style={{ width: 6, height: 6, borderRadius: 999, background: p.primary, opacity: 0.35 + i * 0.3 }} />
+                ))}
+              </div>
+            ) : (
+              <div style={{ width: 28, height: 28, borderRadius: 999, border: `3px solid ${p.sliderBackground}`, borderTopColor: p.primary }} />
+            )}
           </div>
         );
       }
@@ -387,22 +454,44 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "bottomSheet":
       return (
-        <div style={{ ...style, borderRadius: "20px 20px 0 0", background: p.surfaceContainer, padding: "10px 16px 16px", display: "flex", flexDirection: "column" }}>
+        <div style={{ ...style, borderRadius: "20px 20px 0 0", background: p.surfaceContainer, padding: "10px 16px 16px", display: "flex", flexDirection: "column", border: it.variant === "window" ? `1px solid ${p.outline}` : undefined }}>
           <div style={{ width: 36, height: 4, borderRadius: 4, background: p.outline, alignSelf: "center", marginBottom: 12 }} />
-          <div style={{ fontSize: 17, fontWeight: 600, color: p.onSurface }}>{it.label}</div>
+          <div style={{ fontSize: 17, fontWeight: 500, color: p.onSurface }}>{it.label}</div>
           {it.supporting && <div style={{ fontSize: 13, color: p.onSurfaceVariantSummary, marginTop: 6 }}>{it.supporting}</div>}
         </div>
       );
     case "listPopup":
+    case "dropdownMenu":
       return (
         <div style={{ ...style, borderRadius: 16, background: p.surfaceContainer, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "6px 0" }}>
           {(it.tabs ?? [{ label: it.label, icon: "" }]).map((tab, i) => (
-            <div key={i} style={{ padding: "10px 16px", fontSize: 15, color: p.onSurface }}>{tab.label}</div>
+            <div key={i} style={{ padding: "10px 16px", fontSize: 17, color: p.onSurface }}>{tab.label}</div>
           ))}
         </div>
       );
-    case "tooltip":
+    case "cascadingPopup":
       return (
+        <div style={{ ...style, display: "flex", gap: 8 }}>
+          <div style={{ flex: 1, borderRadius: 16, background: p.surfaceContainer, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "6px 0" }}>
+            {(it.tabs ?? []).map((tab, i) => (
+              <div key={i} style={{ padding: "10px 12px", fontSize: 14, color: p.onSurface, display: "flex", justifyContent: "space-between" }}>
+                <span>{tab.label}</span>
+                {i === (it.tabs?.length ?? 1) - 1 && <Symbol name="chevron_right" size={16} color={p.onSurfaceVariantActions} />}
+              </div>
+            ))}
+          </div>
+          <div style={{ width: 96, borderRadius: 16, background: p.surfaceContainerHigh, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "10px 12px", fontSize: 13, color: p.onSurfaceVariantSummary }}>
+            {t("more", lang)}
+          </div>
+        </div>
+      );
+    case "tooltip":
+      return it.variant === "rich" ? (
+        <div style={{ ...style, borderRadius: 14, background: p.onSurface, color: p.surface, padding: "10px 12px", display: "flex", flexDirection: "column", justifyContent: "center", gap: 4 }}>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>{it.label}</div>
+          {it.supporting && <div style={{ fontSize: 11, opacity: 0.72 }}>{it.supporting}</div>}
+        </div>
+      ) : (
         <div style={{ ...style, borderRadius: 12, background: p.onSurface, color: p.surface, display: "grid", placeItems: "center", fontSize: 12, padding: "0 10px" }}>
           {it.label}
         </div>
@@ -424,6 +513,8 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "scrollBar":
       return <div style={{ ...style, borderRadius: 999, background: p.outline, opacity: 0.7 }} />;
+    case "basicPref":
+      return <PrefRow it={it} p={p} join={join} />;
     case "switchPref":
       return <PrefRow it={it} p={p} join={join} trailing={<SwitchTrack on={!!it.checked} p={p} compact />} />;
     case "checkboxPref":
@@ -431,12 +522,12 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "radioPref":
       return <PrefRow it={it} p={p} join={join} trailing={<Check on={!!it.checked} p={p} radio />} />;
     case "sliderPref":
+    case "rangeSliderPref":
       return (
         <div style={{ ...style, background: p.surfaceContainer, padding: "10px 16px", borderRadius: `${join?.top ? 0 : 16}px ${join?.top ? 0 : 16}px ${join?.bottom ? 0 : 16}px ${join?.bottom ? 0 : 16}px` }}>
-          <div style={{ fontSize: 16, color: p.onSurfaceContainer }}>{it.label}</div>
-          <div style={{ marginTop: 12, height: 4, borderRadius: 4, background: p.sliderBackground, position: "relative" }}>
-            <div style={{ width: `${Math.round((it.value ?? 0.5) * 100)}%`, height: "100%", background: p.primary, borderRadius: 4 }} />
-            <div style={{ position: "absolute", top: -6, left: `${Math.round((it.value ?? 0.5) * 100)}%`, width: 16, height: 16, marginLeft: -8, borderRadius: 8, background: p.primary }} />
+          <div style={{ fontSize: 17, fontWeight: 500, color: p.onSurfaceContainer }}>{it.label}</div>
+          <div style={{ marginTop: 12 }}>
+            {it.kind === "rangeSliderPref" ? <RangeBar p={p} high={it.value ?? 0.7} /> : <SliderBar p={p} value={it.value ?? 0.5} />}
           </div>
         </div>
       );

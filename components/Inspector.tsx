@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { AiPanel } from "@/components/AiPanel";
-import { ICONS, KIND_SPEC } from "@/lib/tokens";
+import { applyVariant, ICONS, KIND_SPEC } from "@/lib/tokens";
 import { KIND_TEXT, TRANSITION_TEXT, t, type Lang } from "@/lib/i18n";
 import type { Doc, Item, Screen, Selection, Transition } from "@/lib/types";
 import { BACK_TARGET, SWIPE_DIRS, TRANSITIONS, frameSize } from "@/lib/types";
@@ -10,13 +10,19 @@ import { BACK_TARGET, SWIPE_DIRS, TRANSITIONS, frameSize } from "@/lib/types";
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] text-[var(--muted)]">{label}</span>
+      <span className="text-[13px] text-[var(--muted-strong)]">{label}</span>
       {children}
     </label>
   );
 }
 
-const input = "w-full rounded-[10px] border-0 bg-[var(--tile)] px-2.5 py-2 text-[13px] text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--accent)]";
+function ChromeSwitch({ on, onChange }: { on: boolean; onChange: (next: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} className="press miuix-switch" data-on={on ? "1" : undefined} onClick={() => onChange(!on)} />
+  );
+}
+
+const input = "miuix-field";
 
 function TargetSelect({
   doc,
@@ -49,21 +55,23 @@ export function Inspector({
   onChangeItem,
   onChangeScreen,
   onChangeTitle,
+  onBeginHistory,
 }: {
   doc: Doc;
   lang: Lang;
   selection: Selection;
-  onChangeItem: (screenId: string, itemId: string, patch: Partial<Item>) => void;
-  onChangeScreen: (screenId: string, patch: Partial<Screen>) => void;
-  onChangeTitle: (title: string) => void;
+  onChangeItem: (screenId: string, itemId: string, patch: Partial<Item>, record?: boolean) => void;
+  onChangeScreen: (screenId: string, patch: Partial<Screen>, record?: boolean) => void;
+  onChangeTitle: (title: string, record?: boolean) => void;
+  onBeginHistory?: () => void;
 }) {
   if (!selection) {
     return (
       <div className="flex flex-col gap-3 px-3 py-3">
         <Field label={t("title", lang)}>
-          <input className={input} value={doc.title} onChange={(e) => onChangeTitle(e.target.value)} />
+          <input className={input} value={doc.title} onFocus={onBeginHistory} onChange={(e) => onChangeTitle(e.target.value, false)} />
         </Field>
-        <p className="text-[12px] leading-relaxed text-[var(--muted)]">{t("noSelection", lang)}</p>
+        <p className="text-[13px] leading-relaxed text-[var(--muted)]">{t("noSelection", lang)}</p>
       </div>
     );
   }
@@ -74,17 +82,17 @@ export function Inspector({
   if (selection.kind === "screen") {
     const size = frameSize(screen.preset);
     return (
-      <div className="flex flex-col gap-3 overflow-auto px-3 py-3">
+      <div className="flex flex-col gap-3 px-3 py-3">
         <Field label={t("screenName", lang)}>
-          <input className={input} value={screen.name} onChange={(e) => onChangeScreen(screen.id, { name: e.target.value })} />
+          <input className={input} value={screen.name} onFocus={onBeginHistory} onChange={(e) => onChangeScreen(screen.id, { name: e.target.value }, false)} />
         </Field>
-        <div className="text-[12px] text-[var(--muted)]">
+        <div className="text-[13px] text-[var(--muted)]">
           {screen.preset === "phone" ? t("phone", lang) : t("desktop", lang)} · {size.w}×{size.h}dp
         </div>
         <Field label={t("note", lang)}>
-          <textarea className={`${input} min-h-[88px] resize-y`} value={screen.note ?? ""} onChange={(e) => onChangeScreen(screen.id, { note: e.target.value })} />
+          <textarea className={`${input} min-h-[88px] resize-y`} value={screen.note ?? ""} onFocus={onBeginHistory} onChange={(e) => onChangeScreen(screen.id, { note: e.target.value }, false)} />
         </Field>
-        <div className="text-[11px] text-[var(--muted)]">{t("swipe", lang)}</div>
+        <div className="text-[13px] text-[var(--muted-strong)]">{t("swipe", lang)}</div>
         {SWIPE_DIRS.map((dir) => (
           <Field key={dir} label={t(`swipe${dir[0].toUpperCase()}${dir.slice(1)}` as "swipeLeft", lang)}>
             <TargetSelect doc={doc} screenId={screen.id} lang={lang} value={screen.swipe?.[dir]} onChange={(to) => onChangeScreen(screen.id, { swipe: { ...screen.swipe, [dir]: to } })} />
@@ -98,27 +106,34 @@ export function Inspector({
   const it = screen.items.find((i) => i.id === selection.itemId);
   if (!it) return null;
   const spec = KIND_SPEC[it.kind];
-  const patch = (p: Partial<Item>) => onChangeItem(screen.id, it.id, p);
+  const patch = (p: Partial<Item>, record = true) => onChangeItem(screen.id, it.id, p, record);
 
   return (
-    <div className="flex flex-col gap-3 overflow-auto px-3 py-3">
-      <div className="text-[12px] font-medium text-[var(--accent)]">{KIND_TEXT[lang][it.kind]}</div>
+    <div className="flex flex-col gap-3 px-3 py-3">
+      <div className="text-[13px] font-medium text-[var(--accent)]">{KIND_TEXT[lang][it.kind]}</div>
       <Field label={t("label", lang)}>
-        <input className={input} value={it.label} onChange={(e) => patch({ label: e.target.value })} />
+        <input className={input} value={it.label} onFocus={onBeginHistory} onChange={(e) => patch({ label: e.target.value }, false)} />
       </Field>
       {(it.supporting !== undefined || spec.defaultSupporting) && (
         <Field label={t("supporting", lang)}>
-          <input className={input} value={it.supporting ?? ""} onChange={(e) => patch({ supporting: e.target.value })} />
+          <input className={input} value={it.supporting ?? ""} onFocus={onBeginHistory} onChange={(e) => patch({ supporting: e.target.value }, false)} />
         </Field>
       )}
       <Field label={t("icon", lang)}>
         <div className="flex flex-wrap gap-1">
+          <button
+            type="button"
+            onClick={() => patch({ icon: null })}
+            className={`press grid h-9 w-9 place-items-center rounded-[12px] ${!it.icon ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "bg-[var(--tile)] text-[var(--muted)]"}`}
+          >
+            <span className="ms text-[18px]">block</span>
+          </button>
           {ICONS.map((icon) => (
             <button
               key={icon}
               type="button"
               onClick={() => patch({ icon })}
-              className={`press grid h-8 w-8 place-items-center rounded-[8px] ${it.icon === icon ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "bg-[var(--tile)] text-[var(--muted)]"}`}
+              className={`press grid h-9 w-9 place-items-center rounded-[12px] ${it.icon === icon ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "bg-[var(--tile)] text-[var(--muted)]"}`}
             >
               <span className="ms text-[18px]">{icon}</span>
             </button>
@@ -132,8 +147,9 @@ export function Inspector({
               <button
                 key={v}
                 type="button"
-                onClick={() => patch({ variant: v })}
-                className={`press rounded-[8px] px-2.5 py-1 text-[12px] ${it.variant === v ? "bg-[var(--accent)] text-white" : "bg-[var(--tile)]"}`}
+                onClick={() => patch(applyVariant(it, v))}
+                className="press miuix-chip"
+                data-on={it.variant === v ? "1" : undefined}
               >
                 {v}
               </button>
@@ -142,24 +158,27 @@ export function Inspector({
         </Field>
       )}
       {typeof it.checked === "boolean" && (
-        <label className="flex items-center justify-between text-[13px]">
+        <div className="flex items-center justify-between rounded-[16px] bg-[var(--chrome)] px-4 py-3 text-[15px]">
           <span>{t("checked", lang)}</span>
-          <input type="checkbox" checked={it.checked} onChange={(e) => patch({ checked: e.target.checked })} />
-        </label>
+          <ChromeSwitch on={it.checked} onChange={(checked) => patch({ checked })} />
+        </div>
       )}
       {typeof it.value === "number" && (
         <Field label={t("value", lang)}>
-          <input type="range" min={0} max={1} step={0.05} value={it.value} onChange={(e) => patch({ value: Number(e.target.value) })} />
+          <input type="range" min={0} max={1} step={0.05} value={it.value} onPointerDown={onBeginHistory} onChange={(e) => patch({ value: Number(e.target.value) }, false)} />
         </Field>
       )}
       {it.tabs && (
         <Field label={t("tabs", lang)}>
           <div className="flex flex-col gap-2">
             {it.tabs.map((tab, i) => (
-              <div key={i} className="flex flex-col gap-1 rounded-[10px] bg-[var(--tile)] p-2">
+              <div key={i} className={`flex flex-col gap-1 rounded-[16px] p-2 ${(it.selected ?? 0) === i ? "bg-[var(--accent-soft)]" : "bg-[var(--chrome)]"}`}>
+                <button type="button" className="self-start text-[11px] text-[var(--accent)]" onClick={() => patch({ selected: i })}>
+                  {t("selected", lang)} {i === (it.selected ?? 0) ? "●" : "○"}
+                </button>
                 <div className="flex gap-1">
-                  <input className={input} value={tab.icon} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)) })} />
-                  <input className={input} value={tab.label} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })} />
+                  <input className={input} value={tab.icon} onFocus={onBeginHistory} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)) }, false)} />
+                  <input className={input} value={tab.label} onFocus={onBeginHistory} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) }, false)} />
                 </div>
                 <TargetSelect
                   doc={doc}
@@ -186,7 +205,7 @@ export function Inspector({
         </Field>
       )}
       <Field label={t("note", lang)}>
-        <textarea className={`${input} min-h-[80px] resize-y`} value={it.note ?? ""} onChange={(e) => patch({ note: e.target.value })} />
+        <textarea className={`${input} min-h-[80px] resize-y`} value={it.note ?? ""} onFocus={onBeginHistory} onChange={(e) => patch({ note: e.target.value }, false)} />
       </Field>
       <AiPanel doc={doc} lang={lang} screen={screen} item={it} onNote={(note) => patch({ note })} />
     </div>

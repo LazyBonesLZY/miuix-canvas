@@ -104,7 +104,7 @@ async function complete(s: AiSettings, system: string, user: string): Promise<st
   throw new Error("empty");
 }
 
-const LANG: Record<Lang, string> = { zh: "Simplified Chinese", en: "English" };
+const LANG: Record<Lang, string> = { zh: "Simplified Chinese", en: "English", ja: "Japanese", ko: "Korean" };
 
 export async function proposeNote(s: AiSettings, doc: Doc, lang: Lang, screen: Screen, item?: Item): Promise<string> {
   const system = "You write short product-spec notes for a HyperOS / Miuix UI sketch. Reply with one sentence only. No markdown.";

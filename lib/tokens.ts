@@ -1,5 +1,5 @@
 import { MIUIX_BLUE } from "./color";
-import type { Category, FramePreset, Item, Kind, NavTab, Theme } from "./types";
+import type { Category, FramePreset, Item, Kind, Lang, Localized, NavTab, Theme } from "./types";
 import { DESKTOP_H, DESKTOP_W, MARGIN, PHONE_H, PHONE_W, contentWidth, uid } from "./types";
 
 export const DEFAULT_THEME: Theme = {
@@ -16,85 +16,159 @@ export type KindSpec = {
   h: number;
   edge?: "top" | "bottom" | "start";
   variants?: string[];
-  defaultLabel: { zh: string; en: string };
-  defaultSupporting?: { zh: string; en: string };
+  defaultLabel: Localized;
+  defaultSupporting?: Localized;
   tabs?: NavTab[];
   checked?: boolean;
   value?: number;
   composable: string;
 };
 
+const L = (zh: string, en: string, ja: string, ko: string): Localized => ({ zh, en, ja, ko });
 const full = (preset: FramePreset) => contentWidth(preset);
 const edge = () => PHONE_W;
 
+const TAB_I18N: Record<string, Localized> = {
+  首页: L("首页", "Home", "ホーム", "홈"),
+  发现: L("发现", "Explore", "探す", "탐색"),
+  我的: L("我的", "Me", "マイ", "나"),
+  推荐: L("推荐", "For you", "おすすめ", "추천"),
+  关注: L("关注", "Following", "フォロー", "팔로잉"),
+  热门: L("热门", "Popular", "人気", "인기"),
+  复制: L("复制", "Copy", "コピー", "복사"),
+  分享: L("分享", "Share", "共有", "공유"),
+  删除: L("删除", "Delete", "削除", "삭제"),
+  编辑: L("编辑", "Edit", "編集", "편집"),
+  更多: L("更多", "More", "その他", "더보기"),
+};
+
 export const KIND_SPEC: Record<Kind, KindSpec> = {
-  button: { kind: "button", category: "actions", icon: "smart_button", w: () => 128, h: 50, variants: ["primary", "secondary", "text"], defaultLabel: { zh: "确定", en: "OK" }, composable: "Button" },
-  iconButton: { kind: "iconButton", category: "actions", icon: "more_horiz", w: () => 40, h: 40, defaultLabel: { zh: "", en: "" }, composable: "IconButton" },
-  fab: { kind: "fab", category: "actions", icon: "add", w: () => 56, h: 56, defaultLabel: { zh: "", en: "" }, composable: "FloatingActionButton" },
-  floatingToolbar: { kind: "floatingToolbar", category: "actions", icon: "construction", w: () => 220, h: 52, defaultLabel: { zh: "工具", en: "Tools" }, tabs: [{ icon: "edit", label: "" }, { icon: "content_copy", label: "" }, { icon: "delete", label: "" }], composable: "FloatingToolbar" },
-  topAppBar: { kind: "topAppBar", category: "navigation", icon: "web_asset", w: edge, h: 88, edge: "top", variants: ["small", "large"], defaultLabel: { zh: "标题", en: "Title" }, composable: "TopAppBar" },
-  smallTitle: { kind: "smallTitle", category: "navigation", icon: "title", w: full, h: 28, defaultLabel: { zh: "常用功能", en: "Shortcuts" }, composable: "SmallTitle" },
-  navigationBar: { kind: "navigationBar", category: "navigation", icon: "dock_to_bottom", w: edge, h: 64, edge: "bottom", defaultLabel: { zh: "导航", en: "Navigation" }, tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationBar" },
-  navigationRail: { kind: "navigationRail", category: "navigation", icon: "view_sidebar", w: () => 80, h: 400, edge: "start", defaultLabel: { zh: "导航", en: "Navigation" }, tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationRail" },
-  tabRow: { kind: "tabRow", category: "navigation", icon: "tabs", w: full, h: 40, defaultLabel: { zh: "标签", en: "Tabs" }, tabs: [{ icon: "", label: "推荐" }, { icon: "", label: "关注" }, { icon: "", label: "热门" }], composable: "TabRow" },
-  searchBar: { kind: "searchBar", category: "navigation", icon: "search", w: full, h: 48, defaultLabel: { zh: "搜索", en: "Search" }, composable: "SearchBar" },
-  breadcrumb: { kind: "breadcrumb", category: "navigation", icon: "more_horiz", w: full, h: 36, defaultLabel: { zh: "设置 / 显示", en: "Settings / Display" }, composable: "BreadcrumbBar" },
-  card: { kind: "card", category: "containment", icon: "rectangle", w: full, h: 120, defaultLabel: { zh: "卡片标题", en: "Card title" }, defaultSupporting: { zh: "辅助说明文字", en: "Supporting text" }, composable: "Card" },
-  surface: { kind: "surface", category: "containment", icon: "crop_square", w: full, h: 80, defaultLabel: { zh: "", en: "" }, composable: "Surface" },
-  divider: { kind: "divider", category: "containment", icon: "horizontal_rule", w: full, h: 1, defaultLabel: { zh: "", en: "" }, composable: "HorizontalDivider" },
-  snackbar: { kind: "snackbar", category: "containment", icon: "call_to_action", w: full, h: 48, defaultLabel: { zh: "已保存", en: "Saved" }, composable: "Snackbar" },
-  dialog: { kind: "dialog", category: "containment", icon: "web_stories", w: () => 320, h: 200, defaultLabel: { zh: "提示", en: "Notice" }, defaultSupporting: { zh: "确认要继续吗？", en: "Continue?" }, composable: "OverlayDialog" },
-  bottomSheet: { kind: "bottomSheet", category: "containment", icon: "bottom_sheets", w: edge, h: 280, defaultLabel: { zh: "更多操作", en: "More" }, defaultSupporting: { zh: "从底部滑出的面板", en: "Sheet from the bottom" }, composable: "OverlayBottomSheet" },
-  listPopup: { kind: "listPopup", category: "containment", icon: "list", w: () => 200, h: 160, defaultLabel: { zh: "菜单", en: "Menu" }, tabs: [{ icon: "", label: "复制" }, { icon: "", label: "分享" }, { icon: "", label: "删除" }], composable: "ListPopup" },
-  tooltip: { kind: "tooltip", category: "containment", icon: "tooltip_2", w: () => 140, h: 36, defaultLabel: { zh: "提示文字", en: "Tooltip" }, composable: "Tooltip" },
-  textField: { kind: "textField", category: "inputs", icon: "edit_note", w: full, h: 50, defaultLabel: { zh: "输入内容", en: "Enter text" }, composable: "TextField" },
-  switch: { kind: "switch", category: "inputs", icon: "toggle_on", w: () => 46, h: 26, defaultLabel: { zh: "", en: "" }, checked: true, composable: "Switch" },
-  checkbox: { kind: "checkbox", category: "inputs", icon: "check_box", w: () => 24, h: 24, defaultLabel: { zh: "", en: "" }, checked: true, composable: "Checkbox" },
-  radio: { kind: "radio", category: "inputs", icon: "radio_button_checked", w: () => 24, h: 24, defaultLabel: { zh: "", en: "" }, checked: true, composable: "RadioButton" },
-  slider: { kind: "slider", category: "inputs", icon: "tune", w: full, h: 28, defaultLabel: { zh: "", en: "" }, value: 0.6, composable: "Slider" },
-  dropdown: { kind: "dropdown", category: "inputs", icon: "arrow_drop_down_circle", w: full, h: 50, defaultLabel: { zh: "请选择", en: "Choose" }, composable: "Dropdown" },
-  numberPicker: { kind: "numberPicker", category: "inputs", icon: "pin", w: () => 160, h: 140, defaultLabel: { zh: "12", en: "12" }, composable: "NumberPicker" },
-  colorPicker: { kind: "colorPicker", category: "inputs", icon: "palette", w: full, h: 180, defaultLabel: { zh: "取色", en: "Color" }, composable: "ColorPicker" },
-  colorPalette: { kind: "colorPalette", category: "inputs", icon: "grid_view", w: full, h: 72, defaultLabel: { zh: "", en: "" }, composable: "ColorPalette" },
-  text: { kind: "text", category: "content", icon: "notes", w: full, h: 24, defaultLabel: { zh: "正文", en: "Body" }, composable: "Text" },
-  image: { kind: "image", category: "content", icon: "image", w: full, h: 160, defaultLabel: { zh: "", en: "" }, composable: "Image" },
-  badge: { kind: "badge", category: "content", icon: "mark_chat_unread", w: () => 22, h: 18, defaultLabel: { zh: "3", en: "3" }, composable: "Badge" },
-  icon: { kind: "icon", category: "content", icon: "star", w: () => 28, h: 28, defaultLabel: { zh: "", en: "" }, composable: "Icon" },
-  progress: { kind: "progress", category: "progress", icon: "progress_activity", w: full, h: 6, variants: ["linear", "circular"], defaultLabel: { zh: "", en: "" }, value: 0.45, composable: "ProgressIndicator" },
-  pullToRefresh: { kind: "pullToRefresh", category: "progress", icon: "refresh", w: () => 40, h: 40, defaultLabel: { zh: "", en: "" }, composable: "PullToRefresh" },
-  scrollBar: { kind: "scrollBar", category: "progress", icon: "linear_scale", w: () => 6, h: 80, defaultLabel: { zh: "", en: "" }, composable: "ScrollBar" },
-  switchPref: { kind: "switchPref", category: "preference", icon: "toggle_on", w: full, h: 64, defaultLabel: { zh: "深色模式", en: "Dark mode" }, defaultSupporting: { zh: "跟随系统", en: "Follow system" }, checked: true, composable: "SwitchPreference" },
-  checkboxPref: { kind: "checkboxPref", category: "preference", icon: "check_box", w: full, h: 64, defaultLabel: { zh: "同步数据", en: "Sync data" }, defaultSupporting: { zh: "使用移动网络时同步", en: "Sync on mobile data" }, checked: false, composable: "CheckboxPreference" },
-  radioPref: { kind: "radioPref", category: "preference", icon: "radio_button_checked", w: full, h: 56, defaultLabel: { zh: "标准", en: "Standard" }, checked: true, composable: "RadioButtonPreference" },
-  sliderPref: { kind: "sliderPref", category: "preference", icon: "tune", w: full, h: 80, defaultLabel: { zh: "字体大小", en: "Font size" }, value: 0.5, composable: "SliderPreference" },
-  dropdownPref: { kind: "dropdownPref", category: "preference", icon: "arrow_drop_down_circle", w: full, h: 64, defaultLabel: { zh: "语言", en: "Language" }, defaultSupporting: { zh: "简体中文", en: "Simplified Chinese" }, composable: "WindowSpinnerPreference" },
-  arrowPref: { kind: "arrowPref", category: "preference", icon: "chevron_right", w: full, h: 64, defaultLabel: { zh: "关于本机", en: "About phone" }, defaultSupporting: { zh: "HyperOS 2", en: "HyperOS 2" }, composable: "ArrowPreference" },
+  button: { kind: "button", category: "actions", icon: "smart_button", w: () => 128, h: 50, variants: ["secondary", "primary", "text"], defaultLabel: L("确定", "OK", "OK", "확인"), composable: "Button" },
+  iconButton: { kind: "iconButton", category: "actions", icon: "more_horiz", w: () => 40, h: 40, defaultLabel: L("", "", "", ""), composable: "IconButton" },
+  fab: { kind: "fab", category: "actions", icon: "add", w: () => 60, h: 60, defaultLabel: L("", "", "", ""), composable: "FloatingActionButton" },
+  floatingToolbar: { kind: "floatingToolbar", category: "actions", icon: "construction", w: () => 220, h: 52, defaultLabel: L("工具", "Tools", "ツール", "도구"), tabs: [{ icon: "edit", label: "" }, { icon: "content_copy", label: "" }, { icon: "delete", label: "" }], composable: "FloatingToolbar" },
+  topAppBar: { kind: "topAppBar", category: "navigation", icon: "web_asset", w: edge, h: 88, edge: "top", variants: ["small", "large"], defaultLabel: L("标题", "Title", "タイトル", "제목"), composable: "TopAppBar" },
+  smallTitle: { kind: "smallTitle", category: "navigation", icon: "title", w: full, h: 28, defaultLabel: L("常用功能", "Shortcuts", "ショートカット", "바로가기"), composable: "SmallTitle" },
+  navigationBar: { kind: "navigationBar", category: "navigation", icon: "dock_to_bottom", w: edge, h: 64, edge: "bottom", defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationBar" },
+  floatingNav: { kind: "floatingNav", category: "navigation", icon: "dock_to_bottom", w: () => 280, h: 56, defaultLabel: L("悬浮导航", "Floating nav", "フローティングナビ", "플로팅 탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "FloatingNavigationBar" },
+  navigationRail: { kind: "navigationRail", category: "navigation", icon: "view_sidebar", w: () => 80, h: 400, edge: "start", defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationRail" },
+  tabRow: { kind: "tabRow", category: "navigation", icon: "tabs", w: full, h: 42, variants: ["default", "contour"], defaultLabel: L("标签", "Tabs", "タブ", "탭"), tabs: [{ icon: "", label: "推荐" }, { icon: "", label: "关注" }, { icon: "", label: "热门" }], composable: "TabRow" },
+  searchBar: { kind: "searchBar", category: "navigation", icon: "search", w: full, h: 45, defaultLabel: L("搜索", "Search", "検索", "검색"), composable: "SearchBar" },
+  breadcrumb: { kind: "breadcrumb", category: "navigation", icon: "more_horiz", w: full, h: 36, defaultLabel: L("设置 / 显示", "Settings / Display", "設定 / 表示", "설정 / 디스플레이"), composable: "BreadcrumbBar" },
+  card: { kind: "card", category: "containment", icon: "rectangle", w: full, h: 120, defaultLabel: L("卡片标题", "Card title", "カードタイトル", "카드 제목"), defaultSupporting: L("辅助说明文字", "Supporting text", "補足テキスト", "보조 설명"), composable: "Card" },
+  surface: { kind: "surface", category: "containment", icon: "crop_square", w: full, h: 80, defaultLabel: L("", "", "", ""), composable: "Surface" },
+  divider: { kind: "divider", category: "containment", icon: "horizontal_rule", w: full, h: 1, variants: ["horizontal", "vertical"], defaultLabel: L("", "", "", ""), composable: "HorizontalDivider" },
+  snackbar: { kind: "snackbar", category: "containment", icon: "call_to_action", w: full, h: 48, defaultLabel: L("已保存", "Saved", "保存しました", "저장됨"), composable: "Snackbar" },
+  dialog: { kind: "dialog", category: "containment", icon: "web_stories", w: () => 320, h: 200, variants: ["overlay", "window"], defaultLabel: L("提示", "Notice", "確認", "알림"), defaultSupporting: L("确认要继续吗？", "Continue?", "続行しますか？", "계속할까요?"), composable: "OverlayDialog" },
+  bottomSheet: { kind: "bottomSheet", category: "containment", icon: "bottom_sheets", w: edge, h: 280, edge: "bottom", variants: ["overlay", "window"], defaultLabel: L("更多操作", "More", "その他", "더보기"), defaultSupporting: L("从底部滑出的面板", "Sheet from the bottom", "下から出るシート", "아래에서 올라오는 시트"), composable: "OverlayBottomSheet" },
+  listPopup: { kind: "listPopup", category: "containment", icon: "list", w: () => 200, h: 160, defaultLabel: L("菜单", "Menu", "メニュー", "메뉴"), tabs: [{ icon: "", label: "复制" }, { icon: "", label: "分享" }, { icon: "", label: "删除" }], composable: "ListPopup" },
+  cascadingPopup: { kind: "cascadingPopup", category: "containment", icon: "account_tree", w: () => 280, h: 176, defaultLabel: L("级联菜单", "Cascading menu", "カスケードメニュー", "계단식 메뉴"), tabs: [{ icon: "", label: "编辑" }, { icon: "", label: "分享" }, { icon: "", label: "更多" }], composable: "ListPopup" },
+  dropdownMenu: { kind: "dropdownMenu", category: "containment", icon: "menu", w: () => 200, h: 168, variants: ["overlay", "window"], defaultLabel: L("下拉菜单", "Dropdown menu", "ドロップダウン", "드롭다운 메뉴"), tabs: [{ icon: "", label: "复制" }, { icon: "", label: "分享" }, { icon: "", label: "删除" }], composable: "OverlayDropdownMenu" },
+  tooltip: { kind: "tooltip", category: "containment", icon: "tooltip_2", w: () => 140, h: 36, variants: ["plain", "rich"], defaultLabel: L("提示文字", "Tooltip", "ツールチップ", "툴팁"), defaultSupporting: L("补充说明", "More detail", "補足", "추가 설명"), composable: "Tooltip" },
+  textField: { kind: "textField", category: "inputs", icon: "edit_note", w: full, h: 50, defaultLabel: L("输入内容", "Enter text", "入力", "입력"), composable: "TextField" },
+  switch: { kind: "switch", category: "inputs", icon: "toggle_on", w: () => 49, h: 28, defaultLabel: L("", "", "", ""), checked: true, composable: "Switch" },
+  checkbox: { kind: "checkbox", category: "inputs", icon: "check_box", w: () => 26, h: 26, defaultLabel: L("", "", "", ""), checked: true, composable: "Checkbox" },
+  radio: { kind: "radio", category: "inputs", icon: "radio_button_checked", w: () => 26, h: 26, defaultLabel: L("", "", "", ""), checked: true, composable: "RadioButton" },
+  slider: { kind: "slider", category: "inputs", icon: "tune", w: full, h: 28, variants: ["horizontal", "vertical"], defaultLabel: L("", "", "", ""), value: 0.6, composable: "Slider" },
+  rangeSlider: { kind: "rangeSlider", category: "inputs", icon: "linear_scale", w: full, h: 28, defaultLabel: L("", "", "", ""), value: 0.7, composable: "RangeSlider" },
+  dropdown: { kind: "dropdown", category: "inputs", icon: "arrow_drop_down_circle", w: full, h: 50, variants: ["overlay", "window"], defaultLabel: L("请选择", "Choose", "選択", "선택"), composable: "Dropdown" },
+  numberPicker: { kind: "numberPicker", category: "inputs", icon: "pin", w: () => 160, h: 140, defaultLabel: L("12", "12", "12", "12"), composable: "NumberPicker" },
+  colorPicker: { kind: "colorPicker", category: "inputs", icon: "palette", w: full, h: 180, defaultLabel: L("取色", "Color", "カラー", "색상"), composable: "ColorPicker" },
+  colorPalette: { kind: "colorPalette", category: "inputs", icon: "grid_view", w: full, h: 72, defaultLabel: L("", "", "", ""), composable: "ColorPalette" },
+  text: { kind: "text", category: "content", icon: "notes", w: full, h: 24, defaultLabel: L("正文", "Body", "本文", "본문"), composable: "Text" },
+  image: { kind: "image", category: "content", icon: "image", w: full, h: 160, defaultLabel: L("", "", "", ""), composable: "Image" },
+  badge: { kind: "badge", category: "content", icon: "mark_chat_unread", w: () => 22, h: 18, defaultLabel: L("3", "3", "3", "3"), composable: "Badge" },
+  icon: { kind: "icon", category: "content", icon: "star", w: () => 28, h: 28, defaultLabel: L("", "", "", ""), composable: "Icon" },
+  progress: { kind: "progress", category: "progress", icon: "progress_activity", w: full, h: 6, variants: ["linear", "circular", "infinite"], defaultLabel: L("", "", "", ""), value: 0.45, composable: "ProgressIndicator" },
+  pullToRefresh: { kind: "pullToRefresh", category: "progress", icon: "refresh", w: () => 40, h: 40, defaultLabel: L("", "", "", ""), composable: "PullToRefresh" },
+  scrollBar: { kind: "scrollBar", category: "progress", icon: "linear_scale", w: () => 6, h: 80, variants: ["vertical", "horizontal"], defaultLabel: L("", "", "", ""), composable: "ScrollBar" },
+  basicPref: { kind: "basicPref", category: "preference", icon: "view_agenda", w: full, h: 64, defaultLabel: L("通用项", "Basic row", "基本項目", "기본 항목"), defaultSupporting: L("自定义右侧内容", "Custom trailing slot", "末尾スロットをカスタム", "오른쪽 슬롯 사용자화"), composable: "BasicComponent" },
+  switchPref: { kind: "switchPref", category: "preference", icon: "toggle_on", w: full, h: 64, defaultLabel: L("深色模式", "Dark mode", "ダークモード", "다크 모드"), defaultSupporting: L("跟随系统", "Follow system", "システムに合わせる", "시스템 따름"), checked: true, composable: "SwitchPreference" },
+  checkboxPref: { kind: "checkboxPref", category: "preference", icon: "check_box", w: full, h: 64, defaultLabel: L("同步数据", "Sync data", "データを同期", "데이터 동기화"), defaultSupporting: L("使用移动网络时同步", "Sync on mobile data", "モバイル通信でも同期", "모바일 데이터에서도 동기화"), checked: false, composable: "CheckboxPreference" },
+  radioPref: { kind: "radioPref", category: "preference", icon: "radio_button_checked", w: full, h: 56, defaultLabel: L("标准", "Standard", "標準", "표준"), checked: true, composable: "RadioButtonPreference" },
+  sliderPref: { kind: "sliderPref", category: "preference", icon: "tune", w: full, h: 80, defaultLabel: L("字体大小", "Font size", "文字サイズ", "글자 크기"), value: 0.5, composable: "SliderPreference" },
+  rangeSliderPref: { kind: "rangeSliderPref", category: "preference", icon: "linear_scale", w: full, h: 80, defaultLabel: L("音量范围", "Volume range", "音量レンジ", "음량 범위"), value: 0.7, composable: "RangeSliderPreference" },
+  dropdownPref: { kind: "dropdownPref", category: "preference", icon: "arrow_drop_down_circle", w: full, h: 64, variants: ["window", "overlay"], defaultLabel: L("语言", "Language", "言語", "언어"), defaultSupporting: L("简体中文", "English", "日本語", "한국어"), composable: "WindowSpinnerPreference" },
+  arrowPref: { kind: "arrowPref", category: "preference", icon: "chevron_right", w: full, h: 64, defaultLabel: L("关于本机", "About phone", "端末情報", "휴대전화 정보"), defaultSupporting: L("HyperOS 2", "HyperOS 2", "HyperOS 2", "HyperOS 2"), composable: "ArrowPreference" },
 };
 
 export const KIND_ORDER = Object.keys(KIND_SPEC) as Kind[];
 export const KIND_SET = new Set<string>(KIND_ORDER);
 export const CATEGORIES: Category[] = ["actions", "navigation", "containment", "inputs", "content", "progress", "preference"];
 
-export function makeItem(kind: Kind, preset: FramePreset, lang: "zh" | "en", x: number, y: number): Item {
+export function makeItem(kind: Kind, preset: FramePreset, lang: Lang, x: number, y: number): Item {
   const spec = KIND_SPEC[kind];
   const screenW = preset === "desktop" ? DESKTOP_W : PHONE_W;
-  const w = spec.edge === "top" || spec.edge === "bottom" ? screenW : spec.w(preset);
+  const sized = applyVariant({ id: "", kind, x, y, w: spec.w(preset), h: spec.h, label: "" }, spec.variants?.[0] ?? "");
+  const w = spec.edge === "top" || spec.edge === "bottom" ? screenW : (sized.w ?? spec.w(preset));
   return {
     id: uid(),
     kind,
     x,
     y,
     w,
-    h: spec.h,
+    h: sized.h ?? spec.h,
     label: spec.defaultLabel[lang],
     supporting: spec.defaultSupporting?.[lang],
     icon: spec.icon,
     variant: spec.variants?.[0],
     checked: spec.checked,
     value: spec.value,
-    tabs: spec.tabs ? spec.tabs.map((tab) => ({ ...tab })) : undefined,
+    tabs: spec.tabs
+      ? spec.tabs.map((tab) => ({ ...tab, label: TAB_I18N[tab.label]?.[lang] ?? tab.label }))
+      : undefined,
     selected: spec.tabs ? 0 : undefined,
   };
+}
+
+export function applyVariant(it: Item, variant: string): Partial<Item> {
+  const patch: Partial<Item> = { variant };
+  if (it.kind === "divider") {
+    return variant === "vertical" ? { ...patch, w: 1, h: Math.max(it.h > 8 ? it.h : 160, 120) } : { ...patch, w: Math.max(it.w, 200), h: 1 };
+  }
+  if (it.kind === "slider") {
+    return variant === "vertical" ? { ...patch, w: 28, h: Math.max(it.h, 160) } : { ...patch, w: Math.max(it.w, 200), h: 28 };
+  }
+  if (it.kind === "progress") {
+    return variant === "linear" ? { ...patch, w: Math.max(it.w, 200), h: 6 } : { ...patch, w: 40, h: 40 };
+  }
+  if (it.kind === "tooltip") {
+    return variant === "rich" ? { ...patch, w: Math.max(it.w, 168), h: Math.max(it.h, 72) } : { ...patch, h: 36 };
+  }
+  if (it.kind === "scrollBar") {
+    return variant === "horizontal" ? { ...patch, w: Math.max(it.w, 80), h: 6 } : { ...patch, w: 6, h: Math.max(it.h, 80) };
+  }
+  return patch;
+}
+
+export function composableOf(it: Pick<Item, "kind" | "variant">): string {
+  const v = it.variant;
+  switch (it.kind) {
+    case "divider":
+      return v === "vertical" ? "VerticalDivider" : "HorizontalDivider";
+    case "progress":
+      return v === "infinite" ? "InfiniteProgressIndicator" : v === "circular" ? "CircularProgressIndicator" : "LinearProgressIndicator";
+    case "slider":
+      return v === "vertical" ? "VerticalSlider" : "Slider";
+    case "tabRow":
+      return v === "contour" ? "TabRowWithContour" : "TabRow";
+    case "tooltip":
+      return v === "rich" ? "RichTooltipBox" : "Tooltip";
+    case "dialog":
+      return v === "window" ? "WindowDialog" : "OverlayDialog";
+    case "bottomSheet":
+      return v === "window" ? "WindowBottomSheet" : "OverlayBottomSheet";
+    case "dropdown":
+      return v === "window" ? "WindowDropdownPopup" : "Dropdown";
+    case "dropdownMenu":
+      return v === "window" ? "WindowDropdownMenu" : "OverlayDropdownMenu";
+    case "dropdownPref":
+      return v === "overlay" ? "OverlayDropdownPreference" : "WindowSpinnerPreference";
+    case "scrollBar":
+      return v === "horizontal" ? "HorizontalScrollBar" : "VerticalScrollBar";
+    default:
+      return KIND_SPEC[it.kind].composable;
+  }
 }
 
 export function defaultPosition(kind: Kind, preset: FramePreset, existing: Item[]) {
@@ -104,11 +178,13 @@ export function defaultPosition(kind: Kind, preset: FramePreset, existing: Item[
   if (spec.edge === "top") return { x: 0, y: 0 };
   if (spec.edge === "bottom") return { x: 0, y: h - spec.h };
   if (spec.edge === "start") return { x: 0, y: 88 };
-  if (kind === "fab") return { x: w - MARGIN - 56, y: h - 64 - MARGIN - 56 };
+  if (kind === "fab") return { x: w - MARGIN - 60, y: h - 64 - MARGIN - 60 };
+  if (kind === "floatingNav") return { x: Math.round((w - 280) / 2), y: h - 64 - MARGIN - 56 };
   if (kind === "snackbar") return { x: MARGIN, y: h - 64 - MARGIN - 48 };
   if (kind === "dialog") return { x: Math.round((w - 320) / 2), y: Math.round((h - 200) / 2) };
   if (kind === "bottomSheet") return { x: 0, y: h - 280 };
   if (kind === "scrollBar") return { x: w - 14, y: 120 };
+  if (kind === "cascadingPopup" || kind === "dropdownMenu" || kind === "listPopup") return { x: Math.round((w - spec.w(preset)) / 2), y: 180 };
   const prefs = existing.filter((it) => it.kind.endsWith("Pref") || it.kind === "card" || it.kind === "smallTitle" || it.kind === "searchBar");
   const last = prefs.at(-1);
   if (last) return { x: MARGIN, y: last.y + last.h };

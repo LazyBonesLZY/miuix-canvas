@@ -1,6 +1,6 @@
 "use client";
 
-import { PRESETS } from "@/lib/color";
+import { MIUIX_BLUE, PRESETS } from "@/lib/color";
 import { PLATFORM_TEXT, t, type Lang } from "@/lib/i18n";
 import type { Doc, Platform, ThemeMode } from "@/lib/types";
 
@@ -9,34 +9,32 @@ export function ThemePanel({
   lang,
   onTheme,
   onPlatform,
+  onBeginHistory,
 }: {
   doc: Doc;
   lang: Lang;
-  onTheme: (patch: Partial<Doc["theme"]>) => void;
+  onTheme: (patch: Partial<Doc["theme"]>, record?: boolean) => void;
   onPlatform: (platform: Platform) => void;
+  onBeginHistory?: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-4 overflow-auto px-3 py-3">
-      <div className="flex gap-1">
+    <div className="flex flex-col gap-4 px-3 py-3">
+      <div className="miuix-tabbar">
         {(["light", "dark"] as ThemeMode[]).map((mode) => (
-          <button
-            key={mode}
-            type="button"
-            onClick={() => onTheme({ mode })}
-            className={`press flex-1 rounded-[10px] py-2 text-[13px] ${doc.theme.mode === mode ? "bg-[var(--accent)] text-white" : "bg-[var(--tile)]"}`}
-          >
+          <button key={mode} type="button" data-on={doc.theme.mode === mode ? "1" : undefined} onClick={() => onTheme({ mode })}>
             {t(mode, lang)}
           </button>
         ))}
       </div>
-      <label className="flex flex-col gap-1 text-[11px] text-[var(--muted)]">
+      <label className="flex flex-col gap-1 text-[13px] text-[var(--muted-strong)]">
         {t("seed", lang)}
         <div className="flex items-center gap-2">
-          <input type="color" value={doc.theme.seed} onChange={(e) => onTheme({ seed: e.target.value.toUpperCase() })} className="h-9 w-12 cursor-pointer rounded-[8px] border-0 bg-transparent" />
+          <input type="color" value={/^#[0-9A-F]{6}$/.test(doc.theme.seed) ? doc.theme.seed : MIUIX_BLUE} onFocus={onBeginHistory} onChange={(e) => onTheme({ seed: e.target.value.toUpperCase() }, false)} className="h-10 w-12 cursor-pointer rounded-[12px] border-0 bg-transparent" />
           <input
             value={doc.theme.seed}
-            onChange={(e) => onTheme({ seed: e.target.value })}
-            className="w-full rounded-[10px] bg-[var(--tile)] px-2.5 py-2 text-[13px] text-[var(--ink)] outline-none"
+            onFocus={onBeginHistory}
+            onChange={(e) => onTheme({ seed: e.target.value.toUpperCase() }, false)}
+            className="miuix-field"
           />
         </div>
       </label>
@@ -52,19 +50,19 @@ export function ThemePanel({
           />
         ))}
       </div>
-      <label className="flex items-center justify-between text-[13px]">
+      <div className="flex items-center justify-between rounded-[16px] bg-[var(--chrome)] px-4 py-3 text-[15px]">
         <span>{t("monet", lang)}</span>
-        <input type="checkbox" checked={doc.theme.monet} onChange={(e) => onTheme({ monet: e.target.checked })} />
-      </label>
+        <button type="button" role="switch" aria-checked={doc.theme.monet} className="press miuix-switch" data-on={doc.theme.monet ? "1" : undefined} onClick={() => onTheme({ monet: !doc.theme.monet })} />
+      </div>
       <div>
-        <div className="mb-1 text-[11px] text-[var(--muted)]">{t("platform", lang)}</div>
-        <div className="flex flex-col gap-1">
+        <div className="mb-2 px-1 text-[13px] text-[var(--muted-strong)]">{t("platform", lang)}</div>
+        <div className="flex flex-col gap-2">
           {(["cmp", "android", "web"] as Platform[]).map((p) => (
             <button
               key={p}
               type="button"
               onClick={() => onPlatform(p)}
-              className={`press rounded-[10px] px-3 py-2 text-left text-[13px] ${doc.platform === p ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "bg-[var(--tile)]"}`}
+              className={`press rounded-[16px] bg-[var(--chrome)] px-4 py-3 text-left text-[15px] ${doc.platform === p ? "text-[var(--accent)]" : "text-[var(--ink)]"}`}
             >
               {PLATFORM_TEXT[lang][p]}
             </button>

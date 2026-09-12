@@ -29,21 +29,21 @@ export function AiPanel({
   };
 
   return (
-    <div className="flex flex-col gap-2 rounded-[12px] bg-[var(--tile)] p-2.5">
-      <div className="text-[11px] text-[var(--muted)]">{t("ai", lang)}</div>
-      <select className="rounded-[8px] bg-[var(--chrome)] px-2 py-1.5 text-[12px]" value={settings.provider} onChange={(e) => {
+    <div className="flex flex-col gap-2 rounded-[16px] bg-[var(--chrome)] p-3">
+      <div className="text-[13px] text-[var(--muted-strong)]">{t("ai", lang)}</div>
+      <select className="miuix-field" value={settings.provider} onChange={(e) => {
         const spec = PROVIDERS.find((p) => p.key === e.target.value) ?? PROVIDERS[0];
         patch({ provider: spec.key, baseUrl: spec.baseUrl, model: spec.model });
       }}>
         {PROVIDERS.map((p) => <option key={p.key} value={p.key}>{p.label}</option>)}
       </select>
-      <input className="rounded-[8px] bg-[var(--chrome)] px-2 py-1.5 text-[12px]" placeholder="model" value={settings.model} onChange={(e) => patch({ model: e.target.value })} />
-      <input className="rounded-[8px] bg-[var(--chrome)] px-2 py-1.5 text-[12px]" placeholder="API key" type="password" value={settings.key} onChange={(e) => patch({ key: e.target.value })} />
-      <p className="text-[11px] leading-relaxed text-[var(--muted)]">{t("aiNeedKey", lang)}</p>
+      <input className="miuix-field" placeholder="model" value={settings.model} onChange={(e) => patch({ model: e.target.value })} />
+      <input className="miuix-field" placeholder="API key" type="password" value={settings.key} onChange={(e) => patch({ key: e.target.value })} />
+      <p className="text-[13px] leading-relaxed text-[var(--muted)]">{t("aiNeedKey", lang)}</p>
       <button
         type="button"
         disabled={!hasKey(settings) || busy || !screen}
-        className="press rounded-[10px] bg-[var(--accent)] py-1.5 text-[12px] text-white disabled:opacity-40"
+        className="press rounded-[16px] bg-[var(--accent)] py-2 text-[15px] text-white disabled:opacity-40"
         onClick={async () => {
           if (!screen) return;
           setBusy(true);

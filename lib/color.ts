@@ -10,6 +10,8 @@ export type Palette = {
   onSecondary: string;
   secondaryVariant: string;
   onSecondaryVariant: string;
+  secondaryContainer: string;
+  onSecondaryContainer: string;
   background: string;
   onBackground: string;
   onBackgroundVariant: string;
@@ -100,6 +102,8 @@ const LIGHT_SURFACES = {
   onSecondary: "#FFFFFF",
   secondaryVariant: "#F0F0F0",
   onSecondaryVariant: "#303030",
+  secondaryContainer: "#F0F0F0",
+  onSecondaryContainer: "#A9A9A9",
   background: "#FFFFFF",
   onBackground: "#000000",
   onBackgroundVariant: "#8C93B0",
@@ -127,6 +131,8 @@ const DARK_SURFACES = {
   onSecondary: "#FFFFFF",
   secondaryVariant: "#434343",
   onSecondaryVariant: "#D9D9D9",
+  secondaryContainer: "#434343",
+  onSecondaryContainer: "#7C7C7C",
   background: "#242424",
   onBackground: "rgba(255,255,255,0.9)",
   onBackgroundVariant: "#787E96",
@@ -151,13 +157,19 @@ const DARK_SURFACES = {
 
 /** Shift MIUIX primary roles from a seed, keep HyperOS surfaces. */
 export function schemeFromSeed(seed: string, dark: boolean): Palette {
-  const { h, s } = hexToHsl(seed || MIUIX_BLUE);
+  const raw = (seed || MIUIX_BLUE).toUpperCase();
+  const { h, s } = hexToHsl(raw);
   const sat = clamp(s, 0.45, 0.95);
-  const primary = dark ? hslToHex(h, sat, 0.56) : hslToHex(h, sat, 0.6);
-  const primaryContainer = dark ? hslToHex(h, sat * 0.85, 0.54) : hslToHex(h, sat * 0.82, 0.68);
-  const primaryVariant = dark ? hslToHex(h, sat, 0.44) : primary;
-  const tertiary = dark ? hslToHex(h, 0.35, 0.24) : hslToHex(h, 0.55, 0.96);
-  const onTertiary = dark ? hslToHex(h, 0.9, 0.64) : primary;
+  const officialBlue = raw === MIUIX_BLUE;
+  const primary = officialBlue ? (dark ? "#277AF7" : MIUIX_BLUE) : dark ? hslToHex(h, sat, 0.56) : hslToHex(h, sat, 0.6);
+  const primaryContainer = officialBlue
+    ? (dark ? "#277AF7" : "#5C9DFF")
+    : dark
+      ? hslToHex(h, sat * 0.85, 0.54)
+      : hslToHex(h, sat * 0.82, 0.68);
+  const primaryVariant = officialBlue ? (dark ? "#1F6AD4" : MIUIX_BLUE) : dark ? hslToHex(h, sat, 0.44) : primary;
+  const tertiary = officialBlue ? (dark ? "#2B3B54" : "#EAF2FF") : dark ? hslToHex(h, 0.35, 0.24) : hslToHex(h, 0.55, 0.96);
+  const onTertiary = officialBlue ? (dark ? "#5C9DFF" : MIUIX_BLUE) : dark ? hslToHex(h, 0.9, 0.64) : primary;
   const surfaces = dark ? DARK_SURFACES : LIGHT_SURFACES;
   return {
     primary,
