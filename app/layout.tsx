@@ -29,18 +29,16 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="zh">
       <head>
-        <link rel="preconnect" href="https://cdn-font.hyperos.mi.com" />
-        <link rel="preconnect" href="https://cdn-file.hyperos.mi.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400..700,0..1,0&display=block"
-        />
+        <link rel="preload" href={`${BASE}/fonts/material-symbols-rounded.ttf`} as="font" type="font/ttf" crossOrigin="anonymous" />
+        <style>{`
+          @font-face {
+            font-family: "Material Symbols Rounded";
+            font-style: normal;
+            font-weight: 400;
+            font-display: block;
+            src: url("${BASE}/fonts/material-symbols-rounded.ttf") format("truetype");
+          }
+        `}</style>
       </head>
       <body>{children}</body>
     </html>

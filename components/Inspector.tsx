@@ -58,6 +58,8 @@ export function Inspector({
   onChangeScreen,
   onChangeTitle,
   onBeginHistory,
+  onDelete,
+  onDuplicate,
 }: {
   doc: Doc;
   lang: Lang;
@@ -66,6 +68,8 @@ export function Inspector({
   onChangeScreen: (screenId: string, patch: Partial<Screen>, record?: boolean) => void;
   onChangeTitle: (title: string, record?: boolean) => void;
   onBeginHistory?: () => void;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
 }) {
   if (!selection) {
     return (
@@ -85,6 +89,14 @@ export function Inspector({
     const size = frameSize(screen.preset);
     return (
       <div className="flex flex-col gap-3 px-3 py-3">
+        <div className="flex items-center gap-2">
+          <div className="min-w-0 flex-1 text-[13px] font-medium text-[var(--accent)]">{t("screenName", lang)}</div>
+          {onDelete && (
+            <button type="button" className="press miuix-icon-btn h-11 min-w-11 text-[#e94634]" title={t("deleteScreen", lang)} onClick={onDelete}>
+              <span className="ms text-[20px]">delete</span>
+            </button>
+          )}
+        </div>
         <Field label={t("screenName", lang)}>
           <input className={input} value={screen.name} onFocus={onBeginHistory} onChange={(e) => onChangeScreen(screen.id, { name: e.target.value }, false)} />
         </Field>
@@ -112,7 +124,19 @@ export function Inspector({
 
   return (
     <div className="flex flex-col gap-3 px-3 py-3">
-      <div className="break-words text-[13px] font-medium text-[var(--accent)]">{kindShort(it.kind, lang)}</div>
+      <div className="flex items-center gap-2">
+        <div className="min-w-0 flex-1 break-words text-[13px] font-medium text-[var(--accent)]">{kindShort(it.kind, lang)}</div>
+        {onDuplicate && (
+          <button type="button" className="press miuix-icon-btn h-11 min-w-11" title={t("duplicate", lang)} onClick={onDuplicate}>
+            <span className="ms text-[20px]">content_copy</span>
+          </button>
+        )}
+        {onDelete && (
+          <button type="button" className="press miuix-icon-btn h-11 min-w-11 text-[#e94634]" title={t("delete", lang)} onClick={onDelete}>
+            <span className="ms text-[20px]">delete</span>
+          </button>
+        )}
+      </div>
       <Field label={t("label", lang)}>
         <input className={input} value={it.label} onFocus={onBeginHistory} onChange={(e) => patch({ label: e.target.value }, false)} />
       </Field>

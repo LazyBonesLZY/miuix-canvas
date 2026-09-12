@@ -116,6 +116,8 @@ export function Toolbar({
   onHelp,
   onReset,
   onLang,
+  onDelete,
+  canDelete,
   github,
 }: {
   lang: Lang;
@@ -139,6 +141,8 @@ export function Toolbar({
   onHelp: () => void;
   onReset: () => void;
   onLang: (lang: Lang) => void;
+  onDelete?: () => void;
+  canDelete?: boolean;
   github: string;
 }) {
   const phone = layout === "phone";
@@ -159,6 +163,9 @@ export function Toolbar({
     { key: "share", title: t("share", lang), icon: "ios_share", onClick: onShare },
     { key: "png", title: t("png", lang), icon: "image", onClick: onPng },
     { key: "reset", title: t("reset", lang), icon: "restart_alt", onClick: onReset },
+    ...(onDelete
+      ? [{ key: "delete", title: t("deleteSelection", lang), icon: "delete", onClick: onDelete, disabled: !canDelete }]
+      : []),
   ];
 
   return (

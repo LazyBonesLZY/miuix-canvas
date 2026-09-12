@@ -37,7 +37,7 @@ suspend fun preloadWebFonts(
     }
     // Official CSS is frequency-sorted. The first slices cover everyday UI CJK; skipping the
     // long tail avoids downloading ~50 TTF/WOFF faces per phone iframe.
-    val decls = parseCssFontFaces(css, baseUrl = cssUrl).distinctBy { it.url }.take(16)
+    val decls = parseCssFontFaces(css, baseUrl = cssUrl).distinctBy { it.url }.take(8)
     onProgress(0, decls.size)
     if (decls.isEmpty()) return
     var completed = 0

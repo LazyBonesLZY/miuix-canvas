@@ -91,6 +91,7 @@ export function migrateDoc(doc: Doc): Doc {
   return {
     ...doc,
     version: 3,
+    brief: typeof doc.brief === "string" ? doc.brief : "",
     theme: {
       ...doc.theme,
       monet: fromVersion >= 3 ? Boolean(doc.theme.monet) : false,

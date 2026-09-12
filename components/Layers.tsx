@@ -10,12 +10,14 @@ export function LayersPanel({
   selection,
   onSelect,
   onMove,
+  onDelete,
 }: {
   doc: Doc;
   lang: Lang;
   selection: Selection;
   onSelect: (next: Selection) => void;
   onMove?: (screenId: string, itemId: string, dir: 1 | -1) => void;
+  onDelete?: () => void;
 }) {
   return (
     <div className="flex flex-col gap-3 px-3 pb-6 pt-2">
@@ -45,14 +47,23 @@ export function LayersPanel({
                       <span className="ms text-[16px]">{it.icon || "crop_square"}</span>
                       <PartName>{it.label || kindShort(it.kind, lang)}</PartName>
                     </button>
-                    {on && onMove && (
+                    {on && (
                       <div className="flex pr-1">
-                        <button type="button" title={t("layerUp", lang)} disabled={index === screen.items.length - 1} className="press miuix-icon-btn h-8 min-w-8 disabled:opacity-30" onClick={() => onMove(screen.id, it.id, 1)}>
-                          <span className="ms text-[16px]">keyboard_arrow_up</span>
-                        </button>
-                        <button type="button" title={t("layerDown", lang)} disabled={index === 0} className="press miuix-icon-btn h-8 min-w-8 disabled:opacity-30" onClick={() => onMove(screen.id, it.id, -1)}>
-                          <span className="ms text-[16px]">keyboard_arrow_down</span>
-                        </button>
+                        {onMove && (
+                          <>
+                            <button type="button" title={t("layerUp", lang)} disabled={index === screen.items.length - 1} className="press miuix-icon-btn h-11 min-w-11 disabled:opacity-30" onClick={() => onMove(screen.id, it.id, 1)}>
+                              <span className="ms text-[18px]">keyboard_arrow_up</span>
+                            </button>
+                            <button type="button" title={t("layerDown", lang)} disabled={index === 0} className="press miuix-icon-btn h-11 min-w-11 disabled:opacity-30" onClick={() => onMove(screen.id, it.id, -1)}>
+                              <span className="ms text-[18px]">keyboard_arrow_down</span>
+                            </button>
+                          </>
+                        )}
+                        {onDelete && (
+                          <button type="button" title={t("delete", lang)} className="press miuix-icon-btn h-11 min-w-11 text-[#e94634]" onClick={onDelete}>
+                            <span className="ms text-[18px]">delete</span>
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>

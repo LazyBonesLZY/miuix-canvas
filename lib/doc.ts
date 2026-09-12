@@ -68,6 +68,13 @@ export function defaultDoc(lang: Lang): Doc {
   return {
     version: 3,
     title: loc(lang, "示例应用", "Sample app", "サンプルアプリ", "샘플 앱"),
+    brief: loc(
+      lang,
+      "一款带搜索、设置项、卡片和底栏的 HyperOS 风格示例应用。",
+      "A HyperOS-style sample app with search, settings rows, a card and a bottom bar.",
+      "検索・設定項目・カード・下ナビのある HyperOS 風のサンプルアプリ。",
+      "검색, 설정 항목, 카드, 하단 바가 있는 HyperOS 스타일 샘플 앱.",
+    ),
     platform: "cmp",
     theme: { ...DEFAULT_THEME, seed: MIUIX_BLUE },
     screens: [home],

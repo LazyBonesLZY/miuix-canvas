@@ -54,19 +54,19 @@ body {
   background: var(--surface);
   color: var(--ink);
   overscroll-behavior: none;
-  font-family: "Inter", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", system-ui, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
 }
 
 .app-root[data-lang="zh"] {
-  font-family: "Noto Sans SC", "Inter", system-ui, sans-serif;
+  font-family: system-ui, -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
 }
 
 .app-root[data-lang="ja"] {
-  font-family: "Noto Sans JP", "Inter", system-ui, sans-serif;
+  font-family: system-ui, -apple-system, "Hiragino Sans", "Yu Gothic", "Noto Sans CJK JP", sans-serif;
 }
 
 .app-root[data-lang="ko"] {
-  font-family: "Noto Sans KR", "Inter", system-ui, sans-serif;
+  font-family: system-ui, -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans CJK KR", sans-serif;
 }
 
 .ms {
@@ -507,6 +507,44 @@ input[type="range"]::-moz-range-thumb {
   flex-direction: column;
   border-right: 1px solid var(--line);
   background: var(--surface);
+}
+
+.selection-bar {
+  position: absolute;
+  left: 12px;
+  z-index: 20;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 28px;
+  background: var(--chrome);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+.app-root[data-layout="phone"] .selection-bar {
+  bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.app-root[data-layout="tablet"] .selection-bar {
+  bottom: 16px;
+}
+
+.selection-bar button {
+  min-height: 48px;
+  min-width: 48px;
+  padding: 0 16px;
+  border-radius: 24px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.selection-bar button[data-accent="1"] {
+  background: var(--accent);
+  color: #fff;
+}
+
+.selection-bar button[data-danger="1"] {
+  color: #e94634;
 }
 
 .mobile-bar {

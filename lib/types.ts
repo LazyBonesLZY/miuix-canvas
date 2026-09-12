@@ -154,6 +154,7 @@ export type Theme = {
 export type Doc = {
   version: 3;
   title: string;
+  brief?: string;
   platform: Platform;
   theme: Theme;
   screens: Screen[];

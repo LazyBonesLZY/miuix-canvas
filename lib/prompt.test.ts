@@ -17,6 +17,11 @@ describe("buildPrompt", () => {
     expect(text).not.toContain("Monet");
     expect(text).toContain("OverlayDropdownPreference");
     expect(text).not.toMatch(/组件 Dropdown[^P]/);
+    expect(text).toContain("## 配色");
+    expect(text).toContain("## 屏幕结构");
+    expect(text).toContain("## 各组件的样式");
+    expect(text).toContain("## 整体原则");
+    expect(text).toContain("一款带搜索");
   });
 
   it("can describe a single screen", () => {

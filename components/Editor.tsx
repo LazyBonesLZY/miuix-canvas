@@ -39,6 +39,37 @@ const RAIL: { tab: NonNullable<Sheet>; icon: string }[] = [
   { tab: "prompt", icon: "notes" },
 ];
 
+function SelectionBar({
+  lang,
+  canDuplicate,
+  onEdit,
+  onDuplicate,
+  onDelete,
+}: {
+  lang: Lang;
+  canDuplicate: boolean;
+  onEdit: () => void;
+  onDuplicate: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="selection-bar">
+      <button type="button" className="press" data-accent="1" onClick={onEdit}>
+        <span className="ms text-[20px]">tune</span>
+        {t("edit", lang)}
+      </button>
+      {canDuplicate && (
+        <button type="button" className="press" title={t("duplicate", lang)} onClick={onDuplicate}>
+          <span className="ms text-[22px]">content_copy</span>
+        </button>
+      )}
+      <button type="button" className="press" data-danger="1" title={t("delete", lang)} onClick={onDelete}>
+        <span className="ms text-[22px]">delete</span>
+      </button>
+    </div>
+  );
+}
+
 function ToolRail({
   lang,
   sheet,
@@ -309,6 +340,16 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     setSelection(rest[0] ? { kind: "screen", screenId: rest[0].id } : null);
   }, [selection, doc.screens, setDoc]);
 
+  const duplicateSelection = useCallback(() => {
+    if (selection?.kind !== "item") return;
+    const screen = screenOf(doc, selection.screenId);
+    const it = screen?.items.find((i) => i.id === selection.itemId);
+    if (!it) return;
+    const copy = duplicateItem(it);
+    updateScreen(selection.screenId, (s) => ({ ...s, items: [...s.items, copy] }));
+    setSelection({ kind: "item", screenId: selection.screenId, itemId: copy.id });
+  }, [doc, selection, setDoc]);
+
   useEffect(() => {
     if (!shareReady) return;
     const el = canvasRef.current;
@@ -407,13 +448,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       }
       if (meta && (e.key === "d" || e.key === "D") && selection?.kind === "item") {
         e.preventDefault();
-        const screen = screenOf(doc, selection.screenId);
-        const it = screen?.items.find((i) => i.id === selection.itemId);
-        if (it) {
-          const copy = duplicateItem(it);
-          updateScreen(selection.screenId, (s) => ({ ...s, items: [...s.items, copy] }));
-          setSelection({ kind: "item", screenId: selection.screenId, itemId: copy.id });
-        }
+        duplicateSelection();
       }
       if ((e.key === "Delete" || e.key === "Backspace") && selection) {
         e.preventDefault();
@@ -441,7 +476,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("keyup", onUp);
     };
-  }, [centerSelection, deleteSelection, doc, fitCanvas, helpOpen, layout, pinSelection, preview, redo, resetOpen, selection, shareOpen, sheet, undo]);
+  }, [centerSelection, deleteSelection, doc, duplicateSelection, fitCanvas, helpOpen, layout, pinSelection, preview, redo, resetOpen, selection, shareOpen, sheet, undo]);
 
   useEffect(() => {
     const el = canvasRef.current;
@@ -684,6 +719,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
             selection={selection}
             onSelect={setSelection}
             onMove={(sid, iid, dir) => updateScreen(sid, (s) => ({ ...s, items: moveLayer(s.items, iid, dir) }))}
+            onDelete={deleteSelection}
           />
         )}
       </div>
@@ -713,6 +749,8 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
             onChangeTitle={(title, record = true) => setDoc((d) => ({ ...d, title }), record)}
             onChangeScreen={(id, patch, record = true) => updateScreen(id, (s) => ({ ...s, ...patch }), record)}
             onChangeItem={(sid, iid, patch, record = true) => updateScreen(sid, (s) => ({ ...s, items: s.items.map((it) => (it.id === iid ? { ...it, ...patch } : it)) }), record)}
+            onDelete={deleteSelection}
+            onDuplicate={selection?.kind === "item" ? duplicateSelection : undefined}
           />
         )}
         {right === "theme" && (
@@ -724,7 +762,14 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
             onPlatform={(platform: Platform) => setDoc((d) => ({ ...d, platform }))}
           />
         )}
-        {right === "prompt" && <PromptPanel doc={doc} lang={lang} />}
+        {right === "prompt" && (
+          <PromptPanel
+            doc={doc}
+            lang={lang}
+            onTitle={(title) => setDoc((d) => ({ ...d, title }))}
+            onBrief={(brief) => setDoc((d) => ({ ...d, brief }))}
+          />
+        )}
       </div>
     </div>
   );
@@ -758,6 +803,8 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
         onHelp={() => setHelpOpen(true)}
         onReset={() => setResetOpen(true)}
         onLang={setLang}
+        onDelete={deleteSelection}
+        canDelete={!!selection}
         github={GITHUB}
       />
       <input
@@ -858,7 +905,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                 }),
               )}
             </svg>
-            {doc.screens.map((screen, index) => {
+            {doc.screens.map((screen) => {
               const { w, h, r } = frameSize(screen.preset);
               const selected = selection?.screenId === screen.id;
               return (
@@ -894,8 +941,8 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                       screen={screen}
                       theme={doc.theme}
                       lang={lang}
-                      active={selected || primaryReady}
-                      deferMs={selected ? 0 : 400 + index * 450}
+                      active={selected}
+                      deferMs={0}
                       onPainted={selected ? markPainted : undefined}
                     />
                     {guide && selected && (
@@ -931,6 +978,15 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
               );
             })}
           </div>
+          {layout !== "desktop" && selection?.kind === "item" && !sheet && !preview && (
+            <SelectionBar
+              lang={lang}
+              canDuplicate
+              onEdit={() => pickSheet("inspect")}
+              onDuplicate={duplicateSelection}
+              onDelete={deleteSelection}
+            />
+          )}
         </div>
         {layout === "desktop" && side("right", rightBody)}
       </div>

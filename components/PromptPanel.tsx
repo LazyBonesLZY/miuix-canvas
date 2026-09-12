@@ -5,14 +5,41 @@ import { t, type Lang } from "@/lib/i18n";
 import { buildPrompt } from "@/lib/prompt";
 import type { Doc } from "@/lib/types";
 
-export function PromptPanel({ doc, lang }: { doc: Doc; lang: Lang }) {
+export function PromptPanel({
+  doc,
+  lang,
+  onTitle,
+  onBrief,
+}: {
+  doc: Doc;
+  lang: Lang;
+  onTitle?: (title: string) => void;
+  onBrief?: (brief: string) => void;
+}) {
   const [only, setOnly] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const text = useMemo(() => buildPrompt(doc, lang, only || undefined), [doc, lang, only]);
 
   return (
     <div className="flex h-full flex-col gap-2 px-3 py-3">
-      <p className="text-[11px] leading-relaxed text-[var(--muted)]">{t("promptHint", lang)}</p>
+      <p className="text-[13px] leading-relaxed text-[var(--muted)]">{t("promptHint", lang)}</p>
+      {onTitle && (
+        <label className="flex flex-col gap-1">
+          <span className="text-[13px] text-[var(--muted-strong)]">{t("title", lang)}</span>
+          <input className="miuix-field" value={doc.title} onChange={(e) => onTitle(e.target.value)} />
+        </label>
+      )}
+      {onBrief && (
+        <label className="flex flex-col gap-1">
+          <span className="text-[13px] text-[var(--muted-strong)]">{t("brief", lang)}</span>
+          <textarea
+            className="miuix-field min-h-[72px] resize-y text-[14px] leading-relaxed"
+            value={doc.brief ?? ""}
+            placeholder={t("briefHint", lang)}
+            onChange={(e) => onBrief(e.target.value)}
+          />
+        </label>
+      )}
       <select
         className="miuix-field"
         value={only}
@@ -30,7 +57,7 @@ export function PromptPanel({ doc, lang }: { doc: Doc; lang: Lang }) {
       />
       <button
         type="button"
-        className="press rounded-[16px] bg-[var(--accent)] py-2.5 text-[16px] font-medium text-white"
+        className="press rounded-[16px] bg-[var(--accent)] py-3 text-[16px] font-medium text-white"
         onClick={async () => {
           await navigator.clipboard.writeText(text);
           setCopied(true);
