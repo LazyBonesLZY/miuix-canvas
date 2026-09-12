@@ -10,15 +10,15 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 
 ## What it does
 
-- **Drag-and-drop Miuix parts** — Button, IconButton, FAB, FloatingToolbar, TopAppBar, SmallTitle, NavigationBar, NavigationRail, TabRow, SearchBar, BreadcrumbBar, Card, Surface, Divider, Snackbar, SuperDialog, TextField, Switch, Checkbox, RadioButton, Slider, Dropdown, NumberPicker, Text, Image, Badge, Icon, ProgressIndicator, PullToRefresh.
-- **Preference rows** — SwitchPreference, CheckboxPreference, RadioButtonPreference, SliderPreference, SpinnerPreference, ArrowPreference. These are the HyperOS settings look: white rows on a gray surface.
-- **Phone and desktop screens** — 412×892 phone and 1280×800 desktop. Switch a screen from its label; bars stretch, a navigation bar can sit as a rail on desktop.
-- **Tap to navigate** — give a part a target screen (or back) and a transition. Preview lets you tap through the flow.
-- **Theme** — light / dark, a seed color (default `#3482FF`, the Miuix primary), Monet dynamic-color flag. Surfaces stay HyperOS; primary roles shift with the seed.
-- **Prompt output** — the design becomes a concise brief in Chinese or English. Target Compose Multiplatform (default), Android, or CMP Web. The prompt asks for `top.yukonga.miuix.kmp` and forbids Material 3.
-- **Tidy** — snaps bars to the edges, FAB to the corner, and stacks the rest on 16dp margins.
-- **Export** — copy the prompt, save JSON, share a link, or export a screen as PNG.
-- **Undo / redo**, alignment to a 4dp grid, and automatic save in `localStorage`.
+- **Drag-and-drop Miuix parts** — Button, IconButton, FAB, FloatingToolbar, TopAppBar, SmallTitle, NavigationBar, NavigationRail, TabRow, SearchBar, BreadcrumbBar, Card, Surface, Divider, Snackbar, OverlayDialog, OverlayBottomSheet, ListPopup, Tooltip, TextField, Switch, Checkbox, RadioButton, Slider, Dropdown, NumberPicker, ColorPicker, ColorPalette, Text, Image, Badge, Icon, ProgressIndicator, PullToRefresh, ScrollBar.
+- **Preference rows** — SwitchPreference, CheckboxPreference, RadioButtonPreference, SliderPreference, SpinnerPreference, ArrowPreference. Adjacent rows magnetically join into one HyperOS Card.
+- **Phone and desktop screens** — 412×892 phone and 1280×800 desktop. Switching size converts NavigationBar ↔ NavigationRail.
+- **Tap and swipe to navigate** — parts, nav destinations and screen swipes can open another screen. Preview plays the transition; canvas arrows show the flow.
+- **Theme** — light / dark, a seed color (default `#3482FF`), Monet flag. Surfaces stay HyperOS; primary roles shift with the seed.
+- **Prompt output** — Chinese or English brief naming real Miuix composables (`OverlayDialog`, `SwitchPreference`, …). Target Compose Multiplatform (default), Android, or CMP Web.
+- **Optional AI helper** — your own OpenAI / Claude / Gemini / DeepSeek key writes a part or screen note. The key stays in the browser.
+- **Tidy, layers, guides, undo/redo**, 4dp grid, compressed share links, JSON and PNG.
+- **Phone-friendly** — the side panels collapse into a bottom sheet under 900px.
 
 ## Keyboard
 
@@ -68,13 +68,13 @@ Miuix itself is Apache-2.0. This project reimplements the look in the browser fo
 
 ### 功能
 
-- 拖放 Miuix 基础部件（按钮、顶栏、导航栏、卡片、输入、进度等）
-- HyperOS 设置项：Switch / Checkbox / Radio / Slider / Spinner / Arrow Preference
-- 手机 412×892 与桌面 1280×800，同一设计里可混用
-- 点击跳转 + 预览过渡
-- 浅色 / 深色、种子色（默认 `#3482FF`）、Monet 动态取色标记
-- 中 / 英提示词，目标可选 Compose Multiplatform、Android、CMP Web
-- 整理、JSON、分享链接、PNG、撤销重做；内容保存在浏览器
+- 拖放完整 Miuix 基础部件（含 OverlayDialog、OverlayBottomSheet、ColorPicker、ListPopup 等）
+- HyperOS 设置项可磁吸拼成一组 Card
+- 手机 / 桌面互转时导航栏会变成 NavigationRail
+- 点击、导航项、屏幕滑动都可以跳转；画布上有流程箭头
+- 浅色 / 深色、种子色、Monet；可选填自己的 API key 写行为说明
+- 中 / 英提示词会写出真实的 Miuix composable 名
+- 整理、图层、对齐线、压缩分享链接、JSON、PNG；窄屏用底部面板
 
 ### 开发
 

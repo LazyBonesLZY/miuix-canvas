@@ -3,7 +3,8 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { Palette } from "@/lib/color";
 import { withAlpha } from "@/lib/color";
-import type { Item, NavTab } from "@/lib/types";
+import { t, type Lang } from "@/lib/i18n";
+import type { Item, Join, NavTab } from "@/lib/types";
 
 function Symbol({ name, size = 20, color, fill = false }: { name?: string | null; size?: number; color?: string; fill?: boolean }) {
   if (!name) return null;
@@ -66,7 +67,9 @@ function Check({ on, p, radio = false }: { on: boolean; p: Palette; radio?: bool
   );
 }
 
-function PrefRow({ it, p, trailing }: { it: Item; p: Palette; trailing?: ReactNode }) {
+function PrefRow({ it, p, trailing, join }: { it: Item; p: Palette; trailing?: ReactNode; join?: Join }) {
+  const top = join?.top ? 0 : 16;
+  const bottom = join?.bottom ? 0 : 16;
   return (
     <div
       style={{
@@ -76,6 +79,8 @@ function PrefRow({ it, p, trailing }: { it: Item; p: Palette; trailing?: ReactNo
         alignItems: "center",
         gap: 12,
         background: p.surfaceContainer,
+        borderRadius: `${top}px ${top}px ${bottom}px ${bottom}px`,
+        boxShadow: join?.bottom ? `inset 0 -1px 0 ${p.dividerLine}` : undefined,
       }}
     >
       {it.icon && (
@@ -120,7 +125,7 @@ function Tabs({ tabs, selected, p, vertical = false }: { tabs: NavTab[]; selecte
   );
 }
 
-export function MiuixNode({ item: it, palette: p, interactive = false }: { item: Item; palette: Palette; interactive?: boolean }) {
+export function MiuixNode({ item: it, palette: p, interactive = false, join, lang = "zh" }: { item: Item; palette: Palette; interactive?: boolean; join?: Join; lang?: Lang }) {
   const style: CSSProperties = {
     width: "100%",
     height: "100%",
@@ -280,8 +285,8 @@ export function MiuixNode({ item: it, palette: p, interactive = false }: { item:
           <div style={{ fontSize: 18, fontWeight: 600, color: p.onSurface }}>{it.label}</div>
           {it.supporting && <div style={{ fontSize: 14, color: p.onSurfaceVariantSummary, marginTop: 8, lineHeight: 1.5 }}>{it.supporting}</div>}
           <div style={{ marginTop: "auto", display: "flex", justifyContent: "flex-end", gap: 8 }}>
-            <span style={{ color: p.onSurfaceVariantSummary, fontSize: 15, padding: "6px 10px" }}>取消</span>
-            <span style={{ color: p.primary, fontSize: 15, fontWeight: 600, padding: "6px 10px" }}>确定</span>
+            <span style={{ color: p.onSurfaceVariantSummary, fontSize: 15, padding: "6px 10px" }}>{t("cancel", lang)}</span>
+            <span style={{ color: p.primary, fontSize: 15, fontWeight: 600, padding: "6px 10px" }}>{t("confirm", lang)}</span>
           </div>
         </div>
       );
@@ -380,15 +385,54 @@ export function MiuixNode({ item: it, palette: p, interactive = false }: { item:
           </div>
         </div>
       );
+    case "bottomSheet":
+      return (
+        <div style={{ ...style, borderRadius: "20px 20px 0 0", background: p.surfaceContainer, padding: "10px 16px 16px", display: "flex", flexDirection: "column" }}>
+          <div style={{ width: 36, height: 4, borderRadius: 4, background: p.outline, alignSelf: "center", marginBottom: 12 }} />
+          <div style={{ fontSize: 17, fontWeight: 600, color: p.onSurface }}>{it.label}</div>
+          {it.supporting && <div style={{ fontSize: 13, color: p.onSurfaceVariantSummary, marginTop: 6 }}>{it.supporting}</div>}
+        </div>
+      );
+    case "listPopup":
+      return (
+        <div style={{ ...style, borderRadius: 16, background: p.surfaceContainer, boxShadow: `0 12px 32px ${p.windowDimming}`, padding: "6px 0" }}>
+          {(it.tabs ?? [{ label: it.label, icon: "" }]).map((tab, i) => (
+            <div key={i} style={{ padding: "10px 16px", fontSize: 15, color: p.onSurface }}>{tab.label}</div>
+          ))}
+        </div>
+      );
+    case "tooltip":
+      return (
+        <div style={{ ...style, borderRadius: 12, background: p.onSurface, color: p.surface, display: "grid", placeItems: "center", fontSize: 12, padding: "0 10px" }}>
+          {it.label}
+        </div>
+      );
+    case "colorPicker":
+      return (
+        <div style={{ ...style, borderRadius: 16, background: p.surfaceContainer, padding: 12, display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ flex: 1, borderRadius: 12, background: "linear-gradient(180deg,#fff,hsl(214,100%,60%)),linear-gradient(90deg,#fff,#3482FF)", backgroundBlendMode: "multiply" }} />
+          <div style={{ height: 10, borderRadius: 6, background: "linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)" }} />
+        </div>
+      );
+    case "colorPalette":
+      return (
+        <div style={{ ...style, display: "flex", alignItems: "center", gap: 8, padding: "0 4px" }}>
+          {["#3482FF", "#FF6A00", "#0F9D58", "#7C4DFF", "#E11D48", "#C9A227"].map((c) => (
+            <div key={c} style={{ width: 28, height: 28, borderRadius: 8, background: c }} />
+          ))}
+        </div>
+      );
+    case "scrollBar":
+      return <div style={{ ...style, borderRadius: 999, background: p.outline, opacity: 0.7 }} />;
     case "switchPref":
-      return <PrefRow it={it} p={p} trailing={<SwitchTrack on={!!it.checked} p={p} compact />} />;
+      return <PrefRow it={it} p={p} join={join} trailing={<SwitchTrack on={!!it.checked} p={p} compact />} />;
     case "checkboxPref":
-      return <PrefRow it={it} p={p} trailing={<Check on={!!it.checked} p={p} />} />;
+      return <PrefRow it={it} p={p} join={join} trailing={<Check on={!!it.checked} p={p} />} />;
     case "radioPref":
-      return <PrefRow it={it} p={p} trailing={<Check on={!!it.checked} p={p} radio />} />;
+      return <PrefRow it={it} p={p} join={join} trailing={<Check on={!!it.checked} p={p} radio />} />;
     case "sliderPref":
       return (
-        <div style={{ ...style, background: p.surfaceContainer, padding: "10px 16px" }}>
+        <div style={{ ...style, background: p.surfaceContainer, padding: "10px 16px", borderRadius: `${join?.top ? 0 : 16}px ${join?.top ? 0 : 16}px ${join?.bottom ? 0 : 16}px ${join?.bottom ? 0 : 16}px` }}>
           <div style={{ fontSize: 16, color: p.onSurfaceContainer }}>{it.label}</div>
           <div style={{ marginTop: 12, height: 4, borderRadius: 4, background: p.sliderBackground, position: "relative" }}>
             <div style={{ width: `${Math.round((it.value ?? 0.5) * 100)}%`, height: "100%", background: p.primary, borderRadius: 4 }} />
@@ -398,7 +442,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false }: { item:
       );
     case "dropdownPref":
     case "arrowPref":
-      return <PrefRow it={it} p={p} trailing={<Symbol name="chevron_right" size={22} color={p.onSurfaceVariantActions} />} />;
+      return <PrefRow it={it} p={p} join={join} trailing={<Symbol name="chevron_right" size={22} color={p.onSurfaceVariantActions} />} />;
     default:
       return <div style={style}>{it.label}</div>;
   }

@@ -1,4 +1,4 @@
-import type { Category, Kind, Lang, Platform, Transition } from "./types";
+import type { Category, Kind, Lang, Platform, SwipeDir, Transition } from "./types";
 
 export type { Lang };
 
@@ -65,6 +65,21 @@ const ZH = {
   shareHint: "链接会打开这份设计。太大时请改用 JSON 文件。",
   linkCopied: "链接已复制",
   promptHint: "贴到 Cursor / Claude Code / Codex，让它用 Miuix 把应用做出来。",
+  swipe: "滑动跳转",
+  swipeLeft: "左滑",
+  swipeRight: "右滑",
+  swipeUp: "上滑",
+  swipeDown: "下滑",
+  cancel: "取消",
+  confirm: "确定",
+  ai: "AI 辅助",
+  aiWrite: "写行为说明",
+  aiNeedKey: "填入自己的密钥后可用。请求直达服务商，不经过本站。",
+  aiBusy: "正在写…",
+  layerUp: "上移一层",
+  layerDown: "下移一层",
+  more: "更多",
+  close: "关闭",
 } as const;
 
 const EN: Record<keyof typeof ZH, string> = {
@@ -130,6 +145,21 @@ const EN: Record<keyof typeof ZH, string> = {
   shareHint: "Anyone with the link opens this design. Use JSON if it is too large.",
   linkCopied: "Link copied",
   promptHint: "Paste into Cursor, Claude Code or Codex and ask it to build the app with Miuix.",
+  swipe: "Swipe",
+  swipeLeft: "Swipe left",
+  swipeRight: "Swipe right",
+  swipeUp: "Swipe up",
+  swipeDown: "Swipe down",
+  cancel: "Cancel",
+  confirm: "OK",
+  ai: "AI helper",
+  aiWrite: "Write behavior note",
+  aiNeedKey: "Add your own key. Requests go straight to the provider.",
+  aiBusy: "Writing…",
+  layerUp: "Bring forward",
+  layerDown: "Send back",
+  more: "More",
+  close: "Close",
 };
 
 const DICT: Record<Lang, Record<keyof typeof ZH, string>> = { zh: ZH, en: EN };
@@ -173,7 +203,10 @@ export const KIND_TEXT: Record<Lang, Record<Kind, string>> = {
     surface: "表面 Surface",
     divider: "分割线 Divider",
     snackbar: "提示条 Snackbar",
-    dialog: "对话框 SuperDialog",
+    dialog: "对话框 OverlayDialog",
+    bottomSheet: "底栏 OverlayBottomSheet",
+    listPopup: "列表弹出 ListPopup",
+    tooltip: "工具提示 Tooltip",
     textField: "输入框 TextField",
     switch: "开关 Switch",
     checkbox: "复选框 Checkbox",
@@ -181,12 +214,15 @@ export const KIND_TEXT: Record<Lang, Record<Kind, string>> = {
     slider: "滑块 Slider",
     dropdown: "下拉 Dropdown",
     numberPicker: "数字选择 NumberPicker",
+    colorPicker: "取色 ColorPicker",
+    colorPalette: "色板 ColorPalette",
     text: "文本 Text",
     image: "图片",
     badge: "徽标 Badge",
     icon: "图标 Icon",
     progress: "进度 ProgressIndicator",
     pullToRefresh: "下拉刷新 PullToRefresh",
+    scrollBar: "滚动条 ScrollBar",
     switchPref: "开关设置 SwitchPreference",
     checkboxPref: "复选设置 CheckboxPreference",
     radioPref: "单选设置 RadioButtonPreference",
@@ -210,7 +246,10 @@ export const KIND_TEXT: Record<Lang, Record<Kind, string>> = {
     surface: "Surface",
     divider: "Divider",
     snackbar: "Snackbar",
-    dialog: "SuperDialog",
+    dialog: "OverlayDialog",
+    bottomSheet: "OverlayBottomSheet",
+    listPopup: "ListPopup",
+    tooltip: "Tooltip",
     textField: "TextField",
     switch: "Switch",
     checkbox: "Checkbox",
@@ -218,12 +257,15 @@ export const KIND_TEXT: Record<Lang, Record<Kind, string>> = {
     slider: "Slider",
     dropdown: "Dropdown",
     numberPicker: "NumberPicker",
+    colorPicker: "ColorPicker",
+    colorPalette: "ColorPalette",
     text: "Text",
     image: "Image",
     badge: "Badge",
     icon: "Icon",
     progress: "ProgressIndicator",
     pullToRefresh: "PullToRefresh",
+    scrollBar: "ScrollBar",
     switchPref: "SwitchPreference",
     checkboxPref: "CheckboxPreference",
     radioPref: "RadioButtonPreference",
@@ -236,6 +278,11 @@ export const KIND_TEXT: Record<Lang, Record<Kind, string>> = {
 export const TRANSITION_TEXT: Record<Lang, Record<Transition, string>> = {
   zh: { slide: "从右滑入", slideLeft: "从左滑入", slideUp: "从下滑入", fade: "淡入", none: "无" },
   en: { slide: "Slide from right", slideLeft: "Slide from left", slideUp: "Slide from bottom", fade: "Fade", none: "None" },
+};
+
+export const SWIPE_TEXT: Record<Lang, Record<SwipeDir, string>> = {
+  zh: { left: "左滑", right: "右滑", up: "上滑", down: "下滑" },
+  en: { left: "swipe left", right: "swipe right", up: "swipe up", down: "swipe down" },
 };
 
 export const PLATFORM_TEXT: Record<Lang, Record<Platform, string>> = {

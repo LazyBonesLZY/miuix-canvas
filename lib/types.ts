@@ -12,6 +12,8 @@ export const FRAME_LABEL_H = 40;
 export const FRAME_GAP = 96;
 export const GRID = 4;
 export const HISTORY_MAX = 80;
+export const GUIDE_PX = 6;
+export const MAGNET = 14;
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
 export const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
@@ -24,6 +26,7 @@ export type FramePreset = "phone" | "desktop";
 export type ThemeMode = "light" | "dark";
 export type Transition = "slide" | "slideLeft" | "slideUp" | "fade" | "none";
 export type Category = "actions" | "navigation" | "containment" | "inputs" | "content" | "progress" | "preference";
+export type SwipeDir = "left" | "right" | "up" | "down";
 
 export type Kind =
   | "button"
@@ -42,6 +45,9 @@ export type Kind =
   | "divider"
   | "snackbar"
   | "dialog"
+  | "bottomSheet"
+  | "listPopup"
+  | "tooltip"
   | "textField"
   | "switch"
   | "checkbox"
@@ -49,12 +55,15 @@ export type Kind =
   | "slider"
   | "dropdown"
   | "numberPicker"
+  | "colorPicker"
+  | "colorPalette"
   | "text"
   | "image"
   | "badge"
   | "icon"
   | "progress"
   | "pullToRefresh"
+  | "scrollBar"
   | "switchPref"
   | "checkboxPref"
   | "radioPref"
@@ -62,7 +71,7 @@ export type Kind =
   | "dropdownPref"
   | "arrowPref";
 
-export type NavTab = { icon: string; label: string };
+export type NavTab = { icon: string; label: string; to?: string; transition?: Transition };
 
 export type Item = {
   id: string;
@@ -84,6 +93,8 @@ export type Item = {
   transition?: Transition;
 };
 
+export type Swipe = Partial<Record<SwipeDir, string>>;
+
 export type Screen = {
   id: string;
   name: string;
@@ -91,6 +102,7 @@ export type Screen = {
   y: number;
   preset: FramePreset;
   note?: string;
+  swipe?: Swipe;
   items: Item[];
 };
 
@@ -113,9 +125,12 @@ export type Selection =
   | { kind: "item"; screenId: string; itemId: string }
   | null;
 
-export const BACK_TARGET = "back";
+export type Join = { top: boolean; bottom: boolean };
+export type Guide = { x?: number; y?: number; gx?: number; gy?: number };
 
+export const BACK_TARGET = "back";
 export const TRANSITIONS: Transition[] = ["slide", "slideLeft", "slideUp", "fade", "none"];
+export const SWIPE_DIRS: SwipeDir[] = ["left", "right", "up", "down"];
 
 export function frameSize(preset: FramePreset) {
   return preset === "desktop" ? { w: DESKTOP_W, h: DESKTOP_H, r: DESKTOP_R } : { w: PHONE_W, h: PHONE_H, r: PHONE_R };
@@ -131,4 +146,8 @@ export function isPref(kind: Kind) {
 
 export function isBar(kind: Kind) {
   return kind === "topAppBar" || kind === "navigationBar" || kind === "navigationRail" || kind === "searchBar";
+}
+
+export function isTypingTarget(el: EventTarget | null) {
+  return el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement || (el instanceof HTMLElement && el.isContentEditable);
 }

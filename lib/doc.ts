@@ -1,7 +1,8 @@
 import { MIUIX_BLUE } from "./color";
+import { isProject, migrateDoc } from "./project";
 import { DEFAULT_THEME } from "./tokens";
 import type { Doc, FramePreset, Item, Screen } from "./types";
-import { FRAME_GAP, PHONE_H, PHONE_W, uid } from "./types";
+import { FRAME_GAP, PHONE_W, uid } from "./types";
 
 export const DOC_KEY = "miuix:doc";
 export const UI_KEY = "miuix:ui";
@@ -156,8 +157,8 @@ export function loadDoc(): Doc | null {
   try {
     const raw = localStorage.getItem(DOC_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Doc;
-    if (parsed?.version === 1 && Array.isArray(parsed.screens)) return parsed;
+    const parsed: unknown = JSON.parse(raw);
+    if (isProject(parsed)) return migrateDoc(parsed);
   } catch {
     /* ignore */
   }

@@ -12,6 +12,18 @@
   --line: #ececec;
 }
 
+.app-root[data-theme="dark"] {
+  --accent: #277af7;
+  --accent-soft: #2b3b54;
+  --ink: #f2f2f2;
+  --muted: #8a8a8a;
+  --chrome: #1a1a1a;
+  --canvas: #111111;
+  --tile: #2a2a2a;
+  --tile-hover: #333333;
+  --line: #333333;
+}
+
 html,
 body {
   height: 100%;
@@ -112,8 +124,29 @@ body {
 .preview-slide-up { animation: preview-slide-up 280ms cubic-bezier(0.2, 0.8, 0.2, 1); }
 .preview-fade { animation: preview-fade 220ms ease; }
 
+.mobile-bar,
+.mobile-sheet {
+  display: none;
+}
+
 @media (max-width: 900px) {
-  aside {
+  .desk-aside {
     display: none;
+  }
+  .mobile-bar {
+    display: flex;
+    border-top: 1px solid var(--line);
+    background: var(--chrome);
+  }
+  .mobile-sheet {
+    display: grid;
+    align-items: end;
+  }
+  .mobile-sheet-card {
+    width: 100%;
+    border-radius: 18px 18px 0 0;
+    background: var(--chrome);
+    color: var(--ink);
+    padding: 12px;
   }
 }

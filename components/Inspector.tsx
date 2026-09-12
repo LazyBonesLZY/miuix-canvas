@@ -1,10 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { AiPanel } from "@/components/AiPanel";
 import { ICONS, KIND_SPEC } from "@/lib/tokens";
 import { KIND_TEXT, TRANSITION_TEXT, t, type Lang } from "@/lib/i18n";
 import type { Doc, Item, Screen, Selection, Transition } from "@/lib/types";
-import { BACK_TARGET, TRANSITIONS, frameSize } from "@/lib/types";
+import { BACK_TARGET, SWIPE_DIRS, TRANSITIONS, frameSize } from "@/lib/types";
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -16,6 +17,30 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 }
 
 const input = "w-full rounded-[10px] border-0 bg-[var(--tile)] px-2.5 py-2 text-[13px] text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--accent)]";
+
+function TargetSelect({
+  doc,
+  screenId,
+  value,
+  lang,
+  onChange,
+}: {
+  doc: Doc;
+  screenId: string;
+  value?: string;
+  lang: Lang;
+  onChange: (to: string | undefined) => void;
+}) {
+  return (
+    <select className={input} value={value ?? ""} onChange={(e) => onChange(e.target.value || undefined)}>
+      <option value="">{t("none", lang)}</option>
+      <option value={BACK_TARGET}>{t("back", lang)}</option>
+      {doc.screens.filter((s) => s.id !== screenId).map((s) => (
+        <option key={s.id} value={s.id}>{s.name}</option>
+      ))}
+    </select>
+  );
+}
 
 export function Inspector({
   doc,
@@ -59,6 +84,13 @@ export function Inspector({
         <Field label={t("note", lang)}>
           <textarea className={`${input} min-h-[88px] resize-y`} value={screen.note ?? ""} onChange={(e) => onChangeScreen(screen.id, { note: e.target.value })} />
         </Field>
+        <div className="text-[11px] text-[var(--muted)]">{t("swipe", lang)}</div>
+        {SWIPE_DIRS.map((dir) => (
+          <Field key={dir} label={t(`swipe${dir[0].toUpperCase()}${dir.slice(1)}` as "swipeLeft", lang)}>
+            <TargetSelect doc={doc} screenId={screen.id} lang={lang} value={screen.swipe?.[dir]} onChange={(to) => onChangeScreen(screen.id, { swipe: { ...screen.swipe, [dir]: to } })} />
+          </Field>
+        ))}
+        <AiPanel doc={doc} lang={lang} screen={screen} onNote={(note) => onChangeScreen(screen.id, { note })} />
       </div>
     );
   }
@@ -122,34 +154,27 @@ export function Inspector({
       )}
       {it.tabs && (
         <Field label={t("tabs", lang)}>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {it.tabs.map((tab, i) => (
-              <div key={i} className="flex gap-1">
-                <input className={input} value={tab.icon} onChange={(e) => {
-                  const tabs = it.tabs!.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x));
-                  patch({ tabs });
-                }} />
-                <input className={input} value={tab.label} onChange={(e) => {
-                  const tabs = it.tabs!.map((x, j) => (j === i ? { ...x, label: e.target.value } : x));
-                  patch({ tabs });
-                }} />
+              <div key={i} className="flex flex-col gap-1 rounded-[10px] bg-[var(--tile)] p-2">
+                <div className="flex gap-1">
+                  <input className={input} value={tab.icon} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, icon: e.target.value } : x)) })} />
+                  <input className={input} value={tab.label} onChange={(e) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })} />
+                </div>
+                <TargetSelect
+                  doc={doc}
+                  screenId={screen.id}
+                  lang={lang}
+                  value={tab.to}
+                  onChange={(to) => patch({ tabs: it.tabs!.map((x, j) => (j === i ? { ...x, to } : x)) })}
+                />
               </div>
             ))}
           </div>
         </Field>
       )}
       <Field label={t("target", lang)}>
-        <select
-          className={input}
-          value={it.to ?? ""}
-          onChange={(e) => patch({ to: e.target.value || undefined })}
-        >
-          <option value="">{t("none", lang)}</option>
-          <option value={BACK_TARGET}>{t("back", lang)}</option>
-          {doc.screens.filter((s) => s.id !== screen.id).map((s) => (
-            <option key={s.id} value={s.id}>{s.name}</option>
-          ))}
-        </select>
+        <TargetSelect doc={doc} screenId={screen.id} lang={lang} value={it.to} onChange={(to) => patch({ to })} />
       </Field>
       {it.to && (
         <Field label={t("transition", lang)}>
@@ -163,6 +188,7 @@ export function Inspector({
       <Field label={t("note", lang)}>
         <textarea className={`${input} min-h-[80px] resize-y`} value={it.note ?? ""} onChange={(e) => patch({ note: e.target.value })} />
       </Field>
+      <AiPanel doc={doc} lang={lang} screen={screen} item={it} onNote={(note) => patch({ note })} />
     </div>
   );
 }

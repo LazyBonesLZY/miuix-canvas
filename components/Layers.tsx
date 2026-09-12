@@ -8,11 +8,13 @@ export function LayersPanel({
   lang,
   selection,
   onSelect,
+  onMove,
 }: {
   doc: Doc;
   lang: Lang;
   selection: Selection;
   onSelect: (next: Selection) => void;
+  onMove?: (screenId: string, itemId: string, dir: 1 | -1) => void;
 }) {
   return (
     <div className="flex flex-col gap-3 overflow-auto px-3 pb-6 pt-2">
@@ -28,18 +30,25 @@ export function LayersPanel({
               {screen.name}
             </button>
             <div className="flex flex-col gap-0.5 pl-2">
-              {[...screen.items].sort((a, b) => a.y - b.y).map((it) => {
+              {screen.items.map((it, index) => {
                 const on = selection?.kind === "item" && selection.itemId === it.id;
                 return (
-                  <button
-                    key={it.id}
-                    type="button"
-                    onClick={() => onSelect({ kind: "item", screenId: screen.id, itemId: it.id })}
-                    className={`press flex items-center gap-2 rounded-[8px] px-2 py-1 text-left text-[12px] ${on ? "bg-[var(--accent-soft)] text-[var(--accent)]" : "text-[var(--muted)]"}`}
-                  >
-                    <span className="ms text-[16px]">{it.icon || "crop_square"}</span>
-                    <span className="min-w-0 truncate">{it.label || KIND_TEXT[lang][it.kind].split(" ")[0]}</span>
-                  </button>
+                  <div key={it.id} className={`flex items-center gap-1 rounded-[8px] ${on ? "bg-[var(--accent-soft)]" : ""}`}>
+                    <button
+                      type="button"
+                      onClick={() => onSelect({ kind: "item", screenId: screen.id, itemId: it.id })}
+                      className={`press flex min-w-0 flex-1 items-center gap-2 px-2 py-1 text-left text-[12px] ${on ? "text-[var(--accent)]" : "text-[var(--muted)]"}`}
+                    >
+                      <span className="ms text-[16px]">{it.icon || "crop_square"}</span>
+                      <span className="min-w-0 truncate">{it.label || KIND_TEXT[lang][it.kind].split(" ")[0]}</span>
+                    </button>
+                    {on && onMove && (
+                      <div className="flex pr-1">
+                        <button type="button" title={t("layerDown", lang)} disabled={index === 0} className="press px-1 text-[10px] disabled:opacity-30" onClick={() => onMove(screen.id, it.id, -1)}>▼</button>
+                        <button type="button" title={t("layerUp", lang)} disabled={index === screen.items.length - 1} className="press px-1 text-[10px] disabled:opacity-30" onClick={() => onMove(screen.id, it.id, 1)}>▲</button>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>

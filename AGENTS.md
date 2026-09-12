@@ -11,9 +11,11 @@ Browser canvas for sketching [Miuix](https://github.com/compose-miuix-ui/miuix) 
 
 ## Layout
 
-- `lib/types.ts`, `lib/tokens.ts` — document model and part specs
+- `lib/types.ts`, `lib/tokens.ts` — document model and part specs (every kind maps to a real Miuix composable)
 - `lib/color.ts` — Miuix light/dark surfaces + seed-shifted primary
+- `lib/layout.ts` — magnetic preference joins, guides, phone/desktop conversion
 - `lib/prompt.ts` — natural-language export (zh / en)
+- `lib/ai.ts` — optional browser-side helper (author's own key)
 - `components/MiuixNode.tsx` — on-canvas HyperOS look
 - `components/Editor.tsx` — canvas, history, IO
 
