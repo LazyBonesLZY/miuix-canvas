@@ -18,7 +18,7 @@ function Field({ label, children }: { label: string; children: ReactNode }) {
 
 function ChromeSwitch({ on, onChange }: { on: boolean; onChange: (next: boolean) => void }) {
   return (
-    <button type="button" role="switch" aria-checked={on} className="press miuix-switch" data-on={on ? "1" : undefined} onClick={() => onChange(!on)} />
+    <button type="button" role="switch" aria-checked={on} className="miuix-switch" data-on={on ? "1" : undefined} onClick={() => onChange(!on)} />
   );
 }
 
@@ -184,8 +184,8 @@ export function Inspector({
           )}
         </>
       )}
-      <div className="flex items-center justify-between rounded-[16px] bg-[var(--chrome)] px-4 py-3 text-[15px]">
-        <span>{local(lang, "启用", "Enabled", "有効", "사용")}</span>
+      <div className="flex items-center justify-between gap-3 rounded-[16px] bg-[var(--chrome)] px-4 py-3 text-[15px]">
+        <span className="min-w-0 flex-1 leading-snug">{local(lang, "启用", "Enabled", "有効", "사용")}</span>
         <ChromeSwitch on={it.enabled ?? true} onChange={(enabled) => patch({ enabled })} />
       </div>
       {(["dialog", "bottomSheet", "listPopup", "cascadingPopup", "dropdownMenu", "iconDropdownMenu", "iconCascadingMenu", "tooltip"] as Item["kind"][]).includes(it.kind) && (
@@ -194,13 +194,6 @@ export function Inspector({
           <ChromeSwitch on={it.show ?? true} onChange={(show) => patch({ show })} />
         </div>
       )}
-      <Field label={local(lang, "Scaffold 槽位", "Scaffold slot", "Scaffold スロット", "Scaffold 슬롯")}>
-        <select className={input} value={it.slot ?? "content"} onChange={(e) => patch({ slot: e.target.value as Item["slot"] })}>
-          {["content", "topBar", "bottomBar", "floatingActionButton", "floatingToolbar", "snackbarHost", "overlay"].map((slot) => (
-            <option key={slot} value={slot}>{slot}</option>
-          ))}
-        </select>
-      </Field>
       <Field label={local(lang, "父容器", "Parent container", "親コンテナ", "상위 컨테이너")}>
         <select className={input} value={it.parentId ?? ""} onChange={(e) => patch({ parentId: e.target.value || undefined })}>
           <option value="">{local(lang, "屏幕根节点", "Screen root", "画面ルート", "화면 루트")}</option>

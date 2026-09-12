@@ -26,7 +26,7 @@ export function LayersPanel({
             <button
               type="button"
               onClick={() => onSelect({ kind: "screen", screenId: screen.id })}
-              className={`press mb-1 w-full truncate rounded-[16px] bg-[var(--chrome)] px-3 py-2 text-left text-[15px] font-medium ${selectedScreen ? "text-[var(--accent)]" : "text-[var(--ink)]"}`}
+              className={`press mb-1 w-full break-words rounded-[16px] bg-[var(--chrome)] px-3 py-2 text-left text-[15px] font-medium ${selectedScreen ? "text-[var(--accent)]" : "text-[var(--ink)]"}`}
               title={screen.name}
             >
               {screen.name}

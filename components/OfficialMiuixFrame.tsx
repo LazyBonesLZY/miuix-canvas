@@ -104,7 +104,7 @@ export function OfficialMiuixFrame({
       {!ready && !error && (
         <div className="miuix-loader pointer-events-none absolute inset-0">
           <div className="miuix-spinner" />
-          <span>{t("loading", lang)}</span>
+          <span className="max-w-full px-3 text-center">{t("loading", lang)}</span>
         </div>
       )}
       {error && (

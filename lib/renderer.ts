@@ -11,6 +11,7 @@ export type RendererEvent = {
   from?: number;
   selected?: number;
   label?: string;
+  supporting?: string;
   color?: string;
   variant?: string;
   refreshing?: boolean;

@@ -28,8 +28,27 @@ describe("official theme defaults", () => {
           expect(it.y, `${screen.name} ${it.kind}`).toBeGreaterThanOrEqual(0);
           expect(it.x + it.w, `${screen.name} ${it.kind}`).toBeLessThanOrEqual(w);
           expect(it.y + it.h, `${screen.name} ${it.kind}`).toBeLessThanOrEqual(h);
-          if (it.kind === "switchPref" || it.kind === "arrowPref") expect(it.h).toBeGreaterThanOrEqual(64);
+          if (it.kind === "switchPref" || it.kind === "arrowPref") {
+            expect(it.h, `${screen.name} ${it.kind}`).toBeGreaterThanOrEqual(it.supporting ? 80 : 56);
+          }
+          if (it.kind === "sliderPref" || it.kind === "rangeSliderPref") {
+            expect(it.h, `${screen.name} ${it.kind}`).toBeGreaterThanOrEqual(96);
+          }
           if (it.kind === "smallTitle") expect(it.h).toBeGreaterThanOrEqual(40);
+        }
+      }
+    }
+  });
+
+  it("does not stack sample parts on top of each other", () => {
+    for (const screen of defaultDoc("zh").screens) {
+      const items = screen.items;
+      for (let i = 0; i < items.length; i++) {
+        for (let j = i + 1; j < items.length; j++) {
+          const a = items[i];
+          const b = items[j];
+          const overlap = a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+          expect(overlap, `${screen.name}: ${a.kind}@${a.y} vs ${b.kind}@${b.y}`).toBe(false);
         }
       }
     }
@@ -139,5 +158,55 @@ describe("migrateDoc", () => {
     };
     expect(isProject(raw)).toBe(true);
     expect(migrateDoc(raw as unknown as Doc).theme.monet).toBe(true);
+  });
+
+  it("grows short preference rows so title and summary are not clipped", () => {
+    const raw = {
+      ...base,
+      version: 3 as const,
+      theme: { mode: "light" as const, seed: "#3482FF", monet: false },
+      screens: [
+        {
+          id: "s",
+          name: "Home",
+          x: 0,
+          y: 0,
+          preset: "phone" as const,
+          items: [
+            { id: "a", kind: "switchPref", x: 16, y: 80, w: 380, h: 64, label: "Dark", supporting: "Follow system" },
+            { id: "b", kind: "switch", x: 16, y: 160, w: 20, h: 20, label: "" },
+          ],
+        },
+      ],
+    };
+    const next = migrateDoc(raw as unknown as Doc);
+    expect(next.screens[0].items[0].h).toBe(80);
+    expect(next.screens[0].items[1]).toMatchObject({ w: 49, h: 28 });
+  });
+
+  it("pushes the following row down when a preference grows", () => {
+    const raw = {
+      ...base,
+      version: 3 as const,
+      theme: { mode: "light" as const, seed: "#3482FF", monet: false },
+      screens: [
+        {
+          id: "s",
+          name: "Home",
+          x: 0,
+          y: 0,
+          preset: "phone" as const,
+          items: [
+            { id: "a", kind: "switchPref", x: 16, y: 100, w: 380, h: 64, label: "A", supporting: "one" },
+            { id: "b", kind: "switchPref", x: 16, y: 164, w: 380, h: 64, label: "B", supporting: "two" },
+          ],
+        },
+      ],
+    };
+    const next = migrateDoc(raw as unknown as Doc);
+    const [first, second] = next.screens[0].items;
+    expect(first.h).toBe(80);
+    expect(second.h).toBe(80);
+    expect(second.y).toBeGreaterThanOrEqual(first.y + first.h);
   });
 });

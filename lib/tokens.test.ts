@@ -25,7 +25,7 @@ describe("KIND_SPEC coverage", () => {
     expect(KIND_SPEC.searchBar.h).toBe(45);
     expect(KIND_SPEC.tabRow.h).toBe(42);
     expect(KIND_SPEC.slider.h).toBe(28);
-    expect(KIND_SPEC.floatingNav.h).toBe(52);
+    expect(KIND_SPEC.floatingNav.h).toBe(88);
     expect(KIND_SPEC.floatingNav.variants).toEqual(["default", "iosLike"]);
     expect(KIND_SPEC.navigationBar.variants).toEqual(["iconAndText", "iconOnly", "iconWithSelectedLabel"]);
     expect(KIND_SPEC.navigationRail.variants).toEqual(["classic", "collapsed", "expanded"]);
@@ -34,6 +34,23 @@ describe("KIND_SPEC coverage", () => {
     expect(KIND_SPEC.topAppBar.h).toBe(72);
     expect(KIND_SPEC.pullToRefresh.h).toBe(20);
     expect(KIND_SPEC.breadcrumb.h).toBe(48);
+    expect(KIND_SPEC.smallTitle.h).toBe(40);
+    expect(KIND_SPEC.text.h).toBe(28);
+    expect(KIND_SPEC.switchPref.h).toBe(80);
+    expect(KIND_SPEC.sliderPref.h).toBe(96);
+    expect(KIND_SPEC.arrowPref.h).toBe(80);
+    expect(KIND_SPEC.textField.h).toBe(64);
+    expect(KIND_SPEC.numberPicker.h).toBe(225);
+    expect(KIND_SPEC.snackbar.h).toBe(56);
+    expect(KIND_SPEC.floatingToolbar.h).toBe(56);
+    expect(KIND_SPEC.badge.w("phone")).toBe(24);
+  });
+
+  it("gives preference rows enough height for official 16dp padding plus title/summary", () => {
+    expect(makeItem("switchPref", "phone", "zh", 0, 0).h).toBe(80);
+    expect(makeItem("radioPref", "phone", "zh", 0, 0).h).toBe(56);
+    expect(makeItem("sliderPref", "phone", "zh", 0, 0).h).toBe(96);
+    expect(makeItem("switch", "phone", "zh", 0, 0)).toMatchObject({ w: 49, h: 28 });
   });
 
   it("maps variants to the real composable names", () => {

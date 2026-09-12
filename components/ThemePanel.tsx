@@ -34,7 +34,7 @@ export function ThemePanel({
             value={doc.theme.seed}
             onFocus={onBeginHistory}
             onChange={(e) => onTheme({ seed: e.target.value.toUpperCase() }, false)}
-            className="miuix-field"
+            className="miuix-field min-w-0 flex-1"
           />
         </div>
       </label>
@@ -50,9 +50,9 @@ export function ThemePanel({
           />
         ))}
       </div>
-      <div className="flex items-center justify-between rounded-[16px] bg-[var(--chrome)] px-4 py-3 text-[15px]">
-        <span>{t("monet", lang)}</span>
-        <button type="button" role="switch" aria-checked={doc.theme.monet} className="press miuix-switch" data-on={doc.theme.monet ? "1" : undefined} onClick={() => onTheme({ monet: !doc.theme.monet })} />
+      <div className="flex items-center justify-between gap-3 rounded-[16px] bg-[var(--chrome)] px-4 py-3 text-[15px]">
+        <span className="min-w-0 flex-1 leading-snug">{t("monet", lang)}</span>
+        <button type="button" role="switch" aria-checked={doc.theme.monet} className="miuix-switch" data-on={doc.theme.monet ? "1" : undefined} onClick={() => onTheme({ monet: !doc.theme.monet })} />
       </div>
       <div>
         <div className="mb-2 px-1 text-[13px] text-[var(--muted-strong)]">{t("platform", lang)}</div>

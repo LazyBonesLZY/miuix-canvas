@@ -3,6 +3,7 @@ package canvas.renderer
 import androidx.compose.foundation.Image as ComposeImage
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import top.yukonga.miuix.kmp.basic.Badge
@@ -112,7 +114,6 @@ fun ComponentRenderer(
 
         "floatingToolbar" -> FloatingToolbar(modifier = modifier) {
             Row(
-                modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
@@ -139,11 +140,17 @@ fun ComponentRenderer(
         "card" -> Card(
             modifier = modifier,
             onClick = events::click,
+            insideMargin = PaddingValues(16.dp),
         ) {
-            Text(text = item.label, style = MiuixTheme.textStyles.title3)
+            Text(
+                text = item.label,
+                overflow = TextOverflow.Visible,
+                style = MiuixTheme.textStyles.title3,
+            )
             item.supporting?.let {
                 Text(
                     text = it,
+                    overflow = TextOverflow.Visible,
                     style = MiuixTheme.textStyles.body2,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
                 )
@@ -251,6 +258,7 @@ fun ComponentRenderer(
         "text" -> Text(
             text = item.label,
             modifier = modifier,
+            overflow = TextOverflow.Visible,
             style = when (item.textStyle) {
                 "body2" -> MiuixTheme.textStyles.body2
                 "button" -> MiuixTheme.textStyles.button
@@ -398,6 +406,7 @@ fun ComponentRenderer(
         else -> Text(
             text = item.label.ifBlank { item.kind },
             modifier = modifier,
+            overflow = TextOverflow.Visible,
             style = MiuixTheme.textStyles.body2,
         )
     }

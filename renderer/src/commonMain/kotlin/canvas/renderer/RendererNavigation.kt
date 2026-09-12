@@ -149,20 +149,15 @@ internal fun RenderFloatingNavigationBar(
             color = if (blurred) Color.Transparent else MiuixTheme.colorScheme.surfaceContainer,
             defaultWindowInsetsPadding = false,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                item.options().forEachIndexed { index, tab ->
-                    FloatingNavigationBarItem(
-                        selected = index == item.selectedIndex(),
-                        onClick = { events.select(index, tab) },
-                        icon = rendererIcon(tab.icon),
-                        label = tab.label,
-                        enabled = item.enabled,
-                        badge = tab.badge?.let { badge -> { Badge { Text(badge) } } },
-                    )
-                }
+            item.options().forEachIndexed { index, tab ->
+                FloatingNavigationBarItem(
+                    selected = index == item.selectedIndex(),
+                    onClick = { events.select(index, tab) },
+                    icon = rendererIcon(tab.icon),
+                    label = tab.label,
+                    enabled = item.enabled,
+                    badge = tab.badge?.let { badge -> { Badge { Text(badge) } } },
+                )
             }
         }
     }
@@ -240,14 +235,15 @@ internal fun RenderSearchBar(item: ItemDto, modifier: Modifier, events: Renderer
     SearchBar(
         inputField = {
             InputField(
-                query = item.label,
-                onQueryChange = { events.patch(action = "input", label = it) },
-                onSearch = { events.patch(action = "search", label = it) },
+                query = item.supporting.orEmpty(),
+                onQueryChange = { events.patch(action = "input", supporting = it) },
+                onSearch = { events.patch(action = "search", supporting = it) },
                 expanded = expanded,
                 onExpandedChange = {
                     events.patch(action = if (it) "expand" else "collapse", variant = if (it) "expanded" else "field")
                 },
                 modifier = Modifier.fillMaxWidth(),
+                label = item.label,
                 enabled = item.enabled,
             )
         },

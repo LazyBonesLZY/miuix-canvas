@@ -59,6 +59,7 @@ export function Preview({
       if (typeof event.from === "number") patch.from = event.from;
       if (typeof event.selected === "number") patch.selected = event.selected;
       if (typeof event.label === "string") patch.label = event.label;
+      if (typeof event.supporting === "string") patch.supporting = event.supporting;
       if (typeof event.color === "string") patch.color = event.color;
       if (typeof event.variant === "string") patch.variant = event.variant;
       if (typeof event.refreshing === "boolean") patch.refreshing = event.refreshing;
@@ -114,7 +115,7 @@ export function Preview({
           </div>
         </div>
         <div className="flex max-w-full items-center gap-2 rounded-[16px] bg-[var(--chrome)] px-3 py-1.5 text-[13px] text-[var(--ink)]">
-          <span className="hidden min-[520px]:inline">{t("ready", lang)}</span>
+          <span className="hidden min-w-0 text-pretty min-[520px]:inline">{t("ready", lang)}</span>
           <button type="button" className="press miuix-text-btn" data-accent="1" onClick={onClose}>{t("close", lang)}</button>
         </div>
       </div>

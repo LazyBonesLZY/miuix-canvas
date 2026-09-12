@@ -4,8 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -13,6 +16,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.geometry.Offset
@@ -210,14 +214,26 @@ private fun PositionedItem(
 ) {
     val x = if (parent == null) item.x else item.x - parent.x
     val y = if (parent == null) item.y else item.y - parent.y
+    val fit = itemRenderFit(item.kind)
     Box(
         modifier = Modifier
             .offset(x.dp, y.dp)
             .size(item.w.coerceAtLeast(1f).dp, item.h.coerceAtLeast(1f).dp),
+        contentAlignment = when (fit) {
+            ItemRenderFit.Hug -> Alignment.Center
+            ItemRenderFit.WidthHug -> Alignment.TopStart
+            ItemRenderFit.Fill -> Alignment.TopStart
+        },
     ) {
         ComponentRenderer(
             item = item,
-            modifier = Modifier.fillMaxSize(),
+            modifier = when (fit) {
+                ItemRenderFit.Hug -> Modifier.wrapContentSize(Alignment.Center)
+                ItemRenderFit.WidthHug -> Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight(align = Alignment.Top, unbounded = true)
+                ItemRenderFit.Fill -> Modifier.fillMaxSize()
+            },
             interactive = interactive,
             requestId = requestId,
             backdrop = backdrop,

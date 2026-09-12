@@ -1,4 +1,4 @@
-import { KIND_SET } from "./tokens";
+import { KIND_SET, officialMinHeight } from "./tokens";
 import type { Doc, FramePreset, Item, Screen } from "./types";
 import { frameSize } from "./types";
 
@@ -60,22 +60,30 @@ function migrateItem(it: Item, preset: FramePreset): Item {
     (it.variant === "iosLike" || it.variant === "glass" || (!it.variant && it.h >= 90))
   ) {
     const size = frameSize(preset);
-    return { ...base, variant: "iosLike", x: 0, y: size.h - 100, w: size.w, h: 100 };
+    return fitOfficialSize({ ...base, variant: "iosLike", x: 0, y: size.h - 100, w: size.w, h: 100 });
   }
   if (it.kind === "navigationBar" && it.variant === "blur") {
-    return { ...base, variant: "iconAndText", effect: "textureBlur" };
+    return fitOfficialSize({ ...base, variant: "iconAndText", effect: "textureBlur" });
   }
   if ((it.kind === "navigationBar" || it.kind === "floatingNav") && it.variant === "textureBlur") {
-    return {
+    return fitOfficialSize({
       ...base,
       variant: it.kind === "navigationBar" ? "iconAndText" : "default",
       effect: "textureBlur",
-    };
+    });
   }
   if (it.kind === "navigationBar" && (it.variant === "default" || !it.variant)) {
-    return { ...base, variant: "iconAndText" };
+    return fitOfficialSize({ ...base, variant: "iconAndText" });
   }
-  return base;
+  return fitOfficialSize(base);
+}
+
+function fitOfficialSize(it: Item): Item {
+  const minH = officialMinHeight(it.kind, it.supporting);
+  const w = it.kind === "switch" ? Math.max(it.w, 49) : it.w;
+  const h = Math.max(it.h, minH);
+  if (w === it.w && h === it.h) return it;
+  return { ...it, w, h };
 }
 
 export function migrateDoc(doc: Doc): Doc {
@@ -89,9 +97,30 @@ export function migrateDoc(doc: Doc): Doc {
     },
     screens: doc.screens.map((screen) => ({
       ...screen,
-      items: screen.items.filter((it) => KIND_SET.has(it.kind)).map((it) => migrateItem(it, screen.preset)),
+      items: resolveVerticalOverlaps(
+        screen.items.filter((it) => KIND_SET.has(it.kind)).map((it) => migrateItem(it, screen.preset)),
+      ),
     })),
   };
+}
+
+const PINNED_KINDS = new Set(["topAppBar", "navigationBar", "floatingNav"]);
+
+function resolveVerticalOverlaps(items: Item[]): Item[] {
+  const next = items.map((it) => ({ ...it }));
+  const sorted = next
+    .filter((it) => !PINNED_KINDS.has(it.kind))
+    .sort((a, b) => a.y - b.y || a.x - b.x);
+  for (let i = 0; i < sorted.length; i++) {
+    for (let j = i + 1; j < sorted.length; j++) {
+      const a = sorted[i];
+      const b = sorted[j];
+      if (!(a.x < b.x + b.w && a.x + a.w > b.x)) continue;
+      const overlap = a.y + a.h - b.y;
+      if (overlap > 0) b.y += overlap;
+    }
+  }
+  return next;
 }
 
 export function projectFileName(doc: Doc) {

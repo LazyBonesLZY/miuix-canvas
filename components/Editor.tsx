@@ -825,7 +825,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
               {t("emptyCanvas", lang)}
             </div>
           )}
-          <div className="miuix-zoom absolute bottom-3 left-3 z-10">
+          <div className="miuix-zoom absolute left-3 z-10">
             <button type="button" className="press miuix-icon-btn h-8 min-w-8" title={t("zoomOut", lang)} onClick={() => {
               const rect = canvasSize();
               if (rect) setView((v) => zoomAt(v, clamp(v.z / 1.1, MIN_Z, MAX_Z), rect.width / 2, rect.height / 2));
@@ -960,7 +960,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
               <span className="text-[15px] font-medium">{t(sheet, lang)}</span>
               <button type="button" className="press text-[13px] text-[var(--accent)]" onClick={() => setSheet(null)}>{t("close", lang)}</button>
             </div>
-            <div className="flex h-[min(70dvh,640px)] min-h-0 flex-col overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
               {sheet === "parts" || sheet === "layers" ? leftBody : rightBody}
             </div>
           </div>
@@ -1023,7 +1023,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                   setTimeout(() => setShareCopied(false), 1400);
                 }}
               >
-                {shareCopied ? t("linkCopied", lang) : t("copy", lang)}
+                {shareCopied ? t("linkCopied", lang) : t("copyLink", lang)}
               </button>
             </div>
           </div>

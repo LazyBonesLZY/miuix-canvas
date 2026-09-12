@@ -104,6 +104,24 @@ class RendererRegistryTest {
     }
 
     @Test
+    fun officialPartsDoNotFillABoxThatWouldSquashThem() {
+        assertEquals(ItemRenderFit.Hug, itemRenderFit("switch"))
+        assertEquals(ItemRenderFit.Hug, itemRenderFit("checkbox"))
+        assertEquals(ItemRenderFit.Hug, itemRenderFit("radio"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("switchPref"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("arrowPref"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("smallTitle"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("text"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("button"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("textField"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("numberPicker"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("searchBar"))
+        assertEquals(ItemRenderFit.WidthHug, itemRenderFit("topAppBar"))
+        assertEquals(ItemRenderFit.Fill, itemRenderFit("card"))
+        HANDLED_ITEM_KINDS.forEach { itemRenderFit(it) }
+    }
+
+    @Test
     fun swipePicksOfficialDirectionAndDestination() {
         val swipe = mapOf("left" to "gallery", "right" to "back")
         assertEquals("gallery" to "slide", swipeNavigate(swipe, androidx.compose.ui.geometry.Offset(-80f, 4f), 64f))

@@ -34,18 +34,18 @@ export function defaultDoc(lang: Lang): Doc {
     preset: "phone",
     items: [
       item("topAppBar", 0, 0, 412, 72, loc(lang, "首页", "Home", "ホーム", "홈"), { variant: "small" }),
-      item("searchBar", 16, 84, 380, 45, loc(lang, "搜索", "Search", "検索", "검색"), { variant: "field" }),
-      item("smallTitle", 0, 137, 412, 40, loc(lang, "开关", "Switch", "スイッチ", "스위치")),
-      item("switchPref", 16, 177, 380, 64, loc(lang, "开关", "Switch", "スイッチ", "스위치"), { checked: false }),
-      item("switchPref", 16, 241, 380, 64, loc(lang, "默认开启", "On by default", "デフォルトオン", "기본 켜짐"), { checked: true }),
-      item("smallTitle", 0, 313, 412, 40, loc(lang, "复选 / 单选", "Check / Radio", "チェック / ラジオ", "체크 / 라디오")),
-      item("checkboxPref", 16, 353, 380, 64, loc(lang, "复选", "Checkbox", "チェック", "체크"), { checked: true }),
-      item("radioPref", 16, 417, 380, 56, loc(lang, "标准", "Standard", "標準", "표준"), { checked: true }),
-      item("smallTitle", 0, 481, 412, 40, loc(lang, "按钮", "Button", "ボタン", "버튼")),
-      item("button", 16, 529, 182, 50, loc(lang, "取消", "Cancel", "キャンセル", "취소"), { variant: "secondary" }),
-      item("button", 214, 529, 182, 50, loc(lang, "提交", "Submit", "送信", "제출"), { variant: "primary" }),
-      item("smallTitle", 0, 591, 412, 40, loc(lang, "标签栏", "Tabs", "タブ", "탭")),
-      item("tabRow", 16, 631, 380, 42, "", {
+      item("searchBar", 16, 80, 380, 45, loc(lang, "搜索", "Search", "検索", "검색"), { variant: "field" }),
+      item("smallTitle", 0, 133, 412, 40, loc(lang, "开关", "Switch", "スイッチ", "스위치")),
+      item("switchPref", 16, 173, 380, 56, loc(lang, "开关", "Switch", "スイッチ", "스위치"), { checked: false }),
+      item("switchPref", 16, 229, 380, 56, loc(lang, "默认开启", "On by default", "デフォルトオン", "기본 켜짐"), { checked: true }),
+      item("smallTitle", 0, 293, 412, 40, loc(lang, "复选 / 单选", "Check / Radio", "チェック / ラジオ", "체크 / 라디오")),
+      item("checkboxPref", 16, 333, 380, 56, loc(lang, "复选", "Checkbox", "チェック", "체크"), { checked: true }),
+      item("radioPref", 16, 389, 380, 56, loc(lang, "标准", "Standard", "標準", "표준"), { checked: true }),
+      item("smallTitle", 0, 453, 412, 40, loc(lang, "按钮", "Button", "ボタン", "버튼")),
+      item("button", 16, 501, 182, 50, loc(lang, "取消", "Cancel", "キャンセル", "취소"), { variant: "secondary" }),
+      item("button", 214, 501, 182, 50, loc(lang, "提交", "Submit", "送信", "제출"), { variant: "primary" }),
+      item("smallTitle", 0, 559, 412, 40, loc(lang, "标签栏", "Tabs", "タブ", "탭")),
+      item("tabRow", 16, 607, 380, 42, "", {
         variant: "default",
         tabs: [
           { icon: "", label: loc(lang, "推荐", "For you", "おすすめ", "추천") },
@@ -54,12 +54,12 @@ export function defaultDoc(lang: Lang): Doc {
         ],
         selected: 0,
       }),
-      item("arrowPref", 16, 689, 380, 64, loc(lang, "下拉刷新", "Pull to refresh", "プル更新", "당겨서 새로고침"), {
+      item("arrowPref", 16, 657, 380, 80, loc(lang, "下拉刷新", "Pull to refresh", "プル更新", "당겨서 새로고침"), {
         supporting: loc(lang, "打开组件页", "Open the parts page", "部品ページを開く", "부품 페이지"),
         to: galleryId,
         transition: "slide",
       }),
-      item("arrowPref", 16, 753, 380, 64, loc(lang, "设置", "Settings", "設定", "설정"), {
+      item("arrowPref", 16, 737, 380, 80, loc(lang, "设置", "Settings", "設定", "설정"), {
         supporting: loc(lang, "显示、声音、通知", "Display, sound, notifications", "表示、サウンド、通知", "디스플레이, 소리, 알림"),
         to: settingsId,
         transition: "slide",
@@ -85,15 +85,15 @@ export function defaultDoc(lang: Lang): Doc {
     note: loc(lang, "系统设置列表，分组放在 Card 里", "System settings list, grouped in Cards", "システム設定リスト。Card でグループ化する", "시스템 설정 목록. Card로 묶는다"),
     items: [
       item("topAppBar", 0, 0, 412, 72, loc(lang, "设置", "Settings", "設定", "설정"), { variant: "small", icon: "arrow_back", to: "back", transition: "slide" }),
-      item("searchBar", 16, 84, 380, 45, loc(lang, "搜索设置项", "Search settings", "設定を検索", "설정 검색"), { variant: "field" }),
-      item("smallTitle", 0, 141, 412, 40, loc(lang, "显示", "Display", "表示", "디스플레이")),
-      item("switchPref", 16, 181, 380, 64, loc(lang, "深色模式", "Dark mode", "ダークモード", "다크 모드"), {
+      item("searchBar", 16, 80, 380, 45, loc(lang, "搜索设置项", "Search settings", "設定を検索", "설정 검색"), { variant: "field" }),
+      item("smallTitle", 0, 133, 412, 40, loc(lang, "显示", "Display", "表示", "디스플레이")),
+      item("switchPref", 16, 173, 380, 80, loc(lang, "深色模式", "Dark mode", "ダークモード", "다크 모드"), {
         supporting: loc(lang, "跟随系统", "Follow system", "システムに合わせる", "시스템 따름"),
         checked: false,
         note: loc(lang, "切换 MiuixTheme 的 ThemeController 模式", "Toggle ThemeController dark/light", "ThemeController のモードを切り替える", "ThemeController 모드를 전환"),
       }),
-      item("sliderPref", 16, 245, 380, 80, loc(lang, "字体大小", "Font size", "文字サイズ", "글자 크기"), { value: 0.45 }),
-      item("dropdownPref", 16, 333, 380, 64, loc(lang, "语言", "Language", "言語", "언어"), {
+      item("sliderPref", 16, 253, 380, 96, loc(lang, "字体大小", "Font size", "文字サイズ", "글자 크기"), { value: 0.45 }),
+      item("dropdownPref", 16, 357, 380, 80, loc(lang, "语言", "Language", "言語", "언어"), {
         supporting: loc(lang, "简体中文", "English", "日本語", "한국어"),
         variant: "overlay",
         selected: 0,
@@ -103,7 +103,7 @@ export function defaultDoc(lang: Lang): Doc {
           { icon: "", label: loc(lang, "日本語", "Japanese", "日本語", "일본어") },
         ],
       }),
-      item("spinnerPref", 16, 397, 380, 64, loc(lang, "排序方式", "Sort by", "並べ替え", "정렬"), {
+      item("spinnerPref", 16, 437, 380, 80, loc(lang, "排序方式", "Sort by", "並べ替え", "정렬"), {
         supporting: loc(lang, "名称", "Name", "名前", "이름"),
         variant: "overlay",
         selected: 0,
@@ -113,8 +113,8 @@ export function defaultDoc(lang: Lang): Doc {
           { icon: "", label: loc(lang, "大小", "Size", "サイズ", "크기") },
         ],
       }),
-      item("smallTitle", 0, 473, 412, 40, loc(lang, "系统", "System", "システム", "시스템")),
-      item("arrowPref", 16, 513, 380, 64, loc(lang, "关于本机", "About phone", "端末情報", "휴대전화 정보"), {
+      item("smallTitle", 0, 525, 412, 40, loc(lang, "系统", "System", "システム", "시스템")),
+      item("arrowPref", 16, 565, 380, 80, loc(lang, "关于本机", "About phone", "端末情報", "휴대전화 정보"), {
         supporting: "HyperOS 2",
         to: aboutId,
         transition: "slide",
@@ -130,16 +130,16 @@ export function defaultDoc(lang: Lang): Doc {
     preset: "phone",
     items: [
       item("topAppBar", 0, 0, 412, 72, loc(lang, "关于本机", "About phone", "端末情報", "휴대전화 정보"), { variant: "small", icon: "arrow_back", to: "back", transition: "slide" }),
-      item("card", 16, 100, 380, 168, "Miuix Canvas", {
+      item("card", 16, 88, 380, 168, "Miuix Canvas", {
         supporting: loc(lang, "用 Miuix 组件拼界面，再生成提示词。", "Sketch with Miuix parts, then copy a prompt.", "Miuix 部品で画面を組み、プロンプトにする。", "Miuix 부품으로 화면을 만든 뒤 프롬프트를 복사한다."),
       }),
-      item("textField", 16, 284, 380, 50, loc(lang, "设备名称", "Device name", "デバイス名", "기기 이름")),
-      item("breadcrumb", 16, 350, 380, 48, loc(lang, "设置 / 显示 / 关于", "Settings / Display / About", "設定 / 表示 / 情報", "설정 / 디스플레이 / 정보")),
-      item("arrowPref", 16, 414, 380, 64, loc(lang, "开源许可", "Open source licenses", "オープンソースライセンス", "오픈 소스 라이선스"), {
+      item("textField", 16, 272, 380, 64, loc(lang, "设备名称", "Device name", "デバイス名", "기기 이름")),
+      item("breadcrumb", 16, 344, 380, 48, loc(lang, "设置 / 显示 / 关于", "Settings / Display / About", "設定 / 表示 / 情報", "설정 / 디스플레이 / 정보")),
+      item("arrowPref", 16, 400, 380, 80, loc(lang, "开源许可", "Open source licenses", "オープンソースライセンス", "오픈 소스 라이선스"), {
         supporting: "Apache-2.0 · MIT",
       }),
-      item("button", 16, 498, 182, 50, loc(lang, "返回", "Back", "戻る", "뒤로"), { variant: "text", to: "back", transition: "fade" }),
-      item("button", 214, 498, 182, 50, loc(lang, "确定", "OK", "OK", "확인"), { variant: "primary", to: "back", transition: "fade" }),
+      item("button", 16, 496, 182, 50, loc(lang, "返回", "Back", "戻る", "뒤로"), { variant: "text", to: "back", transition: "fade" }),
+      item("button", 214, 496, 182, 50, loc(lang, "确定", "OK", "OK", "확인"), { variant: "primary", to: "back", transition: "fade" }),
     ],
   };
 
@@ -161,12 +161,12 @@ export function defaultDoc(lang: Lang): Doc {
       item("smallTitle", 0, 332, 412, 40, loc(lang, "色板", "Palette", "パレット", "팔레트")),
       item("colorPalette", 16, 376, 380, 96, ""),
       item("smallTitle", 0, 484, 412, 40, loc(lang, "数字 / 模糊", "Picker / Blur", "ピッカー / ブラー", "선택 / 블러")),
-      item("numberPicker", 36, 532, 160, 140, "12"),
-      item("blur", 216, 532, 180, 140, loc(lang, "纹理模糊", "Texture blur", "テクスチャブラー", "텍스처 블러")),
-      item("snackbar", 16, 688, 380, 48, loc(lang, "已保存", "Saved", "保存しました", "저장됨")),
-      item("tooltip", 16, 748, 140, 36, loc(lang, "提示文字", "Tooltip", "ツールチップ", "툴팁"), { variant: "plain" }),
-      item("badge", 168, 756, 16, 16, "3", { variant: "number" }),
-      item("badge", 196, 762, 6, 6, "", { variant: "dot" }),
+      item("numberPicker", 36, 528, 160, 225, "12"),
+      item("blur", 216, 528, 180, 140, loc(lang, "纹理模糊", "Texture blur", "テクスチャブラー", "텍스처 블러")),
+      item("snackbar", 216, 676, 180, 56, loc(lang, "已保存", "Saved", "保存しました", "저장됨")),
+      item("tooltip", 216, 740, 140, 40, loc(lang, "提示文字", "Tooltip", "ツールチップ", "툴팁"), { variant: "plain" }),
+      item("badge", 360, 748, 24, 16, "3", { variant: "number" }),
+      item("badge", 388, 754, 6, 6, "", { variant: "dot" }),
       item("floatingNav", 0, 792, 412, 100, "", {
         variant: "iosLike",
         tabs: [

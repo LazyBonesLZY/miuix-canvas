@@ -59,6 +59,57 @@ import top.yukonga.miuix.kmp.icon.extended.Tune
 import top.yukonga.miuix.kmp.interfaces.ExperimentalScrollBarApi
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
+/** How an official composable should sit inside the editor's positioned box. */
+internal enum class ItemRenderFit {
+    /** Stretch to the box (bars, cards, images, sliders, fields). */
+    Fill,
+    /** Keep the official intrinsic size and center it (Switch 49×28, Checkbox 26×26). */
+    Hug,
+    /**
+     * Fill width, wrap height without the box's max-height.
+     * Preference rows and text clip when `fillMaxSize()` is forced into 56–64dp.
+     */
+    WidthHug,
+}
+
+internal fun itemRenderFit(kind: String): ItemRenderFit = when (kind) {
+    "switch",
+    "checkbox",
+    "radio",
+    "badge",
+    "icon",
+    "pullToRefresh",
+    "iconButton",
+    "fab",
+    -> ItemRenderFit.Hug
+
+    "text",
+    "smallTitle",
+    "button",
+    "breadcrumb",
+    "snackbar",
+    "tooltip",
+    "dropdown",
+    "textField",
+    "numberPicker",
+    "searchBar",
+    "floatingToolbar",
+    "topAppBar",
+    "floatingNav",
+    "basicPref",
+    "switchPref",
+    "checkboxPref",
+    "radioPref",
+    "sliderPref",
+    "rangeSliderPref",
+    "dropdownPref",
+    "spinnerPref",
+    "arrowPref",
+    -> ItemRenderFit.WidthHug
+
+    else -> ItemRenderFit.Fill
+}
+
 /** The complete renderer registry, directly comparable with the editor's Kind union. */
 val HANDLED_ITEM_KINDS: Set<String> = setOf(
     "button", "iconButton", "fab", "floatingToolbar",
@@ -194,6 +245,7 @@ internal class RendererEvents(
         from: Float? = null,
         selected: Int? = null,
         label: String? = null,
+        supporting: String? = null,
         color: String? = null,
         variant: String? = null,
         refreshing: Boolean? = null,
@@ -208,6 +260,7 @@ internal class RendererEvents(
                 from = from,
                 selected = selected,
                 label = label,
+                supporting = supporting,
                 color = color,
                 variant = variant,
                 refreshing = refreshing,

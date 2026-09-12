@@ -112,6 +112,7 @@ data class RendererEvent(
     val from: Float? = null,
     val selected: Int? = null,
     val label: String? = null,
+    val supporting: String? = null,
     val color: String? = null,
     val variant: String? = null,
     val refreshing: Boolean? = null,
