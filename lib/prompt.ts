@@ -82,7 +82,7 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
     bits.push({ zh: `值 ${start}${Math.round(it.value * 100)}%`, en: `value ${start}${Math.round(it.value * 100)}%`, ja: `値 ${start}${Math.round(it.value * 100)}%`, ko: `값 ${start}${Math.round(it.value * 100)}%` }[lang]);
   }
   if (it.kind === "floatingNav" && it.variant === "glass") {
-    bits.push({ zh: "用 Modifier.textureBlur / layerBackdrop 做液态玻璃底栏", en: "liquid-glass bar via Modifier.textureBlur / layerBackdrop", ja: "Modifier.textureBlur / layerBackdrop でリキッドガラス下バー", ko: "Modifier.textureBlur / layerBackdrop로 리퀴드 글래스 하단바" }[lang]);
+    bits.push({ zh: "液态玻璃：layerBackdrop + vibrancy + 4.dp blur + 24.dp lens 折射，不要做成大半径高斯磨砂", en: "liquid glass: layerBackdrop + vibrancy + 4.dp blur + 24.dp lens refraction, not a heavy Gaussian frost", ja: "リキッドガラス：layerBackdrop + vibrancy + 4.dp blur + 24.dp lens。大きなガウス曇りガラスにしない", ko: "리퀴드 글래스: layerBackdrop + vibrancy + 4.dp blur + 24.dp lens. 큰 가우시안 서리 유리가 아님" }[lang]);
   }
   if (it.kind === "navigationBar" && it.variant === "blur") {
     bits.push({ zh: "底栏用 Modifier.textureBlur", en: "frost the bar with Modifier.textureBlur", ja: "下バーは Modifier.textureBlur", ko: "하단바는 Modifier.textureBlur" }[lang]);

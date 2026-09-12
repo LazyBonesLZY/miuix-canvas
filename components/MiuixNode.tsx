@@ -102,6 +102,41 @@ function GlassNoise() {
   );
 }
 
+/** Official demo liquid glass: 4dp vibrancy + rim lens, not a 32px gaussian frost. */
+function LiquidGlass({
+  p,
+  children,
+  style,
+}: {
+  p: Palette;
+  children: ReactNode;
+  style?: CSSProperties;
+}) {
+  const dark = p.surface === "#000000";
+  return (
+    <div
+      className="miuix-liquid"
+      style={{
+        ...style,
+        borderRadius: 999,
+        background: dark
+          ? "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 100%)"
+          : "linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.10) 100%)",
+        backdropFilter: "blur(4px) saturate(1.9) brightness(1.08) contrast(1.05)",
+        WebkitBackdropFilter: "blur(4px) saturate(1.9) brightness(1.08) contrast(1.05)",
+        boxShadow: dark
+          ? "0 10px 22px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.46), inset 0 -1px 0 rgba(255,255,255,0.08)"
+          : "0 10px 22px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.86), inset 0 -1px 0 rgba(255,255,255,0.22)",
+      }}
+    >
+      <span className="miuix-liquid-spec" />
+      <span className="miuix-liquid-rim" />
+      <span className="miuix-liquid-chroma" />
+      {children}
+    </div>
+  );
+}
+
 function ColorBand({ colors, value }: { colors: string; value: number }) {
   return (
     <div style={{ height: 26, borderRadius: 999, background: colors, position: "relative", boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }}>
@@ -380,24 +415,20 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
         const tabs = it.tabs ?? [];
         const n = Math.max(tabs.length, 1);
         const sel = it.selected ?? 0;
+        const dark = p.surface === "#000000";
         return (
-          <div
+          <LiquidGlass
+            p={p}
             style={{
               ...style,
-              borderRadius: 999,
-              background: withAlpha(p.surfaceContainer, 0.28),
-              backdropFilter: "blur(32px) saturate(2)",
-              WebkitBackdropFilter: "blur(32px) saturate(2)",
-              boxShadow: `0 10px 28px ${withAlpha("#000", 0.16)}, inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(255,255,255,0.18)`,
               padding: 4,
               display: "flex",
               alignItems: "stretch",
               position: "relative",
-              overflow: "hidden",
             }}
           >
-            <GlassNoise />
             <div
+              className="miuix-liquid-pill"
               style={{
                 position: "absolute",
                 top: 4,
@@ -405,18 +436,20 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
                 left: `calc(4px + ${sel} * (100% - 8px) / ${n})`,
                 width: `calc((100% - 8px) / ${n})`,
                 borderRadius: 999,
-                background: withAlpha(p.onSurface, 0.08),
-                boxShadow: "inset 0 0 0 0.5px rgba(255,255,255,0.4)",
+                background: dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)",
+                boxShadow: dark
+                  ? "inset 0 0 0 0.6px rgba(255,255,255,0.28), inset 1px 0 0 rgba(255,70,90,0.22), inset -1px 0 0 rgba(50,160,255,0.22)"
+                  : "inset 0 0 0 0.6px rgba(255,255,255,0.55), inset 1px 0 0 rgba(255,70,90,0.2), inset -1px 0 0 rgba(50,160,255,0.2)",
                 transition: "left 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
               }}
             />
             {tabs.map((tab, i) => (
-              <div key={i} style={{ flex: 1, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1, color: p.onSurface, opacity: i === sel ? 1 : 0.42 }}>
+              <div key={i} style={{ flex: 1, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1, color: p.onSurface, opacity: i === sel ? 1 : 0.5 }}>
                 <Symbol name={tab.icon} size={22} color={p.onSurface} fill={i === sel} />
                 {tab.label && <span style={{ fontSize: 11 }}>{tab.label}</span>}
               </div>
             ))}
-          </div>
+          </LiquidGlass>
         );
       }
       return (
