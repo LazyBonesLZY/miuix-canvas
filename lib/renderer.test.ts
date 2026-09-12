@@ -16,6 +16,18 @@ describe("renderer bridge", () => {
     expect(request.screens?.map((screen) => screen.id)).toEqual(doc.screens.map((screen) => screen.id));
   });
 
+  it("turns null labels into empty strings so Kotlin can decode the screen", () => {
+    const doc = defaultDoc("en");
+    const broken = {
+      ...doc.screens[3],
+      items: [{ ...doc.screens[3].items.at(-1)!, label: null as unknown as string, variant: null as unknown as string }],
+    };
+    const request = renderRequest(broken, doc.theme, "en", false);
+    expect(request.screen.items[0].label).toBe("");
+    expect(request.screen.items[0].variant).toBeUndefined();
+    expect(JSON.stringify(request)).not.toContain('"label":null');
+  });
+
   it("replaces non-finite geometry before the Wasm decoder sees it", () => {
     const doc = defaultDoc("en");
     const broken = {

@@ -1,7 +1,15 @@
 package canvas.renderer
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import top.yukonga.miuix.kmp.nav.core.NavKey
+
+internal val rendererJson = Json {
+    ignoreUnknownKeys = true
+    encodeDefaults = false
+    explicitNulls = false
+    coerceInputValues = true
+}
 
 @Serializable
 data class RenderRequest(

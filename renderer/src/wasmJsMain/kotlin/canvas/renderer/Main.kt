@@ -7,14 +7,10 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.window
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 
-private val json = Json {
-    ignoreUnknownKeys = true
-    encodeDefaults = true
-}
+private val json = rendererJson
 
 private var request by mutableStateOf(RenderRequest())
 private var acceptedRender = false

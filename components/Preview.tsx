@@ -54,14 +54,14 @@ export function Preview({
   const onRendererEvent = useCallback((event: RendererEvent) => {
     if (event.type === "patch" && event.itemId) {
       const patch: Partial<Item> = {};
-      if (event.checked !== undefined) patch.checked = event.checked;
-      if (event.value !== undefined) patch.value = event.value;
-      if (event.from !== undefined) patch.from = event.from;
-      if (event.selected !== undefined) patch.selected = event.selected;
-      if (event.label !== undefined) patch.label = event.label;
-      if (event.color !== undefined) patch.color = event.color;
-      if (event.variant !== undefined) patch.variant = event.variant;
-      if (event.refreshing !== undefined) patch.refreshing = event.refreshing;
+      if (typeof event.checked === "boolean") patch.checked = event.checked;
+      if (typeof event.value === "number") patch.value = event.value;
+      if (typeof event.from === "number") patch.from = event.from;
+      if (typeof event.selected === "number") patch.selected = event.selected;
+      if (typeof event.label === "string") patch.label = event.label;
+      if (typeof event.color === "string") patch.color = event.color;
+      if (typeof event.variant === "string") patch.variant = event.variant;
+      if (typeof event.refreshing === "boolean") patch.refreshing = event.refreshing;
       setLocal((prev) => ({ ...prev, [event.itemId!]: { ...prev[event.itemId!], ...patch } }));
       const source = renderedScreen?.items.find((item) => item.id === event.itemId);
       if (event.checked === true && source && (source.kind === "radio" || source.kind === "radioPref")) {

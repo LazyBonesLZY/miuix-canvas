@@ -38,18 +38,30 @@ function finite(value: number, fallback = 0) {
   return Number.isFinite(value) ? value : fallback;
 }
 
+function text(value: unknown, fallback = "") {
+  return typeof value === "string" ? value : fallback;
+}
+
+function optionalText(value: unknown) {
+  return typeof value === "string" ? value : undefined;
+}
+
 function sanitizeItem(item: Screen["items"][number]): Screen["items"][number] {
   return {
     ...item,
+    label: text(item.label),
+    icon: optionalText(item.icon),
+    variant: optionalText(item.variant),
+    supporting: optionalText(item.supporting),
     x: finite(item.x),
     y: finite(item.y),
     w: finite(item.w, 1),
     h: finite(item.h, 1),
-    value: item.value === undefined ? undefined : finite(item.value),
-    from: item.from === undefined ? undefined : finite(item.from),
-    selected: item.selected === undefined ? undefined : finite(item.selected),
-    blurRadius: item.blurRadius === undefined ? undefined : finite(item.blurRadius),
-    noiseCoefficient: item.noiseCoefficient === undefined ? undefined : finite(item.noiseCoefficient),
+    value: item.value === undefined || item.value === null ? undefined : finite(item.value),
+    from: item.from === undefined || item.from === null ? undefined : finite(item.from),
+    selected: item.selected === undefined || item.selected === null ? undefined : finite(item.selected),
+    blurRadius: item.blurRadius === undefined || item.blurRadius === null ? undefined : finite(item.blurRadius),
+    noiseCoefficient: item.noiseCoefficient === undefined || item.noiseCoefficient === null ? undefined : finite(item.noiseCoefficient),
   };
 }
 

@@ -49,11 +49,16 @@ function defaultSlot(it: Item): Item["slot"] {
 function migrateItem(it: Item, preset: FramePreset): Item {
   const base: Item = {
     ...it,
+    label: typeof it.label === "string" ? it.label : "",
+    variant: it.variant ?? undefined,
     enabled: it.enabled ?? true,
     show: it.show ?? true,
     slot: it.slot ?? defaultSlot(it),
   };
-  if (it.kind === "floatingNav" && (it.variant === "glass" || (it.variant === "iosLike" && it.h < 100))) {
+  if (
+    it.kind === "floatingNav" &&
+    (it.variant === "iosLike" || it.variant === "glass" || (!it.variant && it.h >= 90))
+  ) {
     const size = frameSize(preset);
     return { ...base, variant: "iosLike", x: 0, y: size.h - 100, w: size.w, h: 100 };
   }

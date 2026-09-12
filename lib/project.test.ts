@@ -55,4 +55,22 @@ describe("migrateDoc", () => {
     expect(next.screens[0].items[0]).toMatchObject({ kind: "floatingNav", x: 0, y: 792, w: 412, h: 100, variant: "iosLike" });
     expect(next.screens[0].items[1]).toMatchObject({ kind: "navigationBar", variant: "iconAndText", effect: "textureBlur" });
   });
+
+  it("restores liquid-glass floating nav when variant was wiped", () => {
+    const raw = {
+      ...base,
+      screens: [
+        {
+          id: "s",
+          name: "Home",
+          x: 0,
+          y: 0,
+          preset: "phone" as const,
+          items: [{ id: "a", kind: "floatingNav", x: 0, y: 792, w: 412, h: 100, label: "" }],
+        },
+      ],
+    };
+    const next = migrateDoc(raw as unknown as Doc);
+    expect(next.screens[0].items[0]).toMatchObject({ variant: "iosLike", h: 100 });
+  });
 });

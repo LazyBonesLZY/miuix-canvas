@@ -2,11 +2,10 @@ package canvas.renderer
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlinx.serialization.json.Json
+import kotlin.test.assertFalse
+import kotlinx.serialization.encodeToString
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
-
-private val testJson = Json { ignoreUnknownKeys = true }
 
 class RendererRegistryTest {
     @Test
@@ -44,7 +43,7 @@ class RendererRegistryTest {
 
     @Test
     fun decodesTheEditorJsonShape() {
-        val request = testJson.decodeFromString<RenderRequest>(
+        val request = rendererJson.decodeFromString<RenderRequest>(
             """{"type":"render","requestId":"s:1","interactive":false,"lang":"zh","theme":{"mode":"light","seed":"#3482FF","monet":true},"screen":{"id":"s","name":"Home","x":0,"y":0,"preset":"phone","items":[{"id":"bar","kind":"topAppBar","x":0,"y":0,"w":412,"h":72,"label":"设置","icon":"arrow_back","to":"back","variant":"small"},{"id":"b","kind":"button","x":16,"y":80,"w":180,"h":50,"label":"OK","icon":null}]}}""",
         )
         assertEquals("topAppBar", request.screen.items.first().kind)
@@ -54,8 +53,20 @@ class RendererRegistryTest {
     }
 
     @Test
+    fun coercesNullItemStringsAndOmitsNullEventFields() {
+        val request = rendererJson.decodeFromString<RenderRequest>(
+            """{"type":"render","screen":{"items":[{"id":"nav","kind":"floatingNav","x":0,"y":792,"w":412,"h":100,"label":null,"variant":null}]}}""",
+        )
+        assertEquals("", request.screen.items.single().label)
+        assertEquals(null, request.screen.items.single().variant)
+        val encoded = rendererJson.encodeToString(RendererEvent(type = "patch", itemId = "nav", selected = 1))
+        assertFalse(encoded.contains("label"))
+        assertFalse(encoded.contains("variant"))
+    }
+
+    @Test
     fun requestIgnoresForwardCompatibleFields() {
-        val request = testJson.decodeFromString<RenderRequest>(
+        val request = rendererJson.decodeFromString<RenderRequest>(
             """{"type":"render","future":true,"screen":{"items":[{"id":"a","kind":"button","label":"OK","future":1}]}}""",
         )
         assertEquals("button", request.screen.items.single().kind)
