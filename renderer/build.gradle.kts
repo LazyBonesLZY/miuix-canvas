@@ -18,6 +18,11 @@ kotlin {
             commonWebpackConfig {
                 outputFileName = "miuixRenderer.js"
             }
+            testTask {
+                useKarma {
+                    useChromeHeadlessNoSandbox()
+                }
+            }
         }
         binaries.executable()
     }
