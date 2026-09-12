@@ -1,5 +1,6 @@
 "use client";
 
+import { PartName } from "@/components/PartName";
 import { kindShort, t, type Lang } from "@/lib/i18n";
 import type { Doc, Selection } from "@/lib/types";
 
@@ -42,7 +43,7 @@ export function LayersPanel({
                       className={`press flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left text-[13px] ${on ? "text-[var(--accent)]" : "text-[var(--muted-strong)]"}`}
                     >
                       <span className="ms text-[16px]">{it.icon || "crop_square"}</span>
-                      <span className="part-name">{it.label || kindShort(it.kind, lang)}</span>
+                      <PartName>{it.label || kindShort(it.kind, lang)}</PartName>
                     </button>
                     {on && onMove && (
                       <div className="flex pr-1">

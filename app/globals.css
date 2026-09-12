@@ -498,14 +498,11 @@ input[type="range"]::-webkit-slider-thumb {
   scrollbar-width: thin;
 }
 
-.panel-scroll::-webkit-scrollbar,
-.part-name::-webkit-scrollbar {
+.panel-scroll::-webkit-scrollbar {
   width: 8px;
-  height: 4px;
 }
 
-.panel-scroll::-webkit-scrollbar-thumb,
-.part-name::-webkit-scrollbar-thumb {
+.panel-scroll::-webkit-scrollbar-thumb {
   background: var(--outline);
   border-radius: 999px;
 }
@@ -518,8 +515,17 @@ input[type="range"]::-webkit-slider-thumb {
   white-space: nowrap;
   font-size: 13px;
   line-height: 1.25;
-  color: var(--ink);
-  scrollbar-width: thin;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  touch-action: pan-x;
+}
+
+.part-name::-webkit-scrollbar {
+  display: none;
+}
+
+.part-name.is-overflow {
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 16px), transparent);
 }
 
 @keyframes miuix-spin {

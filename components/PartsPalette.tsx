@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { PartName } from "@/components/PartName";
 import { KIND_TEXT, categoryLabel, kindShort, t, type Lang } from "@/lib/i18n";
 import { CATEGORIES, KIND_SPEC } from "@/lib/tokens";
 import type { Kind } from "@/lib/types";
@@ -65,7 +66,7 @@ export function PartsPalette({
                   <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[12px] bg-[var(--accent-soft)]">
                     <span className="ms text-[18px] text-[var(--accent)]">{KIND_SPEC[kind].icon}</span>
                   </span>
-                  <span className="part-name" onPointerDown={(e) => e.stopPropagation()}>{short}</span>
+                  <PartName>{short}</PartName>
                 </button>
               );
             })}
