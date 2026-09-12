@@ -23,7 +23,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
+import top.yukonga.miuix.kmp.basic.Card
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import androidx.compose.foundation.layout.PaddingValues
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
@@ -55,10 +59,16 @@ fun RendererApp(
 
     MiuixTheme(controller = controller) {
         CompositionLocalProvider(LocalRendererLang provides request.lang) {
-            if (request.screens.isNotEmpty()) {
-                NavigableRenderer(request = request, emit = emit)
-            } else {
-                ScreenRenderer(request = request, emit = emit)
+            val density = LocalDensity.current
+            val layoutScale = request.layoutScale.takeIf { it > 0f } ?: 1f
+            CompositionLocalProvider(
+                LocalDensity provides Density(density.density * layoutScale, density.fontScale),
+            ) {
+                if (request.screens.isNotEmpty()) {
+                    NavigableRenderer(request = request, emit = emit)
+                } else {
+                    ScreenRenderer(request = request, emit = emit)
+                }
             }
         }
     }
@@ -161,8 +171,11 @@ internal fun ScreenRenderer(
     emit: (RendererEvent) -> Unit,
 ) {
     val backdrop = rememberLayerBackdrop()
+    val groups = remember(request.screen.items) { preferenceGroups(request.screen.items) }
+    val groupedIds = remember(groups) { groups.flatMap { group -> group.items.map { it.id } }.toSet() }
     val roots = request.screen.items.filter { item ->
-        item.parentId == null || request.screen.items.none { parent -> parent.id == item.parentId }
+        (item.parentId == null || request.screen.items.none { parent -> parent.id == item.parentId }) &&
+            item.id !in groupedIds
     }
     val density = LocalDensity.current
     val swipeThreshold = with(density) { 64.dp.toPx() }
@@ -174,6 +187,16 @@ internal fun ScreenRenderer(
     ) {
         Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
             Box(modifier = Modifier.fillMaxSize().background(MiuixTheme.colorScheme.surface))
+            groups.forEach { group ->
+                PreferenceGroupCard(
+                    group = group,
+                    allItems = request.screen.items,
+                    interactive = request.interactive,
+                    requestId = request.requestId,
+                    backdrop = backdrop,
+                    emit = emit,
+                )
+            }
             roots
                 .filterNot(ItemDto::usesBackdrop)
                 .forEach { item ->
@@ -199,6 +222,40 @@ internal fun ScreenRenderer(
                     emit = emit,
                 )
             }
+    }
+}
+
+@Composable
+private fun PreferenceGroupCard(
+    group: PreferenceGroup,
+    allItems: List<ItemDto>,
+    interactive: Boolean,
+    requestId: String,
+    backdrop: LayerBackdrop,
+    emit: (RendererEvent) -> Unit,
+) {
+    val host = ItemDto(id = "card:${group.items.first().id}", x = group.x, y = group.y, w = group.w, h = group.h)
+    Box(
+        modifier = Modifier
+            .offset(group.x.dp, group.y.dp)
+            .size(group.w.coerceAtLeast(1f).dp, group.h.coerceAtLeast(1f).dp),
+    ) {
+        Card(
+            modifier = Modifier.fillMaxSize(),
+            cornerRadius = CardDefaults.CornerRadius,
+            insideMargin = PaddingValues(0.dp),
+        ) {}
+        group.items.forEach { item ->
+            PositionedItem(
+                item = item,
+                allItems = allItems,
+                interactive = interactive,
+                requestId = requestId,
+                backdrop = backdrop,
+                emit = emit,
+                parent = host,
+            )
+        }
     }
 }
 

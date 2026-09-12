@@ -44,6 +44,7 @@ describe("KIND_SPEC coverage", () => {
     expect(KIND_SPEC.snackbar.h).toBe(56);
     expect(KIND_SPEC.floatingToolbar.h).toBe(56);
     expect(KIND_SPEC.badge.w("phone")).toBe(24);
+    expect(KIND_SPEC.card.h).toBe(88);
   });
 
   it("gives preference rows enough height for official 16dp padding plus title/summary", () => {

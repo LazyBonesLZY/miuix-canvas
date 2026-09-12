@@ -68,7 +68,7 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   tabRow: { kind: "tabRow", category: "navigation", icon: "tabs", w: full, h: 42, variants: ["default", "contour"], defaultLabel: L("标签", "Tabs", "タブ", "탭"), tabs: [{ icon: "", label: "推荐" }, { icon: "", label: "关注" }, { icon: "", label: "热门" }], composable: "TabRow" },
   searchBar: { kind: "searchBar", category: "navigation", icon: "search", w: full, h: 45, variants: ["field", "expanded"], defaultLabel: L("搜索", "Search", "検索", "검색"), composable: "SearchBar" },
   breadcrumb: { kind: "breadcrumb", category: "navigation", icon: "more_horiz", w: full, h: 48, defaultLabel: L("设置 / 显示", "Settings / Display", "設定 / 表示", "설정 / 디스플레이"), composable: "BreadcrumbBar" },
-  card: { kind: "card", category: "containment", icon: "rectangle", w: full, h: 120, defaultLabel: L("卡片标题", "Card title", "カードタイトル", "카드 제목"), defaultSupporting: L("辅助说明文字", "Supporting text", "補足テキスト", "보조 설명"), composable: "Card" },
+  card: { kind: "card", category: "containment", icon: "rectangle", w: full, h: 88, defaultLabel: L("卡片标题", "Card title", "カードタイトル", "카드 제목"), defaultSupporting: L("辅助说明文字", "Supporting text", "補足テキスト", "보조 설명"), composable: "Card" },
   surface: { kind: "surface", category: "containment", icon: "crop_square", w: full, h: 80, defaultLabel: L("", "", "", ""), composable: "Surface" },
   divider: { kind: "divider", category: "containment", icon: "horizontal_rule", w: full, h: 1, variants: ["horizontal", "vertical"], defaultLabel: L("", "", "", ""), composable: "HorizontalDivider" },
   snackbar: { kind: "snackbar", category: "containment", icon: "call_to_action", w: full, h: 56, defaultLabel: L("已保存", "Saved", "保存しました", "저장됨"), composable: "Snackbar" },

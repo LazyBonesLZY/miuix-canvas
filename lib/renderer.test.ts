@@ -14,13 +14,19 @@ describe("renderer bridge", () => {
       currentScreenId: doc.screens[0].id,
     });
     expect(request.screens?.map((screen) => screen.id)).toEqual(doc.screens.map((screen) => screen.id));
+    expect(request.layoutScale).toBe(1);
+  });
+
+  it("passes the preview layout scale so Compose can rasterize at the displayed size", () => {
+    const doc = defaultDoc("zh");
+    expect(renderRequest(doc.screens[0], doc.theme, "zh", true, doc.screens, 0.72).layoutScale).toBe(0.72);
   });
 
   it("turns null labels into empty strings so Kotlin can decode the screen", () => {
     const doc = defaultDoc("en");
     const broken = {
-      ...doc.screens[3],
-      items: [{ ...doc.screens[3].items.at(-1)!, label: null as unknown as string, variant: null as unknown as string }],
+      ...doc.screens[0],
+      items: [{ ...doc.screens[0].items.at(-1)!, label: null as unknown as string, variant: null as unknown as string }],
     };
     const request = renderRequest(broken, doc.theme, "en", false);
     expect(request.screen.items[0].label).toBe("");

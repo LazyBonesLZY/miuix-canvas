@@ -31,6 +31,8 @@ export function Preview({
   const palette = schemeFromSeed(doc.theme.seed, doc.theme.mode === "dark");
   const { w, h, r } = frameSize(screen?.preset ?? "phone");
   const scale = previewScale(w, h, box.vw, box.vh);
+  const displayW = w * scale;
+  const displayH = h * scale;
 
   useEffect(() => {
     const measure = () => setBox({ vw: window.innerWidth, vh: window.innerHeight });
@@ -95,24 +97,24 @@ export function Preview({
     <div className="preview-root" onClick={onClose}>
       <div className="flex max-h-full max-w-full flex-col items-center gap-3" onClick={(e) => e.stopPropagation()}>
         <div
-          className="relative shrink-0"
-          style={{ width: w * scale, height: h * scale }}
+          className="relative shrink-0 overflow-hidden"
+          style={{
+            width: displayW,
+            height: displayH,
+            borderRadius: r * scale,
+            background: palette.surface,
+            boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
+          }}
         >
-          <div
-            className="absolute left-0 top-0 overflow-hidden"
-            style={{
-              width: w,
-              height: h,
-              borderRadius: r,
-              transform: `scale(${scale})`,
-              transformOrigin: "top left",
-              ["--s" as string]: String(scale),
-              background: palette.surface,
-              boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
-            }}
-          >
-            <OfficialMiuixFrame screen={renderedScreen} screens={renderedScreens} theme={doc.theme} lang={lang} interactive onEvent={onRendererEvent} />
-          </div>
+          <OfficialMiuixFrame
+            screen={renderedScreen}
+            screens={renderedScreens}
+            theme={doc.theme}
+            lang={lang}
+            interactive
+            layoutScale={scale}
+            onEvent={onRendererEvent}
+          />
         </div>
         <div className="flex max-w-full items-center gap-2 rounded-[16px] bg-[var(--chrome)] px-3 py-1.5 text-[13px] text-[var(--ink)]">
           <span className="hidden min-w-0 text-pretty min-[520px]:inline">{t("ready", lang)}</span>

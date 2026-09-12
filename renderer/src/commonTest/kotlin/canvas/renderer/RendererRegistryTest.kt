@@ -122,6 +122,22 @@ class RendererRegistryTest {
     }
 
     @Test
+    fun stackedPreferencesShareOneCard() {
+        val items = listOf(
+            ItemDto(id = "a", kind = "switchPref", x = 16f, y = 100f, w = 380f, h = 56f),
+            ItemDto(id = "b", kind = "switchPref", x = 16f, y = 156f, w = 380f, h = 56f),
+            ItemDto(id = "c", kind = "arrowPref", x = 16f, y = 300f, w = 380f, h = 80f),
+            ItemDto(id = "d", kind = "card", x = 16f, y = 400f, w = 380f, h = 88f, parentId = null),
+        )
+        val groups = preferenceGroups(items)
+        assertEquals(2, groups.size)
+        assertEquals(listOf("a", "b"), groups[0].items.map { it.id })
+        assertEquals(112f, groups[0].h)
+        assertEquals(listOf("c"), groups[1].items.map { it.id })
+        assertEquals(false, items[3].sitsInPreferenceCard())
+    }
+
+    @Test
     fun swipePicksOfficialDirectionAndDestination() {
         val swipe = mapOf("left" to "gallery", "right" to "back")
         assertEquals("gallery" to "slide", swipeNavigate(swipe, androidx.compose.ui.geometry.Offset(-80f, 4f), 64f))

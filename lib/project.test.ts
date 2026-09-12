@@ -17,6 +17,14 @@ describe("official theme defaults", () => {
     expect(DEFAULT_THEME.monet).toBe(false);
     expect(defaultDoc("zh").theme.monet).toBe(false);
     expect(defaultDoc("zh").version).toBe(3);
+    expect(defaultDoc("zh").screens).toHaveLength(1);
+  });
+
+  it("ships a single sample phone", () => {
+    const doc = defaultDoc("zh");
+    expect(doc.screens.map((screen) => screen.name)).toEqual(["首页"]);
+    expect(doc.screens[0].items.some((it) => it.kind === "card")).toBe(true);
+    expect(doc.screens[0].items.filter((it) => it.kind === "switchPref")).toHaveLength(2);
   });
 
   it("keeps the sample inside the phone and leaves room for titles", () => {

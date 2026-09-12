@@ -21,9 +21,9 @@ describe("buildPrompt", () => {
 
   it("can describe a single screen", () => {
     const doc = defaultDoc("en");
-    const text = buildPrompt(doc, "en", doc.screens[2].id);
-    expect(text).toContain("About");
-    expect(text).not.toContain("Screen “Home”");
+    const text = buildPrompt(doc, "en", doc.screens[0].id);
+    expect(text).toContain("Home");
+    expect(doc.screens).toHaveLength(1);
   });
 
   it("writes Japanese without Material 3", () => {

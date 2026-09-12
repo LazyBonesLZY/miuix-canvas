@@ -110,6 +110,43 @@ internal fun itemRenderFit(kind: String): ItemRenderFit = when (kind) {
     else -> ItemRenderFit.Fill
 }
 
+internal data class PreferenceGroup(
+    val items: List<ItemDto>,
+    val x: Float,
+    val y: Float,
+    val w: Float,
+    val h: Float,
+)
+
+internal fun ItemDto.sitsInPreferenceCard(): Boolean =
+    parentId == null && (kind.endsWith("Pref") || kind == "dropdown")
+
+/** Adjacent preference rows share one official Card (16.dp squircle, 0 inside margin). */
+internal fun preferenceGroups(items: List<ItemDto>): List<PreferenceGroup> {
+    val prefs = items.filter { it.sitsInPreferenceCard() }.sortedWith(compareBy({ it.y }, { it.x }))
+    if (prefs.isEmpty()) return emptyList()
+    val buckets = mutableListOf<MutableList<ItemDto>>()
+    for (item in prefs) {
+        val prev = buckets.lastOrNull()?.lastOrNull()
+        val joins = prev != null &&
+            kotlin.math.abs(prev.x - item.x) < 8f &&
+            kotlin.math.abs(prev.w - item.w) < 8f &&
+            kotlin.math.abs(prev.y + prev.h - item.y) < 4f
+        if (joins) buckets.last().add(item) else buckets.add(mutableListOf(item))
+    }
+    return buckets.map { rows ->
+        val x = rows.minOf { it.x }
+        val y = rows.minOf { it.y }
+        PreferenceGroup(
+            items = rows,
+            x = x,
+            y = y,
+            w = rows.maxOf { it.x + it.w } - x,
+            h = rows.maxOf { it.y + it.h } - y,
+        )
+    }
+}
+
 /** The complete renderer registry, directly comparable with the editor's Kind union. */
 val HANDLED_ITEM_KINDS: Set<String> = setOf(
     "button", "iconButton", "fab", "floatingToolbar",

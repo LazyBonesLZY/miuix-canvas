@@ -13,8 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.state.ToggleableState
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import top.yukonga.miuix.kmp.basic.CardDefaults
+import top.yukonga.miuix.kmp.utils.PressFeedbackType
 import coil3.compose.AsyncImage
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.BasicComponent
@@ -139,20 +143,25 @@ fun ComponentRenderer(
 
         "card" -> Card(
             modifier = modifier,
-            onClick = events::click,
+            cornerRadius = CardDefaults.CornerRadius,
             insideMargin = PaddingValues(16.dp),
+            pressFeedbackType = PressFeedbackType.None,
+            onClick = events::click,
         ) {
             Text(
                 text = item.label,
                 overflow = TextOverflow.Visible,
-                style = MiuixTheme.textStyles.title3,
+                color = MiuixTheme.colorScheme.onSurface,
+                fontSize = 19.sp,
+                fontWeight = FontWeight.SemiBold,
             )
             item.supporting?.let {
                 Text(
                     text = it,
                     overflow = TextOverflow.Visible,
-                    style = MiuixTheme.textStyles.body2,
                     color = MiuixTheme.colorScheme.onSurfaceVariantSummary,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Normal,
                 )
             }
         }

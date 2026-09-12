@@ -28,6 +28,7 @@ export type RenderRequest = {
   screen: Screen;
   screens?: Screen[];
   currentScreenId?: string;
+  layoutScale?: number;
 };
 
 export function rendererUrl() {
@@ -100,6 +101,7 @@ export function renderRequest(
   lang: Lang,
   interactive: boolean,
   screens?: Screen[],
+  layoutScale = 1,
 ): RenderRequest {
   return {
     type: "render",
@@ -110,6 +112,7 @@ export function renderRequest(
     screen: sanitizeScreen(screen),
     screens: screens?.map(sanitizeScreen),
     currentScreenId: screen.id,
+    layoutScale: Number.isFinite(layoutScale) && layoutScale > 0 ? layoutScale : 1,
   };
 }
 
