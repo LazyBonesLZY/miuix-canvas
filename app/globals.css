@@ -315,6 +315,45 @@ input[type="range"]::-webkit-slider-thumb {
   visibility: hidden;
 }
 
+.miuix-boot-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.miuix-boot-copy p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.45);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.miuix-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid #e0e0e0;
+  border-top-color: #3482ff;
+  border-radius: 50%;
+  animation: miuix-spin 0.65s linear infinite;
+}
+
+.miuix-loader {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  background: var(--surface);
+  color: var(--muted-strong);
+  font-size: 12px;
+}
+
+@keyframes miuix-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .preview-root {
   position: fixed;
   inset: 0;

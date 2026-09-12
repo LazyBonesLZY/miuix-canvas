@@ -20,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import top.yukonga.miuix.kmp.basic.Scaffold
 import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.blur.layerBackdrop
 import top.yukonga.miuix.kmp.blur.rememberLayerBackdrop
@@ -161,49 +160,18 @@ internal fun ScreenRenderer(
     val roots = request.screen.items.filter { item ->
         item.parentId == null || request.screen.items.none { parent -> parent.id == item.parentId }
     }
-    val topBar = roots.firstOrNull { it.effectiveSlot() == "topBar" }
-    val bottomBar = roots.firstOrNull { it.effectiveSlot() == "bottomBar" }
-    val fab = roots.firstOrNull { it.effectiveSlot() == "floatingActionButton" }
-    val toolbar = roots.firstOrNull { it.effectiveSlot() == "floatingToolbar" }
-    val snackbar = roots.firstOrNull { it.effectiveSlot() == "snackbarHost" }
-    val contentRoots = roots.filter {
-        it !== topBar && it !== bottomBar && it !== fab && it !== toolbar && it !== snackbar
-    }
     val density = LocalDensity.current
     val swipeThreshold = with(density) { 64.dp.toPx() }
-    Scaffold(
+    Box(
         modifier = Modifier
             .fillMaxSize()
+            .background(MiuixTheme.colorScheme.surface)
             .screenSwipe(request.screen.swipe, request.interactive, swipeThreshold, emit),
-        containerColor = MiuixTheme.colorScheme.surface,
-        topBar = { topBar?.let { SlotItem(it, request, backdrop, emit) } },
-        bottomBar = { bottomBar?.let { SlotItem(it, request, backdrop, emit) } },
-        floatingActionButton = { fab?.let { SlotItem(it, request, backdrop, emit) } },
-        floatingToolbar = { toolbar?.let { SlotItem(it, request, backdrop, emit) } },
-        snackbarHost = { snackbar?.let { SlotItem(it, request, backdrop, emit) } },
-    ) { _ ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MiuixTheme.colorScheme.surface),
-        ) {
-            Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
-                Box(modifier = Modifier.fillMaxSize().background(MiuixTheme.colorScheme.surface))
-                contentRoots
-                    .filterNot(ItemDto::usesBackdrop)
-                    .forEach { item ->
-                        PositionedItem(
-                            item = item,
-                            allItems = request.screen.items,
-                            interactive = request.interactive,
-                            requestId = request.requestId,
-                            backdrop = backdrop,
-                            emit = emit,
-                        )
-                    }
-            }
-            contentRoots
-                .filter(ItemDto::usesBackdrop)
+    ) {
+        Box(modifier = Modifier.fillMaxSize().layerBackdrop(backdrop)) {
+            Box(modifier = Modifier.fillMaxSize().background(MiuixTheme.colorScheme.surface))
+            roots
+                .filterNot(ItemDto::usesBackdrop)
                 .forEach { item ->
                     PositionedItem(
                         item = item,
@@ -215,23 +183,19 @@ internal fun ScreenRenderer(
                     )
                 }
         }
+        roots
+            .filter(ItemDto::usesBackdrop)
+            .forEach { item ->
+                PositionedItem(
+                    item = item,
+                    allItems = request.screen.items,
+                    interactive = request.interactive,
+                    requestId = request.requestId,
+                    backdrop = backdrop,
+                    emit = emit,
+                )
+            }
     }
-}
-
-@Composable
-private fun SlotItem(
-    item: ItemDto,
-    request: RenderRequest,
-    backdrop: LayerBackdrop,
-    emit: (RendererEvent) -> Unit,
-) {
-    ComponentRenderer(
-        item = item,
-        interactive = request.interactive,
-        requestId = request.requestId,
-        backdrop = backdrop,
-        emit = emit,
-    )
 }
 
 @Composable
@@ -278,16 +242,6 @@ private fun ItemDto.usesBackdrop(): Boolean =
         effect == "textureBlur" ||
         effect == "progressiveTextureBlur" ||
         (kind == "floatingNav" && (variant == "iosLike" || variant == "glass"))
-
-private fun ItemDto.effectiveSlot(): String = when {
-    slot != "content" -> slot
-    kind == "topAppBar" -> "topBar"
-    kind == "navigationBar" || kind == "floatingNav" -> "bottomBar"
-    kind == "fab" -> "floatingActionButton"
-    kind == "floatingToolbar" -> "floatingToolbar"
-    kind == "snackbar" -> "snackbarHost"
-    else -> "content"
-}
 
 internal fun swipeNavigate(swipe: Map<String, String>, delta: Offset, threshold: Float): Pair<String, String>? {
     val absX = kotlin.math.abs(delta.x)

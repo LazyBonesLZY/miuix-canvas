@@ -107,6 +107,8 @@ const ZH = {
   fieldHint: "输入内容",
   loadFailed: "无法打开这个 JSON 文件。",
   shareFailed: "分享链接无效或已损坏。",
+  loading: "正在加载官方 Miuix…",
+  loadingHint: "第一次会下载渲染器，之后会快很多",
 } as const;
 
 const EN: Record<keyof typeof ZH, string> = {
@@ -214,6 +216,8 @@ const EN: Record<keyof typeof ZH, string> = {
   fieldHint: "Enter text",
   loadFailed: "Could not open that JSON file.",
   shareFailed: "This share link is invalid or damaged.",
+  loading: "Loading official Miuix…",
+  loadingHint: "The first visit downloads the renderer. Later visits are faster.",
 };
 
 const JA: Record<keyof typeof ZH, string> = {
@@ -321,6 +325,8 @@ const JA: Record<keyof typeof ZH, string> = {
   fieldHint: "入力",
   loadFailed: "この JSON ファイルを開けません。",
   shareFailed: "共有リンクが無効か壊れています。",
+  loading: "公式 Miuix を読み込み中…",
+  loadingHint: "初回はレンダラーをダウンロードします。次回から速くなります。",
 };
 
 const KO: Record<keyof typeof ZH, string> = {
@@ -428,6 +434,8 @@ const KO: Record<keyof typeof ZH, string> = {
   fieldHint: "입력",
   loadFailed: "이 JSON 파일을 열 수 없습니다.",
   shareFailed: "공유 링크가 잘못되었거나 손상되었습니다.",
+  loading: "공식 Miuix를 불러오는 중…",
+  loadingHint: "처음에는 렌더러를 받습니다. 다음부터는 빨라집니다.",
 };
 
 const DICT: Record<Lang, Record<keyof typeof ZH, string>> = { zh: ZH, en: EN, ja: JA, ko: KO };

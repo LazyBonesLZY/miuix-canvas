@@ -3,6 +3,7 @@ import { defaultDoc } from "./doc";
 import { isProject, migrateDoc } from "./project";
 import { DEFAULT_THEME } from "./tokens";
 import type { Doc } from "./types";
+import { frameSize } from "./types";
 
 const base = {
   version: 1 as const,
@@ -16,6 +17,22 @@ describe("official theme defaults", () => {
     expect(DEFAULT_THEME.monet).toBe(false);
     expect(defaultDoc("zh").theme.monet).toBe(false);
     expect(defaultDoc("zh").version).toBe(3);
+  });
+
+  it("keeps the sample inside the phone and leaves room for titles", () => {
+    for (const lang of ["zh", "en", "ja", "ko"] as const) {
+      for (const screen of defaultDoc(lang).screens) {
+        const { w, h } = frameSize(screen.preset);
+        for (const it of screen.items) {
+          expect(it.x, `${screen.name} ${it.kind}`).toBeGreaterThanOrEqual(0);
+          expect(it.y, `${screen.name} ${it.kind}`).toBeGreaterThanOrEqual(0);
+          expect(it.x + it.w, `${screen.name} ${it.kind}`).toBeLessThanOrEqual(w);
+          expect(it.y + it.h, `${screen.name} ${it.kind}`).toBeLessThanOrEqual(h);
+          if (it.kind === "switchPref" || it.kind === "arrowPref") expect(it.h).toBeGreaterThanOrEqual(64);
+          if (it.kind === "smallTitle") expect(it.h).toBeGreaterThanOrEqual(40);
+        }
+      }
+    }
   });
 });
 

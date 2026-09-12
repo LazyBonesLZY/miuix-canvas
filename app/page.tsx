@@ -32,7 +32,7 @@ export default function Page() {
   return (
     <>
       {lang && <Editor initialLang={lang} onReady={() => setPhase((p) => (p === "loading" ? "fading" : p))} />}
-      {phase !== "done" && <BootMark done={phase === "fading"} />}
+      {phase !== "done" && <BootMark done={phase === "fading"} lang={lang ?? undefined} />}
     </>
   );
 }

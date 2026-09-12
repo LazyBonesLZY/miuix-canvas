@@ -147,6 +147,8 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   const [notice, setNotice] = useState("");
   const [guide, setGuide] = useState<Guide | null>(null);
   const didFit = useRef(false);
+  const painted = useRef(false);
+  const [primaryReady, setPrimaryReady] = useState(false);
   const [shareReady, setShareReady] = useState(() => !hasShareHash());
   const dragKind = useRef<Kind | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
@@ -180,10 +182,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           setNotice(t("shareFailed", lang));
         }
       }
-      if (!cancelled) {
-        setShareReady(true);
-        onReady();
-      }
+      if (!cancelled) setShareReady(true);
     })();
     return () => {
       cancelled = true;
@@ -202,6 +201,22 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
 
   const palette = useMemo(() => schemeFromSeed(doc.theme.seed, doc.theme.mode === "dark"), [doc.theme]);
   const selectedScreenId = selection?.screenId ?? doc.screens[0]?.id;
+
+  const markPainted = useCallback(() => {
+    if (painted.current) return;
+    painted.current = true;
+    setPrimaryReady(true);
+    onReady();
+  }, [onReady]);
+
+  useEffect(() => {
+    if (shareReady && !doc.screens.length) markPainted();
+  }, [doc.screens.length, markPainted, shareReady]);
+
+  useEffect(() => {
+    const wait = window.setTimeout(markPainted, 25000);
+    return () => window.clearTimeout(wait);
+  }, [markPainted]);
 
   const updateScreen = (screenId: string, fn: (s: Screen) => Screen, record = true) => {
     setDoc((d) => ({ ...d, screens: d.screens.map((s) => (s.id === screenId ? fn(s) : s)) }), record);
@@ -879,7 +894,9 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                       screen={screen}
                       theme={doc.theme}
                       lang={lang}
-                      deferMs={selected ? 0 : 500 + index * 400}
+                      active={selected || primaryReady}
+                      deferMs={selected ? 0 : 400 + index * 450}
+                      onPainted={selected ? markPainted : undefined}
                     />
                     {guide && selected && (
                       <>
@@ -1016,10 +1033,15 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   );
 }
 
-export function BootMark({ done }: { done: boolean }) {
+export function BootMark({ done, lang }: { done: boolean; lang?: Lang }) {
   return (
     <div className="miuix-boot" data-done={done ? "" : undefined} aria-hidden={done}>
-      <Logo size={44} />
+      <div className="miuix-boot-copy">
+        <Logo size={44} />
+        <div className="miuix-spinner" />
+        <p>{t("loading", lang ?? "zh")}</p>
+        <p>{t("loadingHint", lang ?? "zh")}</p>
+      </div>
     </div>
   );
 }

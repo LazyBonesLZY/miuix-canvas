@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { t } from "@/lib/i18n";
 import { parseRendererEvent, rendererBoot, rendererUrl, renderRequest, type RendererEvent } from "@/lib/renderer";
 import type { Lang, Screen, Theme } from "@/lib/types";
 
@@ -11,8 +12,10 @@ export function OfficialMiuixFrame({
   interactive = false,
   screens,
   deferMs = 0,
+  active = true,
   className,
   onEvent,
+  onPainted,
 }: {
   screen: Screen;
   theme: Theme;
@@ -20,15 +23,18 @@ export function OfficialMiuixFrame({
   interactive?: boolean;
   screens?: Screen[];
   deferMs?: number;
+  active?: boolean;
   className?: string;
   onEvent?: (event: RendererEvent) => void;
+  onPainted?: () => void;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
-  const [src, setSrc] = useState(() => (deferMs > 0 ? "" : rendererUrl()));
+  const [src, setSrc] = useState(() => (active && deferMs <= 0 ? rendererUrl() : ""));
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (!active) return;
     const boot = rendererBoot(src, deferMs);
     if (boot === "keep") return;
     if (boot === "now") {
@@ -37,7 +43,7 @@ export function OfficialMiuixFrame({
     }
     const start = window.setTimeout(() => setSrc(rendererUrl()), deferMs);
     return () => window.clearTimeout(start);
-  }, [deferMs, src]);
+  }, [active, deferMs, src]);
 
   const send = useCallback(() => {
     const target = frame.current?.contentWindow;
@@ -58,13 +64,17 @@ export function OfficialMiuixFrame({
       if (message.type === "rendered" && message.requestId) {
         setError("");
         setReady(true);
+        onPainted?.();
       }
-      if (message.type === "error") setError(message.message ?? "Miuix renderer failed");
+      if (message.type === "error") {
+        setError(message.message ?? "Miuix renderer failed");
+        onPainted?.();
+      }
       onEvent?.(message);
     };
     window.addEventListener("message", receive);
     return () => window.removeEventListener("message", receive);
-  }, [onEvent, send]);
+  }, [onEvent, onPainted, send]);
 
   useEffect(() => {
     send();
@@ -92,8 +102,9 @@ export function OfficialMiuixFrame({
         />
       )}
       {!ready && !error && (
-        <div className="pointer-events-none absolute inset-0 grid place-items-center text-[12px] text-[var(--muted)]">
-          Miuix…
+        <div className="miuix-loader pointer-events-none absolute inset-0">
+          <div className="miuix-spinner" />
+          <span>{t("loading", lang)}</span>
         </div>
       )}
       {error && (
