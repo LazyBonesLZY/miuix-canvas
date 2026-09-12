@@ -16,6 +16,19 @@ describe("renderer bridge", () => {
     expect(request.screens?.map((screen) => screen.id)).toEqual(doc.screens.map((screen) => screen.id));
   });
 
+  it("replaces non-finite geometry before the Wasm decoder sees it", () => {
+    const doc = defaultDoc("en");
+    const broken = {
+      ...doc.screens[0],
+      x: Number.NaN,
+      items: [{ ...doc.screens[0].items[0], w: Number.POSITIVE_INFINITY, value: Number.NaN }],
+    };
+    const request = renderRequest(broken, doc.theme, "en", false);
+    expect(Number.isFinite(request.screen.x)).toBe(true);
+    expect(request.screen.items[0].w).toBe(1);
+    expect(request.screen.items[0].value).toBe(0);
+  });
+
   it("accepts only JSON renderer events", () => {
     expect(parseRendererEvent('{"type":"patch","itemId":"a","checked":true}')).toEqual({
       type: "patch",

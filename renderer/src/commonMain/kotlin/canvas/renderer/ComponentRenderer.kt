@@ -127,7 +127,7 @@ fun ComponentRenderer(
             }
         }
 
-        "topAppBar" -> RenderTopAppBar(item, modifier)
+        "topAppBar" -> RenderTopAppBar(item, modifier, events)
         "smallTitle" -> SmallTitle(text = item.label, modifier = modifier)
         "navigationBar" -> RenderNavigationBar(item, modifier, events, backdrop)
         "floatingNav" -> RenderFloatingNavigationBar(item, modifier, events, backdrop)
@@ -395,7 +395,11 @@ fun ComponentRenderer(
             enabled = item.enabled,
         )
 
-        else -> error("No official renderer registered for ${item.kind}")
+        else -> Text(
+            text = item.label.ifBlank { item.kind },
+            modifier = modifier,
+            style = MiuixTheme.textStyles.body2,
+        )
     }
 }
 

@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Badge
 import top.yukonga.miuix.kmp.basic.BreadcrumbBar
+import top.yukonga.miuix.kmp.basic.IconButton
 import top.yukonga.miuix.kmp.basic.BreadcrumbItem
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBar
 import top.yukonga.miuix.kmp.basic.FloatingNavigationBarItem
@@ -41,13 +42,21 @@ import top.yukonga.miuix.kmp.blur.highlight.Highlight
 import upstream.liquid.IosLiquidGlassNavigationBar
 
 @Composable
-internal fun RenderTopAppBar(item: ItemDto, modifier: Modifier) {
+internal fun RenderTopAppBar(item: ItemDto, modifier: Modifier, events: RendererEvents) {
+    val navigationIcon: @Composable () -> Unit = {
+        if (!item.icon.isNullOrBlank() || !item.to.isNullOrBlank()) {
+            IconButton(onClick = events::click, enabled = item.enabled) {
+                RendererIcon(item.icon ?: "back", item.label.ifBlank { "Back" })
+            }
+        }
+    }
     if (item.variant == "large") {
         TopAppBar(
             title = item.label,
             largeTitle = item.largeTitle ?: item.label,
             subtitle = item.subtitle.orEmpty(),
             modifier = modifier,
+            navigationIcon = navigationIcon,
             defaultWindowInsetsPadding = false,
         )
     } else {
@@ -55,6 +64,7 @@ internal fun RenderTopAppBar(item: ItemDto, modifier: Modifier) {
             title = item.label,
             subtitle = item.subtitle.orEmpty(),
             modifier = modifier,
+            navigationIcon = navigationIcon,
             defaultWindowInsetsPadding = false,
         )
     }

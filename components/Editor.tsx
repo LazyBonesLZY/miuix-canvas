@@ -843,7 +843,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                 }),
               )}
             </svg>
-            {doc.screens.map((screen) => {
+            {doc.screens.map((screen, index) => {
               const { w, h, r } = frameSize(screen.preset);
               const selected = selection?.screenId === screen.id;
               return (
@@ -875,7 +875,12 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                       overflow: "hidden",
                     }}
                   >
-                    <OfficialMiuixFrame screen={screen} theme={doc.theme} lang={lang} />
+                    <OfficialMiuixFrame
+                      screen={screen}
+                      theme={doc.theme}
+                      lang={lang}
+                      deferMs={selected ? 0 : 500 + index * 400}
+                    />
                     {guide && selected && (
                       <>
                         {guide.gx !== undefined && <div style={{ position: "absolute", left: guide.gx, top: 0, bottom: 0, width: 1, background: palette.primary, opacity: 0.7, pointerEvents: "none" }} />}

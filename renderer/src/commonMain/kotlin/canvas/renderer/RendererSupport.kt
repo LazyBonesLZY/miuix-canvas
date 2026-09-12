@@ -38,6 +38,7 @@ import top.yukonga.miuix.kmp.blur.progressiveTextureBlur
 import top.yukonga.miuix.kmp.blur.textureBlur
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Add
+import top.yukonga.miuix.kmp.icon.extended.Back
 import top.yukonga.miuix.kmp.icon.extended.Contacts
 import top.yukonga.miuix.kmp.icon.extended.Copy
 import top.yukonga.miuix.kmp.icon.extended.Delete
@@ -136,6 +137,7 @@ internal fun RendererIcon(
 
 internal fun rendererIcon(name: String?): ImageVector = when (name?.lowercase()) {
     "add", "add_circle", "addcircle" -> MiuixIcons.Add
+    "back", "arrow_back", "arrowback", "chevron_backward" -> MiuixIcons.Back
     "home" -> MiuixIcons.Home
     "search", "explore" -> MiuixIcons.Search
     "person", "contacts", "account_circle" -> MiuixIcons.Contacts

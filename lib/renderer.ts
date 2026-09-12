@@ -34,6 +34,34 @@ export function rendererUrl() {
   return `${base}/renderer/index.html`;
 }
 
+function finite(value: number, fallback = 0) {
+  return Number.isFinite(value) ? value : fallback;
+}
+
+function sanitizeItem(item: Screen["items"][number]): Screen["items"][number] {
+  return {
+    ...item,
+    x: finite(item.x),
+    y: finite(item.y),
+    w: finite(item.w, 1),
+    h: finite(item.h, 1),
+    value: item.value === undefined ? undefined : finite(item.value),
+    from: item.from === undefined ? undefined : finite(item.from),
+    selected: item.selected === undefined ? undefined : finite(item.selected),
+    blurRadius: item.blurRadius === undefined ? undefined : finite(item.blurRadius),
+    noiseCoefficient: item.noiseCoefficient === undefined ? undefined : finite(item.noiseCoefficient),
+  };
+}
+
+function sanitizeScreen(screen: Screen): Screen {
+  return {
+    ...screen,
+    x: finite(screen.x),
+    y: finite(screen.y),
+    items: screen.items.map(sanitizeItem),
+  };
+}
+
 export function renderRequest(
   screen: Screen,
   theme: Theme,
@@ -47,8 +75,8 @@ export function renderRequest(
     interactive,
     lang,
     theme,
-    screen,
-    screens,
+    screen: sanitizeScreen(screen),
+    screens: screens?.map(sanitizeScreen),
     currentScreenId: screen.id,
   };
 }

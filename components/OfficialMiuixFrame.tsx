@@ -10,6 +10,7 @@ export function OfficialMiuixFrame({
   lang,
   interactive = false,
   screens,
+  deferMs = 0,
   className,
   onEvent,
 }: {
@@ -18,12 +19,20 @@ export function OfficialMiuixFrame({
   lang: Lang;
   interactive?: boolean;
   screens?: Screen[];
+  deferMs?: number;
   className?: string;
   onEvent?: (event: RendererEvent) => void;
 }) {
   const frame = useRef<HTMLIFrameElement>(null);
+  const [src, setSrc] = useState(() => (deferMs > 0 ? "" : rendererUrl()));
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (src || deferMs <= 0) return;
+    const start = window.setTimeout(() => setSrc(rendererUrl()), deferMs);
+    return () => window.clearTimeout(start);
+  }, [deferMs, src]);
 
   const send = useCallback(() => {
     const target = frame.current?.contentWindow;
@@ -57,20 +66,22 @@ export function OfficialMiuixFrame({
 
   return (
     <div className={`absolute inset-0 ${className ?? ""}`}>
-      <iframe
-        ref={frame}
-        src={rendererUrl()}
-        title={`${screen.name} — Miuix`}
-        onLoad={send}
-        style={{
-          width: "100%",
-          height: "100%",
-          border: 0,
-          display: "block",
-          pointerEvents: interactive ? "auto" : "none",
-          background: "transparent",
-        }}
-      />
+      {src && (
+        <iframe
+          ref={frame}
+          src={src}
+          title={`${screen.name} — Miuix`}
+          onLoad={send}
+          style={{
+            width: "100%",
+            height: "100%",
+            border: 0,
+            display: "block",
+            pointerEvents: interactive ? "auto" : "none",
+            background: "transparent",
+          }}
+        />
+      )}
       {!ready && !error && (
         <div className="pointer-events-none absolute inset-0 grid place-items-center text-[12px] text-[var(--muted)]">
           Miuix…
