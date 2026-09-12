@@ -21,7 +21,7 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 - **Tap and swipe to navigate** — parts, nav destinations and screen swipes can open another screen. Preview plays the transition; canvas arrows show the flow.
 - **Theme** — light / dark, a seed color (default `#3482FF`), Monet flag. Surfaces stay HyperOS; primary roles shift with the seed.
 - **Prompt output** — Chinese, English, Japanese or Korean brief naming real Miuix composables (`OverlayDialog`, `SwitchPreference`, …). Target Compose Multiplatform (default), Android, or CMP Web.
-- **Optional AI helper** — your own OpenAI / Claude / Gemini / DeepSeek key writes a part or screen note. The key stays in the browser.
+- **Optional AI helper** — OpenAI, Claude, Gemini, DeepSeek, or a custom OpenAI / Claude-compatible endpoint writes a part or screen note. The key stays in the browser.
 - **Tidy, layers, guides, undo/redo**, 4dp grid, compressed share links, JSON and PNG.
 - **Reset canvas** — replace the current design with the sample (undo brings it back).
 

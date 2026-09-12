@@ -31,14 +31,53 @@ export function AiPanel({
   return (
     <div className="flex flex-col gap-2 rounded-[16px] bg-[var(--chrome)] p-3">
       <div className="text-[13px] text-[var(--muted-strong)]">{t("ai", lang)}</div>
-      <select className="miuix-field" value={settings.provider} onChange={(e) => {
-        const spec = PROVIDERS.find((p) => p.key === e.target.value) ?? PROVIDERS[0];
-        patch({ provider: spec.key, baseUrl: spec.baseUrl, model: spec.model });
-      }}>
-        {PROVIDERS.map((p) => <option key={p.key} value={p.key}>{p.label}</option>)}
+      <select
+        className="miuix-field"
+        value={settings.provider}
+        onChange={(e) => {
+          const spec = PROVIDERS.find((p) => p.key === e.target.value) ?? PROVIDERS[0];
+          if (spec.key === "custom") {
+            patch({ provider: "custom" });
+            return;
+          }
+          patch({ provider: spec.key, baseUrl: spec.baseUrl, model: spec.model, apiStyle: spec.apiStyle });
+        }}
+      >
+        {PROVIDERS.map((p) => (
+          <option key={p.key} value={p.key}>{p.key === "custom" ? t("aiCustom", lang) : p.label}</option>
+        ))}
       </select>
-      <input className="miuix-field" placeholder="model" value={settings.model} onChange={(e) => patch({ model: e.target.value })} />
-      <input className="miuix-field" placeholder="API key" type="password" value={settings.key} onChange={(e) => patch({ key: e.target.value })} />
+      <input
+        className="miuix-field"
+        placeholder={t("aiBaseUrl", lang)}
+        value={settings.baseUrl}
+        onChange={(e) => patch({ baseUrl: e.target.value })}
+        autoComplete="off"
+        spellCheck={false}
+      />
+      {settings.provider === "custom" && (
+        <select
+          className="miuix-field"
+          value={settings.apiStyle}
+          onChange={(e) => patch({ apiStyle: e.target.value === "claude" ? "claude" : "openai" })}
+        >
+          <option value="openai">{t("aiOpenAICompat", lang)}</option>
+          <option value="claude">{t("aiClaudeCompat", lang)}</option>
+        </select>
+      )}
+      <input
+        className="miuix-field"
+        placeholder={t("aiModel", lang)}
+        value={settings.model}
+        onChange={(e) => patch({ model: e.target.value })}
+      />
+      <input
+        className="miuix-field"
+        placeholder={t("aiKey", lang)}
+        type="password"
+        value={settings.key}
+        onChange={(e) => patch({ key: e.target.value })}
+      />
       <p className="text-[13px] leading-relaxed text-[var(--muted)]">{t("aiNeedKey", lang)}</p>
       <button
         type="button"

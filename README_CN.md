@@ -21,7 +21,7 @@
 - **点击和滑动跳转** — 部件、导航项、屏幕滑动都可以打开另一屏。预览会播过渡；画布上有流程箭头。
 - **主题** — 浅色 / 深色、种子色（默认 `#3482FF`）、Monet。表面色保持 HyperOS，主色随种子色偏移。
 - **提示词** — 中 / 英 / 日 / 韩，会写出真实的 Miuix composable 名（`OverlayDialog`、`SwitchPreference` 等）。目标可以是 Compose Multiplatform（默认）、Android 或 CMP Web。
-- **可选 AI 辅助** — 填自己的 OpenAI / Claude / Gemini / DeepSeek 密钥写行为说明。密钥只留在浏览器里。
+- **可选 AI 辅助** — OpenAI / Claude / Gemini / DeepSeek，或自定义 OpenAI / Claude 兼容接口，用来写行为说明。密钥只留在浏览器里。
 - **整理、图层、对齐线、撤销/重做**，4dp 网格，压缩分享链接，JSON 和 PNG。
 - **重置画布** — 换成示例稿（可用撤销找回）。
 

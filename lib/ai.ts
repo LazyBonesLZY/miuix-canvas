@@ -2,23 +2,32 @@ import { buildPrompt } from "./prompt";
 import type { Doc, Item, Screen } from "./types";
 import type { Lang } from "./i18n";
 
-export type Provider = "openai" | "claude" | "gemini" | "deepseek";
+export type Provider = "openai" | "claude" | "gemini" | "deepseek" | "custom";
+export type ApiStyle = "openai" | "claude";
 
 export type AiSettings = {
   provider: Provider;
   baseUrl: string;
   model: string;
   key: string;
+  apiStyle: ApiStyle;
 };
 
-export const PROVIDERS: { key: Provider; label: string; baseUrl: string; model: string }[] = [
-  { key: "openai", label: "OpenAI", baseUrl: "https://api.openai.com/v1", model: "gpt-5.6-luna" },
-  { key: "claude", label: "Claude", baseUrl: "https://api.anthropic.com", model: "claude-sonnet-5" },
-  { key: "gemini", label: "Gemini", baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-3.8-flash" },
-  { key: "deepseek", label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1", model: "deepseek-v4-flash" },
+export const PROVIDERS: { key: Provider; label: string; baseUrl: string; model: string; apiStyle: ApiStyle }[] = [
+  { key: "openai", label: "OpenAI", baseUrl: "https://api.openai.com/v1", model: "gpt-5.6-luna", apiStyle: "openai" },
+  { key: "claude", label: "Claude", baseUrl: "https://api.anthropic.com", model: "claude-sonnet-5", apiStyle: "claude" },
+  { key: "gemini", label: "Gemini", baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai", model: "gemini-3.8-flash", apiStyle: "openai" },
+  { key: "deepseek", label: "DeepSeek", baseUrl: "https://api.deepseek.com/v1", model: "deepseek-v4-flash", apiStyle: "openai" },
+  { key: "custom", label: "Custom", baseUrl: "", model: "", apiStyle: "openai" },
 ];
 
-export const DEFAULT_AI: AiSettings = { ...PROVIDERS[0], provider: PROVIDERS[0].key };
+export const DEFAULT_AI: AiSettings = {
+  provider: PROVIDERS[0].key,
+  baseUrl: PROVIDERS[0].baseUrl,
+  model: PROVIDERS[0].model,
+  key: "",
+  apiStyle: PROVIDERS[0].apiStyle,
+};
 
 const STORE = "miuix:ai";
 
@@ -32,6 +41,8 @@ export function loadAiSettings(): AiSettings {
     if (typeof v.baseUrl === "string") next.baseUrl = v.baseUrl;
     if (typeof v.model === "string") next.model = v.model;
     if (typeof v.key === "string") next.key = v.key;
+    if (v.apiStyle === "openai" || v.apiStyle === "claude") next.apiStyle = v.apiStyle;
+    else if (next.provider === "claude") next.apiStyle = "claude";
   } catch {
     /* ignore */
   }
@@ -50,6 +61,20 @@ const isLocal = (u: string) => /^https?:\/\/(localhost|127\.0\.0\.1|\[::1\])(:|\
 export const hasKey = (s: AiSettings) => s.key.trim().length > 0 || isLocal(s.baseUrl);
 export const isSecureUrl = (u: string) => /^https:\/\//i.test(u.trim()) || isLocal(u);
 
+export function usesClaude(s: Pick<AiSettings, "provider" | "apiStyle">) {
+  return s.provider === "claude" || (s.provider === "custom" && s.apiStyle === "claude");
+}
+
+/** Append an API path unless the user already pasted the full endpoint. */
+export function joinApiUrl(base: string, path: string) {
+  const b = base.trim().replace(/\/+$/, "");
+  const p = path.startsWith("/") ? path : `/${path}`;
+  if (b.endsWith(p)) return b;
+  if (p === "/v1/messages" && b.endsWith("/v1")) return `${b}/messages`;
+  if (p === "/chat/completions" && b.endsWith("/chat/completions")) return b;
+  return `${b}${p}`;
+}
+
 async function readError(res: Response) {
   try {
     const j = await res.json();
@@ -60,11 +85,11 @@ async function readError(res: Response) {
 }
 
 async function complete(s: AiSettings, system: string, user: string): Promise<string> {
-  const base = s.baseUrl.trim().replace(/\/+$/, "");
+  const base = s.baseUrl.trim();
   if (!s.model.trim()) throw new Error("model");
   if (!isSecureUrl(base)) throw new Error("insecure");
-  if (s.provider === "claude") {
-    const res = await fetch(`${base}/v1/messages`, {
+  if (usesClaude(s)) {
+    const res = await fetch(joinApiUrl(base, "/v1/messages"), {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -85,7 +110,7 @@ async function complete(s: AiSettings, system: string, user: string): Promise<st
   }
   const headers: Record<string, string> = { "content-type": "application/json" };
   if (s.key.trim()) headers.authorization = `Bearer ${s.key.trim()}`;
-  const res = await fetch(`${base}/chat/completions`, {
+  const res = await fetch(joinApiUrl(base, "/chat/completions"), {
     method: "POST",
     headers,
     body: JSON.stringify({
