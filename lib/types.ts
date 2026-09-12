@@ -1,0 +1,134 @@
+export const PHONE_W = 412;
+export const PHONE_H = 892;
+export const DESKTOP_W = 1280;
+export const DESKTOP_H = 800;
+export const PHONE_R = 36;
+export const DESKTOP_R = 20;
+export const STATUS_BAR_H = 28;
+export const GESTURE_H = 18;
+export const MARGIN = 16;
+export const BEZEL = 10;
+export const FRAME_LABEL_H = 40;
+export const FRAME_GAP = 96;
+export const GRID = 4;
+export const HISTORY_MAX = 80;
+
+export const uid = () => Math.random().toString(36).slice(2, 10);
+export const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+export const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+export const onGrid = (v: number, origin = 0) => origin + Math.round((v - origin) / GRID) * GRID;
+
+export type Lang = "zh" | "en";
+export type Platform = "cmp" | "android" | "web";
+export type FramePreset = "phone" | "desktop";
+export type ThemeMode = "light" | "dark";
+export type Transition = "slide" | "slideLeft" | "slideUp" | "fade" | "none";
+export type Category = "actions" | "navigation" | "containment" | "inputs" | "content" | "progress" | "preference";
+
+export type Kind =
+  | "button"
+  | "iconButton"
+  | "fab"
+  | "floatingToolbar"
+  | "topAppBar"
+  | "smallTitle"
+  | "navigationBar"
+  | "navigationRail"
+  | "tabRow"
+  | "searchBar"
+  | "breadcrumb"
+  | "card"
+  | "surface"
+  | "divider"
+  | "snackbar"
+  | "dialog"
+  | "textField"
+  | "switch"
+  | "checkbox"
+  | "radio"
+  | "slider"
+  | "dropdown"
+  | "numberPicker"
+  | "text"
+  | "image"
+  | "badge"
+  | "icon"
+  | "progress"
+  | "pullToRefresh"
+  | "switchPref"
+  | "checkboxPref"
+  | "radioPref"
+  | "sliderPref"
+  | "dropdownPref"
+  | "arrowPref";
+
+export type NavTab = { icon: string; label: string };
+
+export type Item = {
+  id: string;
+  kind: Kind;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  label: string;
+  supporting?: string;
+  icon?: string | null;
+  variant?: string;
+  checked?: boolean;
+  value?: number;
+  tabs?: NavTab[];
+  selected?: number;
+  note?: string;
+  to?: string;
+  transition?: Transition;
+};
+
+export type Screen = {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  preset: FramePreset;
+  note?: string;
+  items: Item[];
+};
+
+export type Theme = {
+  mode: ThemeMode;
+  seed: string;
+  monet: boolean;
+};
+
+export type Doc = {
+  version: 1;
+  title: string;
+  platform: Platform;
+  theme: Theme;
+  screens: Screen[];
+};
+
+export type Selection =
+  | { kind: "screen"; screenId: string }
+  | { kind: "item"; screenId: string; itemId: string }
+  | null;
+
+export const BACK_TARGET = "back";
+
+export const TRANSITIONS: Transition[] = ["slide", "slideLeft", "slideUp", "fade", "none"];
+
+export function frameSize(preset: FramePreset) {
+  return preset === "desktop" ? { w: DESKTOP_W, h: DESKTOP_H, r: DESKTOP_R } : { w: PHONE_W, h: PHONE_H, r: PHONE_R };
+}
+
+export function contentWidth(preset: FramePreset) {
+  return frameSize(preset).w - MARGIN * 2;
+}
+
+export function isPref(kind: Kind) {
+  return kind.endsWith("Pref");
+}
+
+export function isBar(kind: Kind) {
+  return kind === "topAppBar" || kind === "navigationBar" || kind === "navigationRail" || kind === "searchBar";
+}
