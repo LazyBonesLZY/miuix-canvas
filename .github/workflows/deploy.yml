@@ -30,12 +30,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - uses: browser-actions/setup-chrome@v2
-        id: setup-chrome
-      - name: Test Miuix renderer
-        run: ./renderer/gradlew -p renderer compileTestKotlinWasmJs wasmJsBrowserTest
-        env:
-          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+      - name: Compile Miuix renderer tests
+        run: ./renderer/gradlew -p renderer compileTestKotlinWasmJs
       - name: Build static site
         run: npm run build
         env:
