@@ -110,7 +110,7 @@ export function Inspector({
 
   return (
     <div className="flex flex-col gap-3 px-3 py-3">
-      <div className="text-[13px] font-medium text-[var(--accent)]">{KIND_TEXT[lang][it.kind]}</div>
+      <div className="break-words text-[13px] font-medium text-[var(--accent)]">{KIND_TEXT[lang][it.kind]}</div>
       <Field label={t("label", lang)}>
         <input className={input} value={it.label} onFocus={onBeginHistory} onChange={(e) => patch({ label: e.target.value }, false)} />
       </Field>

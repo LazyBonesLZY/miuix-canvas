@@ -16,6 +16,8 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 - **Preference rows** — BasicComponent, SwitchPreference, CheckboxPreference, RadioButtonPreference, SliderPreference, RangeSliderPreference, OverlayDropdownPreference / WindowDropdownPreference, OverlaySpinnerPreference / WindowSpinnerPreference, ArrowPreference. Adjacent rows magnetically join into one HyperOS Card.
 - **Phone and desktop screens** — 412×892 phone and 1280×800 desktop. Switching size converts NavigationBar ↔ NavigationRail.
 - **Editor chrome on three sizes** — phone uses a bottom bar and sheet; tablet uses a left rail and one docked panel; desktop keeps parts and inspector on both sides. Safe areas, compact toolbars, and preview scaling follow the viewport.
+- **HyperOS look** — sketches use official Miuix sizes and colors (gray TextButton, 49×28 Switch, check-only RadioButton, 16dp Card, no Material icon wells). The sample home follows the official jsCanvas demo sections.
+- **Live sketches** — Switch, Checkbox, Radio, Slider, tabs, SearchBar, NumberPicker, ColorPalette, ColorPicker, menus and preference rows respond in preview. On the canvas, click a selected part to toggle or drag a selected slider. Infinite progress and PullToRefresh keep spinning.
 - **Tap and swipe to navigate** — parts, nav destinations and screen swipes can open another screen. Preview plays the transition; canvas arrows show the flow.
 - **Theme** — light / dark, a seed color (default `#3482FF`), Monet flag. Surfaces stay HyperOS; primary roles shift with the seed.
 - **Prompt output** — Chinese, English, Japanese or Korean brief naming real Miuix composables (`OverlayDialog`, `SwitchPreference`, …). Target Compose Multiplatform (default), Android, or CMP Web.

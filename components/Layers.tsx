@@ -1,6 +1,6 @@
 "use client";
 
-import { KIND_TEXT, t, type Lang } from "@/lib/i18n";
+import { kindShort, t, type Lang } from "@/lib/i18n";
 import type { Doc, Selection } from "@/lib/types";
 
 export function LayersPanel({
@@ -25,7 +25,8 @@ export function LayersPanel({
             <button
               type="button"
               onClick={() => onSelect({ kind: "screen", screenId: screen.id })}
-              className={`press mb-1 w-full rounded-[16px] bg-[var(--chrome)] px-3 py-2 text-left text-[15px] font-medium ${selectedScreen ? "text-[var(--accent)]" : "text-[var(--ink)]"}`}
+              className={`press mb-1 w-full truncate rounded-[16px] bg-[var(--chrome)] px-3 py-2 text-left text-[15px] font-medium ${selectedScreen ? "text-[var(--accent)]" : "text-[var(--ink)]"}`}
+              title={screen.name}
             >
               {screen.name}
             </button>
@@ -41,7 +42,7 @@ export function LayersPanel({
                       className={`press flex min-w-0 flex-1 items-center gap-2 px-2 py-1.5 text-left text-[13px] ${on ? "text-[var(--accent)]" : "text-[var(--muted-strong)]"}`}
                     >
                       <span className="ms text-[16px]">{it.icon || "crop_square"}</span>
-                      <span className="min-w-0 truncate">{it.label || KIND_TEXT[lang][it.kind].split(" ")[0]}</span>
+                      <span className="part-name">{it.label || kindShort(it.kind, lang)}</span>
                     </button>
                     {on && onMove && (
                       <div className="flex pr-1">

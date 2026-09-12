@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { MiuixNode, StatusBar } from "@/components/MiuixNode";
 import { schemeFromSeed } from "@/lib/color";
 import { t, type Lang } from "@/lib/i18n";
+import { isLiveKind, isValueDragKind, livePatch } from "@/lib/interact";
 import { prefJoin, previewScale } from "@/lib/layout";
 import type { Doc, Item, Transition } from "@/lib/types";
 import { BACK_TARGET, GESTURE_H, frameSize } from "@/lib/types";
@@ -36,6 +37,7 @@ export function Preview({
   }));
   const swipe = useRef<{ x: number; y: number } | null>(null);
   const swiped = useRef(false);
+  const liveDrag = useRef(false);
   const currentId = stack.at(-1);
   const screen = doc.screens.find((s) => s.id === currentId) ?? doc.screens[0];
   const palette = schemeFromSeed(doc.theme.seed, doc.theme.mode === "dark");
@@ -57,6 +59,13 @@ export function Preview({
   };
 
   const itemOf = (it: Item): Item => ({ ...it, ...local[it.id] });
+
+  const applyLive = (it: Item, nx: number, ny: number) => {
+    const patch = livePatch(it, nx, ny);
+    if (!patch) return null;
+    setLocal((prev) => ({ ...prev, [it.id]: { ...prev[it.id], ...patch } }));
+    return { ...it, ...local[it.id], ...patch };
+  };
 
   if (!screen) return null;
 
@@ -84,6 +93,11 @@ export function Preview({
             onPointerUp={(e) => {
               const start = swipe.current;
               swipe.current = null;
+              if (liveDrag.current) {
+                liveDrag.current = false;
+                swiped.current = false;
+                return;
+              }
               if (!start) return;
               const dx = e.clientX - start.x;
               const dy = e.clientY - start.y;
@@ -97,32 +111,37 @@ export function Preview({
             {screen.items.map((raw) => {
               const it = itemOf(raw);
               const dest = it.to;
+              const live = isLiveKind(it.kind);
               return (
                 <button
                   key={it.id}
                   type="button"
+                  onPointerDown={() => {
+                    if (isValueDragKind(it.kind)) liveDrag.current = true;
+                  }}
+                  onPointerMove={(e) => {
+                    if (e.buttons !== 1 || !isValueDragKind(it.kind)) return;
+                    liveDrag.current = true;
+                    const boxEl = e.currentTarget.getBoundingClientRect();
+                    applyLive(it, (e.clientX - boxEl.left) / boxEl.width, (e.clientY - boxEl.top) / boxEl.height);
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (swiped.current) {
                       swiped.current = false;
                       return;
                     }
-                    if (it.tabs?.length) {
-                      const boxEl = e.currentTarget.getBoundingClientRect();
-                      const t0 = it.kind === "navigationRail"
-                        ? Math.floor(((e.clientY - boxEl.top) / boxEl.height) * it.tabs.length)
-                        : Math.floor(((e.clientX - boxEl.left) / boxEl.width) * it.tabs.length);
-                      const tab = it.tabs[Math.max(0, Math.min(it.tabs.length - 1, t0))];
-                      setLocal((prev) => ({ ...prev, [it.id]: { ...prev[it.id], selected: Math.max(0, Math.min(it.tabs!.length - 1, t0)) } }));
-                      if (tab?.to) {
-                        go(tab.to, tab.transition ?? it.transition);
-                        return;
-                      }
+                    const boxEl = e.currentTarget.getBoundingClientRect();
+                    const next = applyLive(it, (e.clientX - boxEl.left) / boxEl.width, (e.clientY - boxEl.top) / boxEl.height);
+                    const selected = next?.selected ?? it.selected ?? 0;
+                    const tab = it.tabs?.[selected];
+                    if (tab?.to) {
+                      go(tab.to, tab.transition ?? it.transition);
+                      return;
                     }
-                    if (typeof it.checked === "boolean") {
-                      setLocal((prev) => ({ ...prev, [it.id]: { ...prev[it.id], checked: !it.checked } }));
+                    if (dest && !isValueDragKind(it.kind) && it.kind !== "searchBar" && it.kind !== "numberPicker" && it.kind !== "colorPalette") {
+                      go(dest, it.transition);
                     }
-                    go(dest, it.transition);
                   }}
                   style={{
                     position: "absolute",
@@ -133,7 +152,7 @@ export function Preview({
                     padding: 0,
                     border: 0,
                     background: "transparent",
-                    cursor: dest || it.tabs || typeof it.checked === "boolean" ? "pointer" : "default",
+                    cursor: dest || live ? "pointer" : "default",
                   }}
                 >
                   <MiuixNode item={it} palette={palette} interactive lang={lang} join={prefJoin(screen.items.map(itemOf), it)} />

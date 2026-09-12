@@ -17,6 +17,7 @@ import { centerItem, centerViewOnScreen, convertPreset, duplicateItem, fitView, 
 import { readProject, saveProject } from "@/lib/project";
 import { consumeShareHash, hasShareHash, readShareHash, shareUrl } from "@/lib/share";
 import { tidyScreen } from "@/lib/tidy";
+import { isLiveKind, isValueDragKind, livePatch } from "@/lib/interact";
 import { KIND_SPEC, defaultPosition, makeItem } from "@/lib/tokens";
 import type { Doc, FramePreset, Guide, Kind, Platform, Screen, Selection } from "@/lib/types";
 import { BEZEL, FRAME_LABEL_H, GESTURE_H, HISTORY_MAX, clamp, frameSize, isTypingTarget, onGrid, uid } from "@/lib/types";
@@ -160,6 +161,9 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     screenId?: string;
     itemId?: string;
     recorded?: boolean;
+    moved?: boolean;
+    liveValue?: boolean;
+    alreadySelected?: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -476,8 +480,18 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     }
     const item = [...hit.items].reverse().find((it) => x >= it.x && x <= it.x + it.w && y >= it.y && y <= it.y + it.h);
     if (item) {
+      const alreadySelected = selection?.kind === "item" && selection.itemId === item.id;
       setSelection({ kind: "item", screenId: hit.id, itemId: item.id });
-      drag.current = { type: "item", sx: e.clientX, sy: e.clientY, ox: item.x, oy: item.y, screenId: hit.id, itemId: item.id };
+      drag.current = {
+        type: "item",
+        sx: e.clientX,
+        sy: e.clientY,
+        ox: item.x,
+        oy: item.y,
+        screenId: hit.id,
+        itemId: item.id,
+        alreadySelected,
+      };
     } else {
       setSelection({ kind: "screen", screenId: hit.id });
       drag.current = { type: "screen", sx: e.clientX, sy: e.clientY, ox: hit.x, oy: hit.y, screenId: hit.id };
@@ -493,6 +507,38 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     }
     const dx = (e.clientX - d.sx) / view.z;
     const dy = (e.clientY - d.sy) / view.z;
+    if (!d.moved && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 6) return;
+    if (d.type === "item" && d.alreadySelected && d.screenId && d.itemId && !d.liveValue) {
+      const current = screenOf(doc, d.screenId)?.items.find((it) => it.id === d.itemId);
+      if (current && isValueDragKind(current.kind)) d.liveValue = true;
+    }
+    if (d.type === "item" && d.liveValue && d.screenId && d.itemId) {
+      const el = canvasRef.current;
+      if (!el) return;
+      if (!d.recorded) {
+        beginHistory();
+        d.recorded = true;
+      }
+      d.moved = true;
+      const rect = el.getBoundingClientRect();
+      setDoc((cur) => {
+        const screen = screenOf(cur, d.screenId);
+        const it = screen?.items.find((item) => item.id === d.itemId);
+        if (!screen || !it) return cur;
+        const x = (e.clientX - rect.left - view.x) / view.z - screen.x - BEZEL;
+        const y = (e.clientY - rect.top - view.y) / view.z - screen.y - FRAME_LABEL_H - BEZEL;
+        const patch = livePatch(it, (x - it.x) / it.w, (y - it.y) / it.h);
+        if (!patch) return cur;
+        return {
+          ...cur,
+          screens: cur.screens.map((s) =>
+            s.id === d.screenId ? { ...s, items: s.items.map((item) => (item.id === d.itemId ? { ...item, ...patch } : item)) } : s,
+          ),
+        };
+      }, false);
+      return;
+    }
+    d.moved = true;
     if (!d.recorded) {
       beginHistory();
       d.recorded = true;
@@ -525,9 +571,29 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     }
   };
 
-  const onPointerUp = () => {
+  const onPointerUp = (e: React.PointerEvent) => {
+    const d = drag.current;
     drag.current = null;
     setGuide(null);
+    if (!d || d.type !== "item" || d.moved || d.liveValue || !d.alreadySelected || !d.screenId || !d.itemId) return;
+    const el = canvasRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setDoc((cur) => {
+      const screen = screenOf(cur, d.screenId);
+      const it = screen?.items.find((item) => item.id === d.itemId);
+      if (!screen || !it || !isLiveKind(it.kind)) return cur;
+      const x = (e.clientX - rect.left - view.x) / view.z - screen.x - BEZEL;
+      const y = (e.clientY - rect.top - view.y) / view.z - screen.y - FRAME_LABEL_H - BEZEL;
+      const patch = livePatch(it, (x - it.x) / it.w, (y - it.y) / it.h);
+      if (!patch) return cur;
+      return {
+        ...cur,
+        screens: cur.screens.map((s) =>
+          s.id === d.screenId ? { ...s, items: s.items.map((item) => (item.id === d.itemId ? { ...item, ...patch } : item)) } : s,
+        ),
+      };
+    });
   };
 
   const onDrop = (e: React.DragEvent) => {
@@ -568,7 +634,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   };
 
   const side = (kind: "left" | "right", children: React.ReactNode, extra = "") => (
-    <aside className={`flex h-full min-h-0 shrink-0 flex-col border-[var(--line)] bg-[var(--surface)] ${kind === "left" ? "w-[272px] border-r" : "w-[300px] border-l"} ${extra}`}>
+    <aside className={`flex h-full min-h-0 shrink-0 flex-col border-[var(--line)] bg-[var(--surface)] ${kind === "left" ? "w-[288px] border-r" : "w-[300px] border-l"} ${extra}`}>
       {children}
     </aside>
   );
@@ -586,7 +652,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           </div>
         </div>
       )}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div className="panel-scroll min-h-0 flex-1">
         {left === "parts" ? (
           <PartsPalette lang={lang} wide={layout === "phone"} onAdd={(k) => { addItem(k); }} onDragStart={(k) => { dragKind.current = k; }} />
         ) : (
@@ -615,7 +681,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           </div>
         </div>
       )}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+      <div className="panel-scroll min-h-0 flex-1">
         {right === "inspect" && (
           <Inspector
             doc={doc}
@@ -769,7 +835,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
               return (
                 <div key={screen.id} style={{ position: "absolute", left: screen.x, top: screen.y, width: w + BEZEL * 2 }}>
                   <div className={`mb-1 flex items-center justify-between px-1 text-[12px] ${selected ? "text-[var(--accent)]" : "text-[var(--muted)]"}`} style={{ height: FRAME_LABEL_H - 8 }}>
-                    <span className="font-medium">{screen.name}</span>
+                    <span className="min-w-0 truncate font-medium" title={screen.name}>{screen.name}</span>
                     <button
                       type="button"
                       className="press miuix-chip"

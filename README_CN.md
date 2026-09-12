@@ -16,6 +16,8 @@
 - **Preference 行** — BasicComponent、SwitchPreference、CheckboxPreference、RadioButtonPreference、SliderPreference、RangeSliderPreference、OverlayDropdownPreference / WindowDropdownPreference、OverlaySpinnerPreference / WindowSpinnerPreference、ArrowPreference。相邻行会磁吸拼成一张 HyperOS Card。
 - **手机和桌面屏幕** — 412×892 手机、1280×800 桌面。切换尺寸时 NavigationBar 会和 NavigationRail 互转。
 - **编辑器三端适配** — 手机用底栏 + 底部面板；平板用左侧图标轨 + 一块停靠面板；电脑左右分栏。安全区、紧凑工具栏和预览缩放会跟着视口走。
+- **HyperOS 外观** — 草图按官方尺寸和颜色来（灰色 TextButton、49×28 Switch、只有勾的 RadioButton、16dp Card，没有 Material 色块图标井）。示例首页按官方 jsCanvas demo 的区块来排。
+- **动态草图** — 预览里可以拨开关、拖滑条、切标签、展开搜索、滚数字、点色板和菜单。画布上先选中部件再点一下就会切换；已选中的滑条可以拖数值。无限进度和下拉刷新会一直转。
 - **点击和滑动跳转** — 部件、导航项、屏幕滑动都可以打开另一屏。预览会播过渡；画布上有流程箭头。
 - **主题** — 浅色 / 深色、种子色（默认 `#3482FF`）、Monet。表面色保持 HyperOS，主色随种子色偏移。
 - **提示词** — 中 / 英 / 日 / 韩，会写出真实的 Miuix composable 名（`OverlayDialog`、`SwitchPreference` 等）。目标可以是 Compose Multiplatform（默认）、Android 或 CMP Web。

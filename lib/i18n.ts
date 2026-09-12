@@ -95,6 +95,8 @@ const ZH = {
   layersHint: "从上到下是从前景到背景。",
   zoomIn: "放大",
   zoomOut: "缩小",
+  searchParts: "搜索部件",
+  noParts: "没有匹配的部件",
 } as const;
 
 const EN: Record<keyof typeof ZH, string> = {
@@ -190,6 +192,8 @@ const EN: Record<keyof typeof ZH, string> = {
   layersHint: "Top of the list is in front.",
   zoomIn: "Zoom in",
   zoomOut: "Zoom out",
+  searchParts: "Search parts",
+  noParts: "No matching parts",
 };
 
 const JA: Record<keyof typeof ZH, string> = {
@@ -285,6 +289,8 @@ const JA: Record<keyof typeof ZH, string> = {
   layersHint: "上ほど手前のレイヤーです。",
   zoomIn: "拡大",
   zoomOut: "縮小",
+  searchParts: "部品を検索",
+  noParts: "一致する部品がありません",
 };
 
 const KO: Record<keyof typeof ZH, string> = {
@@ -380,6 +386,8 @@ const KO: Record<keyof typeof ZH, string> = {
   layersHint: "목록 위가 앞쪽 레이어입니다.",
   zoomIn: "확대",
   zoomOut: "축소",
+  searchParts: "부품 검색",
+  noParts: "일치하는 부품이 없습니다",
 };
 
 const DICT: Record<Lang, Record<keyof typeof ZH, string>> = { zh: ZH, en: EN, ja: JA, ko: KO };
@@ -448,6 +456,7 @@ const KIND_ZH: Record<Kind, string> = {
   progress: "进度 ProgressIndicator",
   pullToRefresh: "下拉刷新 PullToRefresh",
   scrollBar: "滚动条 ScrollBar",
+  blur: "模糊 textureBlur",
   basicPref: "基础设置项 BasicComponent",
   switchPref: "开关设置 SwitchPreference",
   checkboxPref: "复选设置 CheckboxPreference",
@@ -462,13 +471,13 @@ const KIND_ZH: Record<Kind, string> = {
 const KIND_EN: Record<Kind, string> = {
   button: "Button",
   iconButton: "IconButton",
-  fab: "FloatingActionButton",
-  floatingToolbar: "FloatingToolbar",
+  fab: "FAB FloatingActionButton",
+  floatingToolbar: "Toolbar FloatingToolbar",
   topAppBar: "TopAppBar",
   smallTitle: "SmallTitle",
-  navigationBar: "NavigationBar",
-  floatingNav: "FloatingNavigationBar",
-  navigationRail: "NavigationRail",
+  navigationBar: "Nav bar NavigationBar",
+  floatingNav: "Floating nav FloatingNavigationBar",
+  navigationRail: "Nav rail NavigationRail",
   tabRow: "TabRow",
   searchBar: "SearchBar",
   breadcrumb: "BreadcrumbBar",
@@ -476,13 +485,13 @@ const KIND_EN: Record<Kind, string> = {
   surface: "Surface",
   divider: "Divider",
   snackbar: "Snackbar",
-  dialog: "OverlayDialog",
-  bottomSheet: "OverlayBottomSheet",
-  listPopup: "OverlayListPopup",
-  cascadingPopup: "OverlayCascadingListPopup",
-  dropdownMenu: "OverlayDropdownMenu",
-  iconDropdownMenu: "OverlayIconDropdownMenu",
-  iconCascadingMenu: "OverlayIconCascadingDropdownMenu",
+  dialog: "Dialog OverlayDialog",
+  bottomSheet: "Sheet OverlayBottomSheet",
+  listPopup: "List popup OverlayListPopup",
+  cascadingPopup: "Cascade OverlayCascadingListPopup",
+  dropdownMenu: "Menu OverlayDropdownMenu",
+  iconDropdownMenu: "Icon menu OverlayIconDropdownMenu",
+  iconCascadingMenu: "Icon cascade OverlayIconCascadingDropdownMenu",
   tooltip: "Tooltip",
   textField: "TextField",
   switch: "Switch",
@@ -498,18 +507,19 @@ const KIND_EN: Record<Kind, string> = {
   image: "Image",
   badge: "Badge",
   icon: "Icon",
-  progress: "ProgressIndicator",
-  pullToRefresh: "PullToRefresh",
-  scrollBar: "ScrollBar",
-  basicPref: "BasicComponent",
-  switchPref: "SwitchPreference",
-  checkboxPref: "CheckboxPreference",
-  radioPref: "RadioButtonPreference",
-  sliderPref: "SliderPreference",
-  rangeSliderPref: "RangeSliderPreference",
-  dropdownPref: "DropdownPreference",
-  spinnerPref: "SpinnerPreference",
-  arrowPref: "ArrowPreference",
+  progress: "Progress ProgressIndicator",
+  pullToRefresh: "Refresh PullToRefresh",
+  scrollBar: "Scroll bar ScrollBar",
+  blur: "Blur textureBlur",
+  basicPref: "Basic row BasicComponent",
+  switchPref: "Switch row SwitchPreference",
+  checkboxPref: "Checkbox row CheckboxPreference",
+  radioPref: "Radio row RadioButtonPreference",
+  sliderPref: "Slider row SliderPreference",
+  rangeSliderPref: "Range slider RangeSliderPreference",
+  dropdownPref: "Dropdown row DropdownPreference",
+  spinnerPref: "Spinner row SpinnerPreference",
+  arrowPref: "Arrow row ArrowPreference",
 };
 
 const KIND_JA: Record<Kind, string> = {
@@ -554,6 +564,7 @@ const KIND_JA: Record<Kind, string> = {
   progress: "進捗 ProgressIndicator",
   pullToRefresh: "プル更新 PullToRefresh",
   scrollBar: "スクロールバー ScrollBar",
+  blur: "ブラー textureBlur",
   basicPref: "基本項目 BasicComponent",
   switchPref: "スイッチ設定 SwitchPreference",
   checkboxPref: "チェック設定 CheckboxPreference",
@@ -607,6 +618,7 @@ const KIND_KO: Record<Kind, string> = {
   progress: "진행 ProgressIndicator",
   pullToRefresh: "당겨서 새로고침 PullToRefresh",
   scrollBar: "스크롤바 ScrollBar",
+  blur: "블러 textureBlur",
   basicPref: "기본 항목 BasicComponent",
   switchPref: "스위치 설정 SwitchPreference",
   checkboxPref: "체크 설정 CheckboxPreference",
@@ -624,6 +636,16 @@ export const KIND_TEXT: Record<Lang, Record<Kind, string>> = {
   ja: KIND_JA,
   ko: KIND_KO,
 };
+
+/** Palette / layer label without the trailing composable name. */
+export function kindShort(kind: Kind, lang: Lang): string {
+  const raw = KIND_TEXT[lang][kind];
+  const marked = raw.split(" · ")[0]?.trim();
+  if (marked && marked !== raw) return marked;
+  const match = raw.match(/^(.*)\s+([A-Z][A-Za-z0-9]+)$/);
+  if (match?.[1]?.trim()) return match[1].trim();
+  return raw;
+}
 
 export const TRANSITION_TEXT: Record<Lang, Record<Transition, string>> = {
   zh: { slide: "从右滑入", slideLeft: "从左滑入", slideUp: "从下滑入", fade: "淡入", none: "无" },

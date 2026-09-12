@@ -32,6 +32,10 @@ export type Palette = {
   sliderBackground: string;
   error: string;
   onError: string;
+  disabledSecondaryVariant: string;
+  disabledOnSecondaryVariant: string;
+  disabledPrimaryButton: string;
+  disabledOnPrimaryButton: string;
 };
 
 export const MIUIX_BLUE = "#3482FF";
@@ -124,6 +128,10 @@ const LIGHT_SURFACES = {
   sliderBackground: "rgba(0,0,0,0.06)",
   error: "#E94634",
   onError: "#FFFFFF",
+  disabledSecondaryVariant: "#F2F2F2",
+  disabledOnSecondaryVariant: "#B2B2B2",
+  disabledPrimaryButton: "#C2D9FF",
+  disabledOnPrimaryButton: "#FFFFFF",
 };
 
 const DARK_SURFACES = {
@@ -153,6 +161,10 @@ const DARK_SURFACES = {
   sliderBackground: "rgba(255,255,255,0.15)",
   error: "#F12522",
   onError: "#FFFFFF",
+  disabledSecondaryVariant: "#404040",
+  disabledOnSecondaryVariant: "#707170",
+  disabledPrimaryButton: "#253E64",
+  disabledOnPrimaryButton: "#677893",
 };
 
 /** Shift MIUIX primary roles from a seed, keep HyperOS surfaces. */

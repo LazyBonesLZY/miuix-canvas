@@ -443,6 +443,7 @@ input[type="range"]::-webkit-slider-thumb {
   display: flex;
   width: min(320px, 42vw);
   min-width: 240px;
+  height: 100%;
   min-height: 0;
   flex-shrink: 0;
   flex-direction: column;
@@ -488,3 +489,66 @@ input[type="range"]::-webkit-slider-thumb {
 .app-root[data-layout="desktop"] .toolbar-overflow {
   display: none;
 }
+
+.panel-scroll {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+}
+
+.panel-scroll::-webkit-scrollbar,
+.part-name::-webkit-scrollbar {
+  width: 8px;
+  height: 4px;
+}
+
+.panel-scroll::-webkit-scrollbar-thumb,
+.part-name::-webkit-scrollbar-thumb {
+  background: var(--outline);
+  border-radius: 999px;
+}
+
+.part-name {
+  min-width: 0;
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  font-size: 13px;
+  line-height: 1.25;
+  color: var(--ink);
+  scrollbar-width: thin;
+}
+
+@keyframes miuix-spin {
+  to { transform: rotate(360deg); }
+}
+
+.miuix-spin {
+  animation: miuix-spin 800ms linear infinite;
+}
+
+.miuix-press {
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.miuix-press:active {
+  transform: scale(0.96);
+  filter: brightness(0.96);
+}
+
+@keyframes miuix-caret {
+  50% { opacity: 0; }
+}
+
+.miuix-caret {
+  display: inline-block;
+  width: 2px;
+  height: 18px;
+  margin-left: 2px;
+  vertical-align: middle;
+  animation: miuix-caret 1s steps(1) infinite;
+}
+

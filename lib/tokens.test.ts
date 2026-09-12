@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LANGS } from "./types";
-import { KIND_TEXT } from "./i18n";
+import { KIND_TEXT, kindShort } from "./i18n";
 import { KIND_ORDER, KIND_SPEC, KIND_SET, composableOf, makeItem } from "./tokens";
 
 describe("KIND_SPEC coverage", () => {
@@ -76,5 +76,17 @@ describe("KIND_SPEC coverage", () => {
     const item = makeItem("button", "phone", "zh", 0, 0);
     expect(item.variant).toBe("secondary");
     expect(item.h).toBe(50);
+    expect(item.icon).toBeUndefined();
+  });
+
+  it("shortens long palette names without dropping the composable", () => {
+    expect(kindShort("iconCascadingMenu", "zh")).toBe("图标级联");
+    expect(kindShort("iconCascadingMenu", "en")).toBe("Icon cascade");
+    expect(KIND_TEXT.en.iconCascadingMenu).toContain("OverlayIconCascadingDropdownMenu");
+  });
+
+  it("does not put the palette glyph on preference rows", () => {
+    expect(makeItem("switchPref", "phone", "zh", 0, 0).icon).toBeUndefined();
+    expect(makeItem("arrowPref", "phone", "zh", 0, 0).icon).toBeUndefined();
   });
 });

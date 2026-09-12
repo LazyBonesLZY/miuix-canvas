@@ -76,6 +76,7 @@ export type Kind =
   | "progress"
   | "pullToRefresh"
   | "scrollBar"
+  | "blur"
   | "basicPref"
   | "switchPref"
   | "checkboxPref"
