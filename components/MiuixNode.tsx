@@ -2,7 +2,7 @@
 
 import type { CSSProperties, ReactNode } from "react";
 import type { Palette } from "@/lib/color";
-import { withAlpha } from "@/lib/color";
+import { rgbToHex, withAlpha } from "@/lib/color";
 import { t, type Lang } from "@/lib/i18n";
 import { SLIDER_SIZE, SLIDER_THUMB, fillLengthCalc, rangeEnd, rangeFillLeftCalc, rangeFillWidthCalc, rangeStart, thumbCenterCalc } from "@/lib/slider";
 import type { Item, Join, NavTab } from "@/lib/types";
@@ -31,6 +31,65 @@ function hints(lang: Lang) {
 
 function hueColor(t: number) {
   return `hsl(${Math.round(Math.max(0, Math.min(1, t)) * 360)} 82% 52%)`;
+}
+
+const MIUIX_GRAY = "#888888";
+const PALETTE_S = [0.1, 0.35, 0.7, 1, 1, 1, 1];
+const PALETTE_V = [1, 1, 1, 0.85, 0.65, 0.45, 0.2];
+
+function hsvHex(h: number, s: number, v: number) {
+  const f = (n: number) => {
+    const k = (n + h / 60) % 6;
+    return v - v * s * Math.max(0, Math.min(k, 4 - k, 1));
+  };
+  return rgbToHex(f(5) * 255, f(3) * 255, f(1) * 255);
+}
+
+function paletteCell(col: number, row: number) {
+  if (col === 12) {
+    const g = 1 - row / 6;
+    return rgbToHex(g * 255, g * 255, g * 255);
+  }
+  return hsvHex((col * 30) % 360, PALETTE_S[row] ?? 1, PALETTE_V[row] ?? 1);
+}
+
+function ArrowUpDown({ color }: { color: string }) {
+  return (
+    <svg width={10} height={16} viewBox="0 0 10 16" fill="none" aria-hidden>
+      <path d="M5 1.2 1.4 6.4h7.2L5 1.2Zm0 13.6 3.6-5.2H1.4L5 14.8Z" fill={color} />
+    </svg>
+  );
+}
+
+function OrbitRing({ size = 20, stroke = 2, dot = 4, color = MIUIX_GRAY }: { size?: number; stroke?: number; dot?: number; color?: string }) {
+  return (
+    <div style={{ width: size, height: size, position: "relative" }}>
+      <div style={{ position: "absolute", inset: 0, borderRadius: 999, border: `${stroke}px solid ${color}` }} />
+      <div className="miuix-orbit">
+        <div style={{ position: "absolute", top: (stroke - dot) / 2, left: "50%", width: dot, height: dot, marginLeft: -dot / 2, borderRadius: 999, background: color }} />
+      </div>
+    </div>
+  );
+}
+
+function CircularRing({ value, track, ink }: { value: number; track: string; ink: string }) {
+  const r = 13;
+  const c = 2 * Math.PI * r;
+  const v = Math.max(0, Math.min(1, value));
+  return (
+    <svg width={30} height={30} viewBox="0 0 30 30" aria-hidden>
+      <circle cx={15} cy={15} r={r} fill="none" stroke={track} strokeWidth={4} />
+      <circle cx={15} cy={15} r={r} fill="none" stroke={ink} strokeWidth={4} strokeLinecap="round" strokeDasharray={`${c * v} ${c}`} transform="rotate(-90 15 15)" />
+    </svg>
+  );
+}
+
+function ColorBand({ colors, value }: { colors: string; value: number }) {
+  return (
+    <div style={{ height: 26, borderRadius: 999, background: colors, position: "relative", boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }}>
+      <div style={{ position: "absolute", top: 5, left: `clamp(2px, calc(${value * 100}% - 8px), calc(100% - 18px))`, width: 16, height: 16, borderRadius: 8, background: "#fff", boxShadow: "0 0 0 1px rgba(0,0,0,0.18)" }} />
+    </div>
+  );
 }
 
 function CheckMark({ color, size = 18 }: { color: string; size?: number }) {
@@ -152,7 +211,7 @@ function PrefRow({ it, p, trailing, join }: { it: Item; p: Palette; trailing?: R
     <div
       style={{
         height: "100%",
-        padding: "12px 16px",
+        padding: 16,
         display: "flex",
         alignItems: "center",
         gap: 12,
@@ -164,7 +223,7 @@ function PrefRow({ it, p, trailing, join }: { it: Item; p: Palette; trailing?: R
     >
       {it.icon && <Symbol name={it.icon} size={24} color={p.onSurface} />}
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 17, color: p.onSurfaceContainer, lineHeight: "22px", fontWeight: 500 }}>{it.label}</div>
+        <div style={{ fontSize: 17, color: p.onBackground, lineHeight: "22px", fontWeight: 500 }}>{it.label}</div>
         {it.supporting && (
           <div style={{ fontSize: 14, color: p.onSurfaceVariantSummary, lineHeight: "18px", marginTop: 2 }}>{it.supporting}</div>
         )}
@@ -179,14 +238,14 @@ function ValueTrail({ value, p, swatch }: { value?: string; p: Palette; swatch?:
     <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
       {swatch && <div style={{ width: 16, height: 16, borderRadius: 5, background: swatch }} />}
       {value && <span style={{ fontSize: 14, color: p.onSurfaceVariantSummary }}>{value}</span>}
-      <Symbol name="chevron_right" size={22} color={p.onSurfaceVariantActions} />
+      <ArrowUpDown color={p.onSurfaceVariantActions} />
     </div>
   );
 }
 
 function Tabs({ tabs, selected, p, vertical = false, iconsOnly = false }: { tabs: NavTab[]; selected?: number; p: Palette; vertical?: boolean; iconsOnly?: boolean }) {
   return (
-    <div style={{ display: "flex", flexDirection: vertical ? "column" : "row", justifyContent: "space-around", height: "100%", padding: vertical ? "16px 8px" : "8px 4px 6px" }}>
+    <div style={{ display: "flex", flexDirection: vertical ? "column" : "row", justifyContent: vertical ? "flex-start" : "space-around", height: "100%", padding: vertical ? "24px 8px" : "8px 4px" }}>
       {tabs.map((tab, i) => {
         const on = i === (selected ?? 0);
         const color = p.onSurfaceContainer;
@@ -229,8 +288,8 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
   switch (it.kind) {
     case "button": {
       const variant = it.variant ?? "secondary";
-      const bg = variant === "primary" ? p.primary : variant === "disabled" ? p.disabledSecondaryVariant : variant === "text" ? "transparent" : p.secondaryVariant;
-      const fg = variant === "primary" ? p.onPrimary : variant === "disabled" ? p.disabledOnSecondaryVariant : variant === "text" ? p.primary : p.onSecondaryVariant;
+      const bg = variant === "primary" ? p.primary : variant === "disabled" ? p.disabledSecondaryVariant : p.secondaryVariant;
+      const fg = variant === "primary" ? p.onPrimary : variant === "disabled" ? p.disabledOnSecondaryVariant : p.onSecondaryVariant;
       return (
         <div className={interactive ? "miuix-press" : undefined} style={{ ...style, ...sq(16), background: bg, color: fg, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontSize: 17, fontWeight: 400, padding: "0 16px" }}>
           {it.icon && <Symbol name={it.icon} size={18} color={fg} />}
@@ -254,7 +313,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "floatingToolbar":
       return (
-        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainerHighest, display: "flex", alignItems: "center", justifyContent: "space-evenly", padding: "0 10px" }}>
+        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainer, boxShadow: "0 4px 10px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "space-evenly", padding: "0 10px" }}>
           {(it.tabs ?? []).map((tab, i) => (
             <Symbol key={i} name={tab.icon} size={22} color={i === (it.selected ?? 0) ? p.primary : p.onSurface} />
           ))}
@@ -263,14 +322,14 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "topAppBar": {
       const large = it.variant === "large";
       return (
-        <div style={{ ...style, background: p.surface, padding: large ? "28px 12px 10px" : "28px 4px 8px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+        <div style={{ ...style, background: p.surface, padding: large ? "28px 16px 10px" : "28px 16px 8px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 2, minHeight: 40 }}>
             {it.icon && (
               <div style={{ width: 40, height: 40, display: "grid", placeItems: "center" }}>
                 <Symbol name={it.icon} size={24} color={p.onSurface} />
               </div>
             )}
-            <div style={{ flex: 1, fontSize: large ? 32 : 20, fontWeight: large ? 400 : 500, color: p.onSurface, letterSpacing: large ? -0.4 : 0, paddingLeft: it.icon ? 0 : 12 }}>{it.label}</div>
+            <div style={{ flex: 1, fontSize: large ? 32 : 20, fontWeight: large ? 400 : 500, color: p.onSurface, letterSpacing: large ? -0.4 : 0, paddingLeft: it.icon ? 0 : 10 }}>{it.label}</div>
             {["tune", "sort", "more_horiz"].map((name) => (
               <div key={name} style={{ width: 40, height: 40, display: "grid", placeItems: "center" }}>
                 <Symbol name={name} size={22} color={p.onSurface} />
@@ -307,7 +366,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
             style={{
               ...style,
               borderRadius: 999,
-              background: withAlpha(p.surfaceContainer, 0.4),
+              background: withAlpha(p.surfaceContainer, 0.6),
               backdropFilter: "blur(20px) saturate(1.6)",
               WebkitBackdropFilter: "blur(20px) saturate(1.6)",
               boxShadow: `0 10px 24px ${withAlpha("#000", 0.12)}, inset 0 0.6px 0 rgba(255,255,255,0.5)`,
@@ -349,30 +408,61 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
         </div>
       );
     }
-    case "navigationRail":
+    case "navigationRail": {
+      const tabs = it.tabs ?? [];
+      const sel = it.selected ?? 0;
       return (
-        <div style={{ ...style, background: p.surface }}>
-          <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} vertical />
+        <div style={{ ...style, background: p.surface, padding: "24px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+          {tabs.map((tab, i) => {
+            const on = i === sel;
+            return (
+              <div key={i} style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 0" }}>
+                <div style={{ ...sq(12), background: on ? p.surfaceContainerHigh : "transparent", padding: "4px 10px", display: "grid", placeItems: "center" }}>
+                  <Symbol name={tab.icon} size={28} color={p.onSurface} fill={on} />
+                </div>
+                {tab.label && <span style={{ fontSize: 12, color: p.onSurface, opacity: on ? 1 : 0.6 }}>{tab.label}</span>}
+              </div>
+            );
+          })}
         </div>
       );
+    }
     case "tabRow": {
       const contour = it.variant === "contour";
+      const tabs = it.tabs ?? [];
+      const n = Math.max(tabs.length, 1);
+      const sel = it.selected ?? 0;
+      const gap = contour ? 5 : 9;
+      const pad = contour ? 5 : 0;
       return (
-        <div style={{ ...style, background: contour ? "transparent" : p.surface, ...sq(contour ? 11 : 12), padding: contour ? 3 : 3, display: "flex", gap: contour ? 6 : 8, border: contour ? `1px solid ${p.outline}` : undefined, boxSizing: "border-box" }}>
-          {(it.tabs ?? []).map((tab, i) => {
-            const on = i === (it.selected ?? 0);
+        <div style={{ ...style, position: "relative", background: contour ? "transparent" : p.surface, ...sq(contour ? 11 : 12), padding: pad, display: "flex", gap, border: contour ? `1px solid ${p.outline}` : undefined, boxSizing: "border-box" }}>
+          <div
+            style={{
+              position: "absolute",
+              top: pad,
+              bottom: pad,
+              left: `calc(${pad}px + ${sel} * ((100% - ${pad * 2}px - ${(n - 1) * gap}px) / ${n} + ${gap}px))`,
+              width: `calc((100% - ${pad * 2}px - ${(n - 1) * gap}px) / ${n})`,
+              ...sq(contour ? 8 : 12),
+              background: p.surfaceContainer,
+              transition: "left 200ms linear",
+            }}
+          />
+          {tabs.map((tab, i) => {
+            const on = i === sel;
             return (
               <div
                 key={i}
                 style={{
                   flex: 1,
-                  ...sq(contour ? 8 : 12),
-                  background: on ? p.surfaceContainer : "transparent",
+                  zIndex: 1,
                   color: on ? p.onBackground : p.onSurfaceVariantSummary,
                   display: "grid",
                   placeItems: "center",
-                  fontSize: 14,
+                  fontSize: contour ? 14 : 16,
                   fontWeight: on ? 700 : 400,
+                  ...sq(contour ? 8 : 12),
+                  boxShadow: !contour && !on ? `inset 0 0 0 1px ${p.outline}` : undefined,
                 }}
               >
                 {tab.label}
@@ -386,8 +476,8 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       const expanded = it.variant === "expanded";
       const field = (
         <div style={{ height: 45, borderRadius: 999, background: p.surfaceContainerHigh, display: "flex", alignItems: "center", gap: 8, padding: "0 16px" }}>
-          <Symbol name="search" size={20} color={p.onSurfaceVariantActions} />
-          <span style={{ flex: 1, fontSize: 17, fontWeight: 500, color: p.onSurfaceVariantSummary }}>{it.label}</span>
+          <Symbol name="search" size={20} color={p.onSurfaceContainerHigh} />
+          <span style={{ flex: 1, fontSize: 17, fontWeight: 500, color: p.onSurfaceContainerHigh }}>{it.label}</span>
           {expanded && <span style={{ fontSize: 17, fontWeight: 700, color: p.primary }}>{t("cancel", lang)}</span>}
         </div>
       );
@@ -406,13 +496,38 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "breadcrumb": {
       const parts = it.label.split(/\s*[\/·>]\s*/).filter(Boolean);
       return (
-        <div style={{ ...style, display: "flex", alignItems: "center", padding: "8px 12px", gap: 4, fontSize: 14 }}>
-          {parts.map((part, i) => (
-            <span key={`${part}-${i}`} style={{ display: "flex", alignItems: "center", gap: 4, color: i === parts.length - 1 ? p.onSurface : p.onSurfaceVariantSummary, fontWeight: i === parts.length - 1 ? 500 : 400 }}>
-              {i > 0 && <Symbol name="chevron_right" size={16} color={p.onSurfaceVariantActions} />}
-              {part}
-            </span>
-          ))}
+        <div style={{ ...style, display: "flex", alignItems: "center", padding: "8px 12px", gap: 0, overflow: "hidden" }}>
+          {parts.map((part, i) => {
+            const on = i === parts.length - 1;
+            return (
+              <span key={`${part}-${i}`} style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+                {i > 0 && (
+                  <svg width={10} height={16} viewBox="0 0 10 16" style={{ margin: "0 4px" }} aria-hidden>
+                    <path d="M3 2.5 7.2 8 3 13.5" fill="none" stroke={p.onSurfaceVariantActions} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                )}
+                <span
+                  style={{
+                    height: 32,
+                    maxWidth: 160,
+                    borderRadius: 999,
+                    padding: "0 10px",
+                    display: "grid",
+                    placeItems: "center",
+                    fontSize: 14,
+                    fontWeight: on ? 500 : 400,
+                    color: on ? p.primary : withAlpha(p.onBackground, 0.55),
+                    background: on ? withAlpha(p.primary, 0.2) : withAlpha(p.onBackground, 0.1),
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {part}
+                </span>
+              </span>
+            );
+          })}
         </div>
       );
     }
@@ -427,7 +542,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
         </div>
       );
     case "surface":
-      return <div style={{ ...style, ...sq(16), background: p.surfaceContainer }} />;
+      return <div style={{ ...style, ...sq(16), background: p.surface }} />;
     case "blur":
       return (
         <div style={{ ...style, ...sq(16), position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${p.primary} 0%, #7C4DFF 50%, #E11D48 100%)` }}>
@@ -444,7 +559,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       return (
         <div style={{ ...style, ...sq(16), background: p.onSecondaryVariant, color: p.secondaryVariant, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 12px", fontSize: 14 }}>
           <span>{it.label}</span>
-          <span style={{ color: p.primary, fontWeight: 600, fontSize: 14 }}>{t("confirm", lang)}</span>
+          <span style={{ background: p.primary, color: p.onPrimary, borderRadius: 999, padding: "4px 12px", fontSize: 15, fontWeight: 500 }}>{t("confirm", lang)}</span>
         </div>
       );
     case "dialog":
@@ -460,7 +575,19 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "textField":
       return (
-        <div style={{ ...style, ...sq(16), background: p.secondaryContainer, display: "flex", alignItems: "center", padding: "0 16px", fontSize: 17, color: it.label ? p.onSurface : p.onSecondaryContainer }}>
+        <div
+          style={{
+            ...style,
+            ...sq(16),
+            background: p.secondaryContainer,
+            display: "flex",
+            alignItems: "center",
+            padding: 16,
+            fontSize: 17,
+            color: it.label ? p.onSurface : p.onSecondaryContainer,
+            boxShadow: interactive ? `inset 0 0 0 2px ${p.primary}` : undefined,
+          }}
+        >
           {it.label || t("empty", lang)}
           {interactive && <span className="miuix-caret" style={{ background: p.primary }} />}
         </div>
@@ -506,24 +633,43 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       return (
         <div style={{ ...style, ...sq(16), background: p.surfaceContainer, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 16px" }}>
           <span style={{ fontSize: 17, color: p.onSurface }}>{it.tabs?.[it.selected ?? 0]?.label || it.label}</span>
-          <Symbol name="expand_more" size={22} color={p.onSurfaceVariantActions} />
+          <ArrowUpDown color={p.onSurfaceVariantActions} />
         </div>
       );
     case "numberPicker": {
       const n = Number.parseInt(it.label, 10);
       const cur = Number.isFinite(n) ? n : 12;
       return (
-        <div style={{ ...style, position: "relative", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", color: p.onSurfaceSecondary }}>
-          <div style={{ position: "absolute", left: 12, right: 12, height: 45, ...sq(12), background: p.secondaryVariant }} />
-          <div style={{ fontSize: 16, opacity: 0.4, zIndex: 1 }}>{cur - 1}</div>
-          <div style={{ fontSize: 32, fontWeight: 400, color: p.onSurface, lineHeight: "45px", zIndex: 1 }}>{cur}</div>
-          <div style={{ fontSize: 16, opacity: 0.4, zIndex: 1 }}>{cur + 1}</div>
+        <div style={{ ...style, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          {[-2, -1, 0, 1, 2].map((d) => {
+            const dist = Math.abs(d);
+            const scale = 1 - 0.2 * dist;
+            const alpha = (1 - dist / 2) * (1 - dist * 0.25);
+            return (
+              <div
+                key={d}
+                style={{
+                  height: 28,
+                  display: "grid",
+                  placeItems: "center",
+                  fontSize: d === 0 ? 32 : 16,
+                  fontWeight: d === 0 ? 600 : 400,
+                  color: p.onSurface,
+                  opacity: Math.max(0.18, alpha),
+                  transform: `scale(${scale})`,
+                  lineHeight: 1,
+                }}
+              >
+                {cur + d}
+              </div>
+            );
+          })}
         </div>
       );
     }
     case "text":
       return (
-        <div style={{ ...style, display: "flex", alignItems: "center", fontSize: 17, color: p.onSurfaceSecondary }}>
+        <div style={{ ...style, display: "flex", alignItems: "center", fontSize: 17, color: p.onSurface }}>
           {it.label}
         </div>
       );
@@ -552,26 +698,14 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       if (it.variant === "infinite") {
         return (
           <div style={{ ...style, display: "grid", placeItems: "center" }}>
-            <div className="miuix-spin" style={{ width: 20, height: 20, borderRadius: 999, border: `2px solid ${p.secondaryContainer}`, borderTopColor: p.primary, position: "relative" }}>
-              <div style={{ position: "absolute", top: -3, right: 2, width: 4, height: 4, borderRadius: 999, background: p.primary }} />
-            </div>
+            <OrbitRing />
           </div>
         );
       }
       if (it.variant === "circular") {
-        const v = Math.round((it.value ?? 0.4) * 100);
         return (
           <div style={{ ...style, display: "grid", placeItems: "center" }}>
-            <div
-              style={{
-                width: 30,
-                height: 30,
-                borderRadius: 999,
-                background: `conic-gradient(${p.primary} ${v}%, ${p.secondaryContainer} 0)`,
-                WebkitMask: "radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px))",
-                mask: "radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px))",
-              }}
-            />
+            <CircularRing value={it.value ?? 0.4} track={p.secondaryContainer} ink={p.primary} />
           </div>
         );
       }
@@ -585,19 +719,19 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "pullToRefresh":
       return (
         <div style={{ ...style, display: "grid", placeItems: "center" }}>
-          <div className="miuix-spin" style={{ width: 30, height: 30, borderRadius: 999, border: `4px solid ${p.secondaryContainer}`, borderTopColor: p.primary, boxSizing: "border-box" }} />
+          <OrbitRing size={20} stroke={1.8} dot={3.6} />
         </div>
       );
     case "bottomSheet":
       return (
-        <div style={{ ...style, borderRadius: "28px 28px 0 0", background: p.surfaceContainer, padding: "10px 0 16px", display: "flex", flexDirection: "column", border: it.variant === "window" ? `1px solid ${p.outline}` : undefined }}>
-          <div style={{ width: 36, height: 4, borderRadius: 4, background: p.outline, alignSelf: "center", marginBottom: 8 }} />
-          <div style={{ padding: "8px 16px 12px", fontSize: 18, fontWeight: 500, color: p.onSurface }}>{it.label}</div>
+        <div style={{ ...style, borderRadius: "28px 28px 0 0", background: p.background, padding: "10px 0 16px", display: "flex", flexDirection: "column", border: it.variant === "window" ? `1px solid ${p.outline}` : undefined }}>
+          <div style={{ width: 36, height: 4, borderRadius: 4, background: withAlpha(p.onSurfaceVariantSummary, 0.2), alignSelf: "center", marginBottom: 8 }} />
+          <div style={{ padding: "8px 24px 12px", fontSize: 18, fontWeight: 500, color: p.onBackground }}>{it.label}</div>
           {(it.tabs ?? [
             { icon: "", label: t("confirm", lang) },
             { icon: "", label: t("more", lang) },
           ]).slice(0, 3).map((tab, i) => (
-            <div key={i} style={{ padding: "14px 16px", fontSize: 17, color: p.onSurfaceContainer, boxShadow: i < 2 ? `inset 0 -0.5px 0 ${p.dividerLine}` : undefined }}>{tab.label}</div>
+            <div key={i} style={{ padding: "14px 24px", fontSize: 17, color: p.onSurfaceContainer, boxShadow: i < 2 ? `inset 0 -0.5px 0 ${p.dividerLine}` : undefined }}>{tab.label}</div>
           ))}
         </div>
       );
@@ -653,54 +787,48 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "tooltip":
       return it.variant === "rich" ? (
-        <div style={{ ...style, ...sq(16), background: p.onSurface, color: p.surface, padding: 16, display: "flex", flexDirection: "column", justifyContent: "center", gap: 6 }}>
-          <div style={{ fontSize: 14, fontWeight: 700 }}>{it.label}</div>
-          {it.supporting && <div style={{ fontSize: 13, opacity: 0.72, lineHeight: 1.4 }}>{it.supporting}</div>}
-          <div style={{ alignSelf: "flex-end", ...sq(8), background: withAlpha("#fff", 0.14), padding: "6px 12px", fontSize: 13 }}>{t("confirm", lang)}</div>
+        <div style={{ ...style, ...sq(16), background: p.surfaceContainer, color: p.onSurface, padding: 16, display: "flex", flexDirection: "column", justifyContent: "center", gap: 8, boxShadow: `0 12px 32px ${p.windowDimming}` }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: p.onSurface }}>{it.label}</div>
+          {it.supporting && <div style={{ fontSize: 13, color: p.onSurfaceContainerVariant, lineHeight: 1.4 }}>{it.supporting}</div>}
+          <div style={{ alignSelf: "flex-end", ...sq(8), background: p.secondaryVariant, color: p.onSecondaryVariant, fontSize: 13, padding: "6px 12px" }}>{t("confirm", lang)}</div>
         </div>
       ) : (
-        <div style={{ ...style, ...sq(12), background: p.onSurface, color: p.surface, display: "grid", placeItems: "center", fontSize: 13, padding: "8px 12px" }}>
+        <div style={{ ...style, ...sq(12), background: p.onSecondaryVariant, color: p.secondaryVariant, display: "grid", placeItems: "center", fontSize: 13, padding: "8px 12px" }}>
           {it.label}
         </div>
       );
     case "colorPicker": {
-      const hue = hueColor(it.value ?? 0.6);
+      const hue = it.value ?? 0.6;
+      const hex = hueColor(hue);
       return (
-        <div style={{ ...style, display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{ height: 28, ...sq(8), background: hue }} />
-          <div style={{ flex: 1, ...sq(12), background: `linear-gradient(180deg,#fff,transparent),linear-gradient(90deg,#fff,${hue})`, backgroundBlendMode: "multiply" }} />
-          <div style={{ height: 22, borderRadius: 999, background: "linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)", position: "relative" }}>
-            <div style={{ position: "absolute", top: 3, left: `clamp(2px, calc(${(it.value ?? 0.6) * 100}% - 7px), calc(100% - 16px))`, width: 14, height: 16, borderRadius: 7, background: "#fff", boxShadow: "0 0 0 1px rgba(0,0,0,0.2)" }} />
-          </div>
-          <div style={{ height: 22, borderRadius: 999, background: `linear-gradient(90deg,transparent,${hue})`, boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }} />
+        <div style={{ ...style, display: "flex", flexDirection: "column", justifyContent: "space-between", gap: 12 }}>
+          <div style={{ height: 26, borderRadius: 999, background: hex }} />
+          <ColorBand colors="linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)" value={hue} />
+          <ColorBand colors={`linear-gradient(90deg,#fff,${hex})`} value={0.82} />
+          <ColorBand colors={`linear-gradient(90deg,#000,${hex})`} value={0.7} />
+          <ColorBand colors={`linear-gradient(90deg,transparent,${hex})`} value={1} />
         </div>
       );
     }
     case "colorPalette": {
-      const swatches = ["#3482FF", "#FF6A00", "#0F9D58", "#7C4DFF", "#E11D48", "#C9A227", "#00000000", "#FFFFFF"];
       const on = it.selected ?? 0;
       return (
-        <div style={{ ...style, ...sq(16), background: p.surfaceContainer, padding: 12, display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 8, alignContent: "center" }}>
-          {swatches.map((c, i) => (
-            <div
-              key={c}
-              style={{
-                aspectRatio: "1",
-                ...sq(8),
-                background: c === "#00000000" ? "repeating-conic-gradient(#ddd 0 25%, #fff 0 50%) 50% / 8px 8px" : c,
-                boxShadow: i === on ? `inset 0 0 0 2px ${p.primary}` : `inset 0 0 0 1px ${p.outline}`,
-                display: "grid",
-                placeItems: "center",
-              }}
-            >
-              {i === on && <CheckMark color={c === "#FFFFFF" || c === "#00000000" ? p.primary : "#fff"} size={12} />}
-            </div>
-          ))}
+        <div style={{ ...style, ...sq(16), overflow: "hidden", display: "grid", gridTemplateColumns: "repeat(13, 1fr)", gridTemplateRows: "repeat(7, 1fr)" }}>
+          {Array.from({ length: 91 }, (_, i) => {
+            const col = i % 13;
+            const row = Math.floor(i / 13);
+            const c = paletteCell(col, row);
+            return (
+              <div key={i} style={{ background: c, display: "grid", placeItems: "center" }}>
+                {i === on && <div style={{ width: 10, height: 10, borderRadius: 999, boxShadow: `inset 0 0 0 2px ${row < 3 ? "#111" : "#fff"}` }} />}
+              </div>
+            );
+          })}
         </div>
       );
     }
     case "scrollBar":
-      return <div style={{ ...style, borderRadius: 999, background: p.onSurfaceVariantActions, opacity: 0.45 }} />;
+      return <div style={{ ...style, width: 4, borderRadius: 999, background: p.onSurfaceVariantActions, opacity: 0.1, margin: "0 auto" }} />;
     case "basicPref":
       return <PrefRow it={it} p={p} join={join} />;
     case "switchPref":
@@ -713,7 +841,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "rangeSliderPref":
       return (
         <div style={{ ...style, background: p.surfaceContainer, padding: "10px 16px 14px", borderRadius: `${join?.top ? 0 : 16}px ${join?.top ? 0 : 16}px ${join?.bottom ? 0 : 16}px ${join?.bottom ? 0 : 16}px` }}>
-          <div style={{ fontSize: 17, fontWeight: 500, color: p.onSurfaceContainer }}>{it.label}</div>
+          <div style={{ fontSize: 17, fontWeight: 500, color: p.onBackground }}>{it.label}</div>
           {it.supporting && <div style={{ fontSize: 14, color: p.onSurfaceVariantSummary, marginTop: 2 }}>{it.supporting}</div>}
           <div style={{ marginTop: 12 }}>
             {it.kind === "rangeSliderPref" ? <RangeBar p={p} from={rangeStart(it)} to={rangeEnd(it)} /> : <SliderBar p={p} value={it.value ?? 0.5} />}

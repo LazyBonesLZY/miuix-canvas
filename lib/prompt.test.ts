@@ -9,6 +9,9 @@ describe("buildPrompt", () => {
     expect(text).toContain("屏幕「首页」");
     expect(text).toContain("SwitchPreference");
     expect(text).toContain("不要用 Material 3");
+    expect(text).toContain("Scaffold");
+    expect(text).toContain("TextButton");
+    expect(text).toContain("Overlay");
   });
 
   it("can describe a single screen", () => {

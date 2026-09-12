@@ -36,7 +36,8 @@ describe("livePatch", () => {
   });
 
   it("picks a color swatch", () => {
-    expect(livePatch(base({ kind: "colorPalette" }), 0.9, 0.5)).toEqual({ selected: 7 });
+    expect(livePatch(base({ kind: "colorPalette" }), 0.99, 0)).toEqual({ selected: 12 });
+    expect(livePatch(base({ kind: "colorPalette" }), 0, 0.99)).toEqual({ selected: 78 });
   });
 
   it("moves the nearer RangeSlider thumb", () => {

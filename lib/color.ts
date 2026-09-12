@@ -25,6 +25,7 @@ export type Palette = {
   onSurfaceContainer: string;
   onSurfaceContainerVariant: string;
   surfaceContainerHigh: string;
+  onSurfaceContainerHigh: string;
   surfaceContainerHighest: string;
   outline: string;
   dividerLine: string;
@@ -121,6 +122,7 @@ const LIGHT_SURFACES = {
   onSurfaceContainer: "#000000",
   onSurfaceContainerVariant: "#959595",
   surfaceContainerHigh: "#E8E8E8",
+  onSurfaceContainerHigh: "#A2A2A2",
   surfaceContainerHighest: "#E8E8E8",
   outline: "#D9D9D9",
   dividerLine: "#E0E0E0",
@@ -154,6 +156,7 @@ const DARK_SURFACES = {
   onSurfaceContainer: "rgba(255,255,255,0.9)",
   onSurfaceContainerVariant: "#737373",
   surfaceContainerHigh: "#242424",
+  onSurfaceContainerHigh: "#666666",
   surfaceContainerHighest: "#2D2D2D",
   outline: "#404040",
   dividerLine: "#393939",

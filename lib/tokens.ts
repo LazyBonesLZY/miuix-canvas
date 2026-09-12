@@ -60,14 +60,14 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   iconButton: { kind: "iconButton", category: "actions", icon: "more_horiz", w: () => 40, h: 40, defaultLabel: L("", "", "", ""), composable: "IconButton" },
   fab: { kind: "fab", category: "actions", icon: "add", w: () => 60, h: 60, defaultLabel: L("", "", "", ""), composable: "FloatingActionButton" },
   floatingToolbar: { kind: "floatingToolbar", category: "actions", icon: "construction", w: () => 220, h: 52, defaultLabel: L("工具", "Tools", "ツール", "도구"), tabs: [{ icon: "edit", label: "" }, { icon: "content_copy", label: "" }, { icon: "delete", label: "" }], composable: "FloatingToolbar" },
-  topAppBar: { kind: "topAppBar", category: "navigation", icon: "web_asset", w: edge, h: 88, edge: "top", variants: ["small", "large"], defaultLabel: L("标题", "Title", "タイトル", "제목"), composable: "TopAppBar" },
+  topAppBar: { kind: "topAppBar", category: "navigation", icon: "web_asset", w: edge, h: 72, edge: "top", variants: ["small", "large"], defaultLabel: L("标题", "Title", "タイトル", "제목"), composable: "SmallTopAppBar" },
   smallTitle: { kind: "smallTitle", category: "navigation", icon: "title", w: full, h: 36, defaultLabel: L("常用功能", "Shortcuts", "ショートカット", "바로가기"), composable: "SmallTitle" },
   navigationBar: { kind: "navigationBar", category: "navigation", icon: "dock_to_bottom", w: edge, h: 64, edge: "bottom", variants: ["default", "blur"], defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationBar" },
   floatingNav: { kind: "floatingNav", category: "navigation", icon: "dock_to_bottom", w: () => 280, h: 52, variants: ["default", "glass"], defaultLabel: L("悬浮导航", "Floating nav", "フローティングナビ", "플로팅 탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "FloatingNavigationBar" },
   navigationRail: { kind: "navigationRail", category: "navigation", icon: "view_sidebar", w: () => 80, h: 400, edge: "start", defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationRail" },
   tabRow: { kind: "tabRow", category: "navigation", icon: "tabs", w: full, h: 42, variants: ["default", "contour"], defaultLabel: L("标签", "Tabs", "タブ", "탭"), tabs: [{ icon: "", label: "推荐" }, { icon: "", label: "关注" }, { icon: "", label: "热门" }], composable: "TabRow" },
   searchBar: { kind: "searchBar", category: "navigation", icon: "search", w: full, h: 45, variants: ["field", "expanded"], defaultLabel: L("搜索", "Search", "検索", "검색"), composable: "SearchBar" },
-  breadcrumb: { kind: "breadcrumb", category: "navigation", icon: "more_horiz", w: full, h: 36, defaultLabel: L("设置 / 显示", "Settings / Display", "設定 / 表示", "설정 / 디스플레이"), composable: "BreadcrumbBar" },
+  breadcrumb: { kind: "breadcrumb", category: "navigation", icon: "more_horiz", w: full, h: 48, defaultLabel: L("设置 / 显示", "Settings / Display", "設定 / 表示", "설정 / 디스플레이"), composable: "BreadcrumbBar" },
   card: { kind: "card", category: "containment", icon: "rectangle", w: full, h: 120, defaultLabel: L("卡片标题", "Card title", "カードタイトル", "카드 제목"), defaultSupporting: L("辅助说明文字", "Supporting text", "補足テキスト", "보조 설명"), composable: "Card" },
   surface: { kind: "surface", category: "containment", icon: "crop_square", w: full, h: 80, defaultLabel: L("", "", "", ""), composable: "Surface" },
   divider: { kind: "divider", category: "containment", icon: "horizontal_rule", w: full, h: 1, variants: ["horizontal", "vertical"], defaultLabel: L("", "", "", ""), composable: "HorizontalDivider" },
@@ -95,7 +95,7 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   badge: { kind: "badge", category: "content", icon: "mark_chat_unread", w: () => 16, h: 16, variants: ["number", "dot"], defaultLabel: L("3", "3", "3", "3"), composable: "Badge" },
   icon: { kind: "icon", category: "content", icon: "star", w: () => 28, h: 28, defaultLabel: L("", "", "", ""), composable: "Icon" },
   progress: { kind: "progress", category: "progress", icon: "progress_activity", w: full, h: 6, variants: ["linear", "circular", "infinite"], defaultLabel: L("", "", "", ""), value: 0.45, composable: "ProgressIndicator" },
-  pullToRefresh: { kind: "pullToRefresh", category: "progress", icon: "refresh", w: () => 40, h: 40, defaultLabel: L("", "", "", ""), composable: "PullToRefresh" },
+  pullToRefresh: { kind: "pullToRefresh", category: "progress", icon: "refresh", w: () => 20, h: 20, defaultLabel: L("", "", "", ""), composable: "PullToRefresh" },
   scrollBar: { kind: "scrollBar", category: "progress", icon: "linear_scale", w: () => 6, h: 80, variants: ["vertical", "horizontal"], defaultLabel: L("", "", "", ""), composable: "ScrollBar" },
   blur: { kind: "blur", category: "containment", icon: "blur_on", w: full, h: 160, defaultLabel: L("模糊", "Blur", "ブラー", "블러"), composable: "textureBlur" },
   basicPref: { kind: "basicPref", category: "preference", icon: "view_agenda", w: full, h: 64, defaultLabel: L("通用项", "Basic row", "基本項目", "기본 항목"), defaultSupporting: L("自定义右侧内容", "Custom trailing slot", "末尾スロットをカスタム", "오른쪽 슬롯 사용자화"), composable: "BasicComponent" },
@@ -150,6 +150,9 @@ export function applyVariant(it: Item, variant: string): Partial<Item> {
   if (it.kind === "floatingNav") {
     return variant === "glass" ? { ...patch, w: Math.max(it.w, 364), h: 64 } : { ...patch, w: 280, h: 52 };
   }
+  if (it.kind === "topAppBar") {
+    return variant === "large" ? { ...patch, h: 88 } : { ...patch, h: 72 };
+  }
   if (it.kind === "progress") {
     return variant === "linear" ? { ...patch, w: Math.max(it.w, 200), h: 6 } : { ...patch, w: 30, h: 30 };
   }
@@ -180,6 +183,8 @@ export function composableOf(it: Pick<Item, "kind" | "variant">): string {
       return v === "infinite" ? "InfiniteProgressIndicator" : v === "circular" ? "CircularProgressIndicator" : "LinearProgressIndicator";
     case "slider":
       return v === "vertical" ? "VerticalSlider" : "Slider";
+    case "button":
+      return v === "text" ? "TextButton" : "Button";
     case "topAppBar":
       return v === "small" ? "SmallTopAppBar" : "TopAppBar";
     case "tabRow":

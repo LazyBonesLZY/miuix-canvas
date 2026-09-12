@@ -536,6 +536,12 @@ input[type="range"]::-webkit-slider-thumb {
   animation: miuix-spin 800ms linear infinite;
 }
 
+.miuix-orbit {
+  position: absolute;
+  inset: 0;
+  animation: miuix-spin 800ms linear infinite;
+}
+
 .miuix-press {
   transition: transform 120ms ease, filter 120ms ease;
 }

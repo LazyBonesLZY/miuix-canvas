@@ -12,6 +12,7 @@ describe("schemeFromSeed", () => {
     expect(p.secondaryVariant).toBe("#F0F0F0");
     expect(p.secondaryContainer).toBe("#F0F0F0");
     expect(p.surfaceContainerHigh).toBe("#E8E8E8");
+    expect(p.onSurfaceContainerHigh).toBe("#A2A2A2");
     expect(p.outline).toBe("#D9D9D9");
     expect(p.dividerLine).toBe("#E0E0E0");
     expect(p.windowDimming).toBe("rgba(0,0,0,0.3)");

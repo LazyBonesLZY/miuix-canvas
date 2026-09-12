@@ -133,10 +133,13 @@ export function defaultDoc(lang: Lang): Doc {
       item("card", 16, 100, 380, 148, "Miuix Canvas", {
         supporting: loc(lang, "用 Miuix 组件拼界面，再生成提示词。", "Sketch with Miuix parts, then copy a prompt.", "Miuix 部品で画面を組み、プロンプトにする。", "Miuix 부품으로 화면을 만든 뒤 프롬프트를 복사한다."),
       }),
-      item("arrowPref", 16, 264, 380, 64, loc(lang, "开源许可", "Open source licenses", "オープンソースライセンス", "오픈 소스 라이선스"), {
+      item("textField", 16, 264, 380, 50, loc(lang, "设备名称", "Device name", "デバイス名", "기기 이름")),
+      item("breadcrumb", 16, 328, 380, 48, loc(lang, "设置 / 显示 / 关于", "Settings / Display / About", "設定 / 表示 / 情報", "설정 / 디스플레이 / 정보")),
+      item("arrowPref", 16, 392, 380, 64, loc(lang, "开源许可", "Open source licenses", "オープンソースライセンス", "오픈 소스 라이선스"), {
         supporting: "Apache-2.0 · MIT",
       }),
-      item("button", 16, 348, 380, 50, loc(lang, "返回", "Back", "戻る", "뒤로"), { variant: "primary", to: "back", transition: "fade" }),
+      item("button", 16, 472, 182, 50, loc(lang, "返回", "Back", "戻る", "뒤로"), { variant: "text", to: "back", transition: "fade" }),
+      item("button", 214, 472, 182, 50, loc(lang, "确定", "OK", "OK", "확인"), { variant: "primary", to: "back", transition: "fade" }),
     ],
   };
 

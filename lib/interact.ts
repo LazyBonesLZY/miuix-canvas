@@ -74,7 +74,9 @@ export function livePatch(it: Item, nx: number, ny: number): Partial<Item> | nul
     return { label: String(y < 0.45 ? base + 1 : y > 0.55 ? base - 1 : base) };
   }
   if (it.kind === "colorPalette") {
-    return { selected: Math.min(7, Math.floor(x * 8)) };
+    const col = Math.min(12, Math.floor(x * 13));
+    const row = Math.min(6, Math.floor(y * 7));
+    return { selected: row * 13 + col };
   }
   if (it.kind === "breadcrumb") {
     const parts = it.label.split(/\s*[\/·>]\s*/).filter(Boolean);

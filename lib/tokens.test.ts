@@ -28,6 +28,9 @@ describe("KIND_SPEC coverage", () => {
     expect(KIND_SPEC.floatingNav.h).toBe(52);
     expect(KIND_SPEC.rangeSlider.from).toBe(0.2);
     expect(KIND_SPEC.button.variants?.[0]).toBe("secondary");
+    expect(KIND_SPEC.topAppBar.h).toBe(72);
+    expect(KIND_SPEC.pullToRefresh.h).toBe(20);
+    expect(KIND_SPEC.breadcrumb.h).toBe(48);
   });
 
   it("maps variants to the real composable names", () => {
@@ -43,6 +46,8 @@ describe("KIND_SPEC coverage", () => {
     expect(composableOf({ kind: "dropdownPref", variant: "window" })).toBe("WindowDropdownPreference");
     expect(composableOf({ kind: "listPopup", variant: "window" })).toBe("WindowListPopup");
     expect(composableOf({ kind: "cascadingPopup", variant: "overlay" })).toBe("OverlayCascadingListPopup");
+    expect(composableOf({ kind: "button", variant: "text" })).toBe("TextButton");
+    expect(composableOf({ kind: "topAppBar", variant: "small" })).toBe("SmallTopAppBar");
   });
 
   it("can name every public composable from the official component index", () => {
@@ -55,7 +60,7 @@ describe("KIND_SPEC coverage", () => {
     const official = [
       "Surface", "TopAppBar", "SmallTopAppBar", "NavigationBar", "FloatingNavigationBar", "NavigationRail",
       "TabRow", "TabRowWithContour", "BreadcrumbBar", "Card", "BasicComponent", "Button",
-      "IconButton", "Text", "SmallTitle", "TextField", "Switch", "Checkbox", "RadioButton",
+      "IconButton", "TextButton", "Text", "SmallTitle", "TextField", "Switch", "Checkbox", "RadioButton",
       "Slider", "VerticalSlider", "RangeSlider", "NumberPicker", "LinearProgressIndicator",
       "CircularProgressIndicator", "InfiniteProgressIndicator", "Snackbar", "Tooltip",
       "RichTooltipBox", "Badge", "Icon", "FloatingActionButton", "FloatingToolbar",
