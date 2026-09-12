@@ -6,9 +6,22 @@
     <meta name="color-scheme" content="light dark" />
     <title>Miuix Canvas renderer</title>
     <link rel="stylesheet" href="renderer.css" />
+    <script type="application/javascript">
+      function report(message) {
+        try {
+          window.parent.postMessage(JSON.stringify({ type: "error", message: String(message) }), window.location.origin);
+        } catch (error) {}
+      }
+      window.addEventListener("error", function (event) {
+        report(event.message || event.error || "Renderer script failed");
+      });
+      window.addEventListener("unhandledrejection", function (event) {
+        report(event.reason || "Renderer promise failed");
+      });
+    </script>
   </head>
   <body>
     <div id="ComposeTarget"></div>
-    <script src="miuixRenderer.js"></script>
+    <script src="miuixRenderer.js" type="module"></script>
   </body>
 </html>

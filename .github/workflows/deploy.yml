@@ -36,6 +36,13 @@ jobs:
         run: npm run build
         env:
           NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+      - name: Check renderer can boot as a module
+        run: |
+          grep -q 'src="miuixRenderer.js" type="module"' out/renderer/index.html
+          if grep -q 'import.meta' out/renderer/miuixRenderer.js; then
+            echo 'miuixRenderer.js still contains import.meta'
+            exit 1
+          fi
       - run: touch out/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -36,11 +36,11 @@ export function OfficialMiuixFrame({
       if (event.origin !== window.location.origin || event.source !== frame.current?.contentWindow) return;
       const message = parseRendererEvent(event.data);
       if (!message) return;
-      if (message.type === "ready") {
+      if (message.type === "ready" || message.type === "rendered") {
         setError("");
         setReady(true);
-        send();
       }
+      if (message.type === "ready") send();
       if (message.type === "error") setError(message.message ?? "Miuix renderer failed");
       onEvent?.(message);
     };
@@ -49,17 +49,19 @@ export function OfficialMiuixFrame({
   }, [onEvent, send]);
 
   useEffect(() => {
-    if (ready) send();
+    send();
+    if (ready) return;
+    const retry = window.setInterval(send, 400);
+    return () => window.clearInterval(retry);
   }, [ready, send]);
 
   return (
-    <>
+    <div className={`absolute inset-0 ${className ?? ""}`}>
       <iframe
         ref={frame}
         src={rendererUrl()}
         title={`${screen.name} — Miuix`}
-        className={className}
-        onLoad={() => setReady(false)}
+        onLoad={send}
         style={{
           width: "100%",
           height: "100%",
@@ -69,11 +71,16 @@ export function OfficialMiuixFrame({
           background: "transparent",
         }}
       />
+      {!ready && !error && (
+        <div className="pointer-events-none absolute inset-0 grid place-items-center text-[12px] text-[var(--muted)]">
+          Miuix…
+        </div>
+      )}
       {error && (
         <div className="absolute inset-0 grid place-items-center bg-black/75 p-4 text-center text-xs text-white">
           {error}
         </div>
       )}
-    </>
+    </div>
   );
 }

@@ -1,5 +1,4 @@
-import { access } from "node:fs/promises";
-import { cp, mkdir, rm } from "node:fs/promises";
+import { access, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
@@ -24,3 +23,21 @@ if (!(await exists(source))) {
 await rm(target, { recursive: true, force: true });
 await mkdir(target, { recursive: true });
 await cp(source, target, { recursive: true });
+
+const htmlPath = resolve(target, "index.html");
+const html = await readFile(htmlPath, "utf8");
+await writeFile(
+  htmlPath,
+  html.replace(
+    /<script src="miuixRenderer\.js"[^>]*><\/script>/,
+    '<script src="miuixRenderer.js" type="module"></script>',
+  ),
+);
+
+// kotlinx-io emits a Node-only helper that mentions `import.meta`. That token is a
+// SyntaxError in classic scripts, so the whole Compose bundle never starts.
+const jsPath = resolve(target, "miuixRenderer.js");
+const js = await readFile(jsPath, "utf8");
+if (js.includes("import.meta")) {
+  await writeFile(jsPath, js.replaceAll("import.meta", "undefined"));
+}
