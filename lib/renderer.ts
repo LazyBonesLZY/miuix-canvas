@@ -52,6 +52,18 @@ function optionalText(value: unknown) {
   return typeof value === "string" ? value : undefined;
 }
 
+function sanitizeTabs(tabs: Screen["items"][number]["tabs"]) {
+  if (!Array.isArray(tabs)) return tabs;
+  return tabs.flatMap((tab) => {
+    if (!tab || typeof tab !== "object") return [];
+    return [{
+      ...tab,
+      icon: text(tab.icon),
+      label: text(tab.label),
+    }];
+  });
+}
+
 function sanitizeItem(item: Screen["items"][number]): Screen["items"][number] {
   return {
     ...item,
@@ -59,6 +71,7 @@ function sanitizeItem(item: Screen["items"][number]): Screen["items"][number] {
     icon: optionalText(item.icon),
     variant: optionalText(item.variant),
     supporting: optionalText(item.supporting),
+    tabs: sanitizeTabs(item.tabs),
     x: finite(item.x),
     y: finite(item.y),
     w: finite(item.w, 1),

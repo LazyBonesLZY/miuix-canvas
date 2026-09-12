@@ -50,11 +50,15 @@ export function OfficialMiuixFrame({
       if (event.origin !== window.location.origin || event.source !== frame.current?.contentWindow) return;
       const message = parseRendererEvent(event.data);
       if (!message) return;
-      if (message.type === "ready" || message.type === "rendered") {
+      if (message.type === "ready") {
+        setError("");
+        setReady(true);
+        send();
+      }
+      if (message.type === "rendered" && message.requestId) {
         setError("");
         setReady(true);
       }
-      if (message.type === "ready") send();
       if (message.type === "error") setError(message.message ?? "Miuix renderer failed");
       onEvent?.(message);
     };

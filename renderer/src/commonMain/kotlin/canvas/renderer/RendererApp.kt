@@ -30,9 +30,7 @@ import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
-import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
-import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 
 @Composable
 fun RendererApp(
@@ -119,12 +117,10 @@ internal fun officialThemeController(
     dark: Boolean,
     monet: Boolean,
     seed: Color?,
-): ThemeController = if (monet) {
+): ThemeController = if (monet && seed != null) {
     ThemeController(
         colorSchemeMode = if (dark) ColorSchemeMode.MonetDark else ColorSchemeMode.MonetLight,
         keyColor = seed,
-        colorSpec = ThemeColorSpec.Spec2021,
-        paletteStyle = ThemePaletteStyle.Content,
     )
 } else {
     ThemeController(

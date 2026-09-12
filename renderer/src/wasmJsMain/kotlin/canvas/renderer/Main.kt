@@ -14,6 +14,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
 import webfont.preloadWebFonts
 import kotlin.js.ExperimentalWasmJsInterop
@@ -26,6 +27,7 @@ private var acceptedRender = false
 
 private const val MI_SANS_CSS =
     "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify&display=swap"
+private const val LOADING_FONT_TIMEOUT_MS = 10_000L
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalWasmJsInterop::class)
 fun main() {
@@ -46,7 +48,11 @@ fun main() {
             LaunchedEffect(fontFamilyResolver) {
                 withFrameNanos {}
                 fonts.launch {
-                    runCatching { preloadWebFonts(MI_SANS_CSS, fontFamilyResolver) }
+                    runCatching {
+                        withTimeoutOrNull(LOADING_FONT_TIMEOUT_MS) {
+                            preloadWebFonts(MI_SANS_CSS, fontFamilyResolver)
+                        }
+                    }
                     post(RendererEvent(type = "fonts"))
                 }
             }

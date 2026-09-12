@@ -51,6 +51,16 @@ describe("renderer bridge", () => {
     expect(parseRendererEvent("not json")).toBeNull();
   });
 
+  it("drops null tabs so Kotlin can decode navigation rows", () => {
+    const doc = defaultDoc("en");
+    const broken = {
+      ...doc.screens[0],
+      items: [{ ...doc.screens[0].items.at(-1)!, tabs: [null, { icon: "home", label: "Home" }] as unknown as typeof doc.screens[0]["items"][number]["tabs"] }],
+    };
+    const request = renderRequest(broken, doc.theme, "en", false);
+    expect(request.screen.items[0].tabs).toEqual([{ icon: "home", label: "Home" }]);
+  });
+
   it("starts a deferred renderer as soon as the screen is selected", () => {
     expect(rendererBoot("", 900)).toBe("later");
     expect(rendererBoot("", 0)).toBe("now");

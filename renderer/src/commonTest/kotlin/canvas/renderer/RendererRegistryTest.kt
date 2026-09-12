@@ -96,6 +96,11 @@ class RendererRegistryTest {
         assertEquals(ColorSchemeMode.Dark, officialSchemeMode("dark", monet = false))
         assertEquals(ColorSchemeMode.MonetLight, officialSchemeMode("light", monet = true))
         assertEquals(ColorSchemeMode.MonetDark, officialSchemeMode("dark", monet = true))
+        assertEquals(ColorSchemeMode.Light, officialThemeController(dark = false, monet = true, seed = null).colorSchemeMode)
+        assertEquals(
+            ColorSchemeMode.MonetLight,
+            officialThemeController(dark = false, monet = true, seed = androidx.compose.ui.graphics.Color(0xFF3482FF)).colorSchemeMode,
+        )
     }
 
     @Test
