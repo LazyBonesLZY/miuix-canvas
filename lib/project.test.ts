@@ -31,4 +31,26 @@ describe("migrateDoc", () => {
     const next = migrateDoc(raw as Doc);
     expect(next.screens[0].items.map((it) => it.kind)).toEqual(["button"]);
   });
+
+  it("drops invented glass/blur nav variants", () => {
+    const raw = {
+      ...base,
+      screens: [
+        {
+          id: "s",
+          name: "Home",
+          x: 0,
+          y: 0,
+          preset: "phone" as const,
+          items: [
+            { id: "a", kind: "floatingNav", x: 24, y: 760, w: 364, h: 64, label: "", variant: "glass" },
+            { id: "b", kind: "navigationBar", x: 0, y: 828, w: 412, h: 64, label: "", variant: "blur" },
+          ],
+        },
+      ],
+    };
+    const next = migrateDoc(raw as Doc);
+    expect(next.screens[0].items[0]).toMatchObject({ kind: "floatingNav", w: 280, h: 52, variant: undefined });
+    expect(next.screens[0].items[1]).toMatchObject({ kind: "navigationBar", variant: "iconAndText" });
+  });
 });

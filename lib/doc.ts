@@ -66,6 +66,7 @@ export function defaultDoc(lang: Lang): Doc {
         transition: "slide",
       }),
       item("navigationBar", 0, 828, 412, 64, "", {
+        variant: "iconAndText",
         tabs: [
           { icon: "home", label: loc(lang, "首页", "Home", "ホーム", "홈") },
           { icon: "explore", label: loc(lang, "发现", "Explore", "探す", "탐색"), to: galleryId, transition: "slide" },
@@ -167,13 +168,11 @@ export function defaultDoc(lang: Lang): Doc {
       item("tooltip", 16, 684, 140, 36, loc(lang, "提示文字", "Tooltip", "ツールチップ", "툴팁"), { variant: "plain" }),
       item("badge", 172, 692, 16, 16, "3", { variant: "number" }),
       item("badge", 200, 698, 6, 6, "", { variant: "dot" }),
-      item("image", 0, 700, 412, 192, ""),
-      item("floatingNav", 24, 760, 364, 64, "", {
-        variant: "glass",
+      item("floatingNav", 66, 824, 280, 52, "", {
         tabs: [
           { icon: "home", label: loc(lang, "首页", "Home", "ホーム", "홈") },
           { icon: "explore", label: loc(lang, "发现", "Explore", "探す", "탐색") },
-          { icon: "person", label: loc(lang, "我的", "Me", "マイ", "나") },
+          { icon: "person", label: loc(lang, "我的", "Me", "マイ", "마이") },
         ],
         selected: 0,
       }),

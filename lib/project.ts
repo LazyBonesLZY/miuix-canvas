@@ -35,12 +35,22 @@ export function isProject(value: unknown): value is Doc {
   );
 }
 
+function migrateItem(it: Item): Item {
+  if (it.kind === "floatingNav" && (it.variant === "glass" || it.h === 64)) {
+    return { ...it, variant: undefined, w: 280, h: 52, x: it.w === 364 || it.w === 380 ? Math.round(it.x + (it.w - 280) / 2) : it.x };
+  }
+  if (it.kind === "navigationBar" && (it.variant === "blur" || it.variant === "default" || !it.variant)) {
+    return { ...it, variant: "iconAndText" };
+  }
+  return it;
+}
+
 export function migrateDoc(doc: Doc): Doc {
   return {
     ...doc,
     screens: doc.screens.map((screen) => ({
       ...screen,
-      items: screen.items.filter((it) => KIND_SET.has(it.kind)),
+      items: screen.items.filter((it) => KIND_SET.has(it.kind)).map(migrateItem),
     })),
   };
 }

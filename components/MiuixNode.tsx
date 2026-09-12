@@ -84,59 +84,6 @@ function CircularRing({ value, track, ink }: { value: number; track: string; ink
   );
 }
 
-function GlassNoise() {
-  return (
-    <div
-      aria-hidden
-      style={{
-        position: "absolute",
-        inset: 0,
-        borderRadius: "inherit",
-        pointerEvents: "none",
-        opacity: 0.22,
-        mixBlendMode: "overlay",
-        backgroundImage:
-          "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")",
-      }}
-    />
-  );
-}
-
-/** Official demo liquid glass: 4dp vibrancy + rim lens, not a 32px gaussian frost. */
-function LiquidGlass({
-  p,
-  children,
-  style,
-}: {
-  p: Palette;
-  children: ReactNode;
-  style?: CSSProperties;
-}) {
-  const dark = p.surface === "#000000";
-  return (
-    <div
-      className="miuix-liquid"
-      style={{
-        ...style,
-        borderRadius: 999,
-        background: dark
-          ? "linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.05) 100%)"
-          : "linear-gradient(180deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.10) 100%)",
-        backdropFilter: "blur(4px) saturate(1.9) brightness(1.08) contrast(1.05)",
-        WebkitBackdropFilter: "blur(4px) saturate(1.9) brightness(1.08) contrast(1.05)",
-        boxShadow: dark
-          ? "0 10px 22px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.46), inset 0 -1px 0 rgba(255,255,255,0.08)"
-          : "0 10px 22px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.86), inset 0 -1px 0 rgba(255,255,255,0.22)",
-      }}
-    >
-      <span className="miuix-liquid-spec" />
-      <span className="miuix-liquid-rim" />
-      <span className="miuix-liquid-chroma" />
-      {children}
-    </div>
-  );
-}
-
 function ColorBand({ colors, value }: { colors: string; value: number }) {
   return (
     <div style={{ height: 26, borderRadius: 999, background: colors, position: "relative", boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }}>
@@ -296,16 +243,39 @@ function ValueTrail({ value, p, swatch }: { value?: string; p: Palette; swatch?:
   );
 }
 
-function Tabs({ tabs, selected, p, vertical = false, iconsOnly = false }: { tabs: NavTab[]; selected?: number; p: Palette; vertical?: boolean; iconsOnly?: boolean }) {
+function navBarMode(variant?: string): "iconAndText" | "iconOnly" | "iconWithSelectedLabel" {
+  if (variant === "iconOnly") return "iconOnly";
+  if (variant === "iconWithSelectedLabel") return "iconWithSelectedLabel";
+  return "iconAndText";
+}
+
+function NavBarItems({ tabs, selected, p, variant }: { tabs: NavTab[]; selected?: number; p: Palette; variant?: string }) {
+  const mode = navBarMode(variant);
+  const sel = selected ?? 0;
   return (
-    <div style={{ display: "flex", flexDirection: vertical ? "column" : "row", justifyContent: vertical ? "flex-start" : "space-around", height: "100%", padding: vertical ? "24px 8px" : "8px 4px" }}>
+    <div style={{ display: "flex", height: 64, width: "100%" }}>
       {tabs.map((tab, i) => {
-        const on = i === (selected ?? 0);
-        const color = p.onSurfaceContainer;
+        const on = i === sel;
+        const showLabel = mode === "iconAndText" || (mode === "iconWithSelectedLabel" && on);
         return (
-          <div key={`${tab.label}-${i}`} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 3, color, flex: 1, opacity: on ? 1 : 0.4 }}>
-            <Symbol name={tab.icon} size={26} color={color} fill={on} />
-            {!iconsOnly && tab.label && <span style={{ fontSize: 12, fontWeight: on ? 700 : 400 }}>{tab.label}</span>}
+          <div
+            key={`${tab.label}-${i}`}
+            style={{
+              flex: 1,
+              height: 64,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: mode === "iconOnly" ? "center" : "flex-start",
+              paddingTop: mode === "iconOnly" ? 0 : 8,
+              color: p.onSurfaceContainer,
+              opacity: on ? 1 : 0.4,
+            }}
+          >
+            <Symbol name={tab.icon} size={26} color={p.onSurfaceContainer} />
+            {showLabel && tab.label ? (
+              <span style={{ fontSize: 12, fontWeight: on ? 700 : 400, paddingBottom: 8, marginTop: "auto" }}>{tab.label}</span>
+            ) : null}
           </div>
         );
       })}
@@ -360,15 +330,15 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "fab":
       return (
-        <div className={interactive ? "miuix-press" : undefined} style={{ ...style, borderRadius: 999, background: p.primary, display: "grid", placeItems: "center", boxShadow: `0 6px 16px ${withAlpha(p.primary, 0.28)}` }}>
+        <div className={interactive ? "miuix-press" : undefined} style={{ ...style, borderRadius: 999, background: p.primary, display: "grid", placeItems: "center", boxShadow: "0 4px 10px rgba(0,0,0,0.12)" }}>
           <Symbol name={it.icon || "add"} size={26} color={p.onPrimary} />
         </div>
       );
     case "floatingToolbar":
       return (
-        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainer, boxShadow: "0 4px 10px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "space-evenly", padding: "0 10px" }}>
-          {(it.tabs ?? []).map((tab, i) => (
-            <Symbol key={i} name={tab.icon} size={22} color={i === (it.selected ?? 0) ? p.primary : p.onSurface} />
+        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainer, boxShadow: "0 0 10px rgba(0,0,0,0.1)", display: "flex", alignItems: "center", justifyContent: "space-evenly", padding: "0 10px" }}>
+          {(it.tabs ?? []).map((tab) => (
+            <Symbol key={tab.icon} name={tab.icon} size={24} color={p.onSurfaceContainer} />
           ))}
         </div>
       );
@@ -383,11 +353,6 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
               </div>
             )}
             <div style={{ flex: 1, fontSize: large ? 32 : 20, fontWeight: large ? 400 : 500, color: p.onSurface, letterSpacing: large ? -0.4 : 0, paddingLeft: it.icon ? 0 : 10 }}>{it.label}</div>
-            {["tune", "sort", "more_horiz"].map((name) => (
-              <div key={name} style={{ width: 40, height: 40, display: "grid", placeItems: "center" }}>
-                <Symbol name={name} size={22} color={p.onSurface} />
-              </div>
-            ))}
           </div>
         </div>
       );
@@ -398,89 +363,37 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
           {it.label}
         </div>
       );
-    case "navigationBar": {
-      const blur = it.variant === "blur";
+    case "navigationBar":
       return (
-        <div style={{ ...style, position: "relative", overflow: "hidden", background: blur ? withAlpha(p.surface, 0.42) : p.surface, backdropFilter: blur ? "blur(28px) saturate(1.8)" : undefined, WebkitBackdropFilter: blur ? "blur(28px) saturate(1.8)" : undefined, display: "flex", flexDirection: "column" }}>
-          {blur && <GlassNoise />}
-          <div style={{ height: 0.5, background: p.dividerLine }} />
-          <div style={{ flex: 1 }}>
-            <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} />
-          </div>
+        <div style={{ ...style, background: p.surface, display: "flex", flexDirection: "column" }}>
+          <div style={{ height: 1, background: p.dividerLine }} />
+          <NavBarItems tabs={it.tabs ?? []} selected={it.selected} p={p} variant={it.variant} />
         </div>
       );
-    }
-    case "floatingNav": {
-      if (it.variant === "glass") {
-        const tabs = it.tabs ?? [];
-        const n = Math.max(tabs.length, 1);
-        const sel = it.selected ?? 0;
-        const dark = p.surface === "#000000";
-        return (
-          <LiquidGlass
-            p={p}
-            style={{
-              ...style,
-              padding: 4,
-              display: "flex",
-              alignItems: "stretch",
-              position: "relative",
-            }}
-          >
-            <div
-              className="miuix-liquid-pill"
-              style={{
-                position: "absolute",
-                top: 4,
-                bottom: 4,
-                left: `calc(4px + ${sel} * (100% - 8px) / ${n})`,
-                width: `calc((100% - 8px) / ${n})`,
-                borderRadius: 999,
-                background: dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.08)",
-                boxShadow: dark
-                  ? "inset 0 0 0 0.6px rgba(255,255,255,0.28), inset 1px 0 0 rgba(255,70,90,0.22), inset -1px 0 0 rgba(50,160,255,0.22)"
-                  : "inset 0 0 0 0.6px rgba(255,255,255,0.55), inset 1px 0 0 rgba(255,70,90,0.2), inset -1px 0 0 rgba(50,160,255,0.2)",
-                transition: "left 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
-              }}
-            />
-            {tabs.map((tab, i) => (
-              <div key={i} style={{ flex: 1, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1, color: p.onSurface, opacity: i === sel ? 1 : 0.5 }}>
-                <Symbol name={tab.icon} size={22} color={p.onSurface} fill={i === sel} />
-                {tab.label && <span style={{ fontSize: 11 }}>{tab.label}</span>}
-              </div>
-            ))}
-          </LiquidGlass>
-        );
-      }
+    case "floatingNav":
       return (
-        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainer, boxShadow: "0 10px 20px rgba(0,0,0,0.12)", padding: "0 12px", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
+        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainer, boxShadow: "0 0 10px rgba(0,0,0,0.2)", padding: "0 12px", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
           {(it.tabs ?? []).map((tab, i) => (
             <div key={i} style={{ padding: 10, opacity: i === (it.selected ?? 0) ? 1 : 0.4 }}>
-              <Symbol name={tab.icon} size={28} color={p.onSurfaceContainer} fill={i === (it.selected ?? 0)} />
+              <Symbol name={tab.icon} size={28} color={p.onSurfaceContainer} />
             </div>
           ))}
         </div>
       );
-    }
-    case "navigationRail": {
-      const tabs = it.tabs ?? [];
-      const sel = it.selected ?? 0;
+    case "navigationRail":
       return (
-        <div style={{ ...style, background: p.surface, padding: "24px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-          {tabs.map((tab, i) => {
-            const on = i === sel;
-            return (
-              <div key={i} style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 0" }}>
-                <div style={{ ...sq(12), background: on ? p.surfaceContainerHigh : "transparent", padding: "4px 10px", display: "grid", placeItems: "center" }}>
-                  <Symbol name={tab.icon} size={28} color={p.onSurface} fill={on} />
-                </div>
-                {tab.label && <span style={{ fontSize: 12, color: p.onSurface, opacity: on ? 1 : 0.6 }}>{tab.label}</span>}
+        <div style={{ ...style, background: p.surface, display: "flex" }}>
+          <div style={{ flex: 1, padding: "24px 0", display: "flex", flexDirection: "column", alignItems: "center" }}>
+            {(it.tabs ?? []).map((tab, i) => (
+              <div key={i} style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "12px 0", color: p.onSurfaceContainer }}>
+                <Symbol name={tab.icon} size={28} color={p.onSurfaceContainer} />
+                {tab.label ? <span style={{ fontSize: 12, fontWeight: 500 }}>{tab.label}</span> : null}
               </div>
-            );
-          })}
+            ))}
+          </div>
+          <div style={{ width: 1, background: p.dividerLine }} />
         </div>
       );
-    }
     case "tabRow": {
       const contour = it.variant === "contour";
       const tabs = it.tabs ?? [];
@@ -598,27 +511,41 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "surface":
       return <div style={{ ...style, ...sq(16), background: p.surface }} />;
     case "blur": {
-      const scene = `radial-gradient(120% 80% at 10% 20%, ${p.primary} 0%, transparent 55%), radial-gradient(90% 70% at 90% 10%, #7C4DFF 0%, transparent 50%), linear-gradient(150deg, #E11D48 0%, ${p.primary} 48%, #0F9D58 100%)`;
+      const dark = p.surface === "#000000";
       return (
         <div style={{ ...style, ...sq(16), position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", inset: 0, background: scene }} />
-          <div style={{ position: "absolute", inset: -28, background: scene, filter: "blur(26px) saturate(1.6)", transform: "scale(1.12)" }} />
+          <svg aria-hidden viewBox="0 0 180 140" preserveAspectRatio="xMidYMid slice" style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}>
+            <rect width="180" height="140" fill="#7EB6D9" />
+            <rect y="78" width="180" height="62" fill="#5B8C51" />
+            <circle cx="38" cy="36" r="16" fill="#F4E4A6" />
+            <ellipse cx="28" cy="92" rx="22" ry="14" fill="#3F6B38" />
+            <ellipse cx="132" cy="88" rx="30" ry="16" fill="#4A7A40" />
+            <rect x="96" y="54" width="18" height="36" fill="#C4A574" />
+          </svg>
           <div
             style={{
               position: "absolute",
-              inset: 22,
-              ...sq(16),
-              background: withAlpha(p.surfaceContainer, 0.32),
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(255,255,255,0.14)",
+              left: "10%",
+              right: "10%",
+              top: "50%",
+              height: "72%",
+              transform: "translateY(-50%)",
+              borderRadius: 24,
+              overflow: "hidden",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
               display: "grid",
               placeItems: "center",
-              fontSize: 17,
+              fontSize: 14,
               fontWeight: 500,
               color: p.onSurface,
-              overflow: "hidden",
+              textAlign: "center",
+              padding: 12,
             }}
           >
-            <GlassNoise />
+            <span style={{ position: "absolute", inset: 0, background: dark ? "#7A7A7A66" : "#BDBDBDE6", mixBlendMode: dark ? "color-burn" : "overlay" }} />
+            <span style={{ position: "absolute", inset: 0, background: dark ? "#74747433" : "#2B2B2B99", mixBlendMode: dark ? "overlay" : "color-dodge" }} />
+            <span style={{ position: "absolute", inset: 0, background: dark ? "#2B2B2B32" : "#9C9C9C33" }} />
             <span style={{ zIndex: 1 }}>{it.label}</span>
           </div>
         </div>

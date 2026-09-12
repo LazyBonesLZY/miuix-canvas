@@ -81,11 +81,12 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
     const start = typeof it.from === "number" ? `${Math.round(it.from * 100)}%–` : "";
     bits.push({ zh: `值 ${start}${Math.round(it.value * 100)}%`, en: `value ${start}${Math.round(it.value * 100)}%`, ja: `値 ${start}${Math.round(it.value * 100)}%`, ko: `값 ${start}${Math.round(it.value * 100)}%` }[lang]);
   }
-  if (it.kind === "floatingNav" && it.variant === "glass") {
-    bits.push({ zh: "液态玻璃：layerBackdrop + vibrancy + 4.dp blur + 24.dp lens 折射，不要做成大半径高斯磨砂", en: "liquid glass: layerBackdrop + vibrancy + 4.dp blur + 24.dp lens refraction, not a heavy Gaussian frost", ja: "リキッドガラス：layerBackdrop + vibrancy + 4.dp blur + 24.dp lens。大きなガウス曇りガラスにしない", ko: "리퀴드 글래스: layerBackdrop + vibrancy + 4.dp blur + 24.dp lens. 큰 가우시안 서리 유리가 아님" }[lang]);
+  if (it.kind === "floatingNav") {
+    bits.push({ zh: "FloatingNavigationBar：surfaceContainer，圆角 50.dp，dropShadow 10.dp / alpha 0.2，只显示图标", en: "FloatingNavigationBar: surfaceContainer, 50.dp corners, dropShadow 10.dp / alpha 0.2, icons only", ja: "FloatingNavigationBar：surfaceContainer、角 50.dp、dropShadow 10.dp / alpha 0.2、アイコンのみ", ko: "FloatingNavigationBar: surfaceContainer, 50.dp 모서리, dropShadow 10.dp / alpha 0.2, 아이콘만" }[lang]);
   }
-  if (it.kind === "navigationBar" && it.variant === "blur") {
-    bits.push({ zh: "底栏用 Modifier.textureBlur", en: "frost the bar with Modifier.textureBlur", ja: "下バーは Modifier.textureBlur", ko: "하단바는 Modifier.textureBlur" }[lang]);
+  if (it.kind === "navigationBar") {
+    const mode = it.variant === "iconOnly" ? "IconOnly" : it.variant === "iconWithSelectedLabel" ? "IconWithSelectedLabel" : "IconAndText";
+    bits.push({ zh: `NavigationBarDisplayMode.${mode}，底色 surface，顶部分割线，未选中 alpha 0.4`, en: `NavigationBarDisplayMode.${mode}, surface color, top divider, unselected alpha 0.4`, ja: `NavigationBarDisplayMode.${mode}、surface、上端の分割線、未選択 alpha 0.4`, ko: `NavigationBarDisplayMode.${mode}, surface, 상단 구분선, 미선택 alpha 0.4` }[lang]);
   }
   if (it.kind === "button" && it.variant === "text") {
     bits.push({ zh: "TextButton：secondaryVariant 底，onSecondaryVariant 字", en: "TextButton: secondaryVariant fill, onSecondaryVariant label", ja: "TextButton：secondaryVariant 背景、onSecondaryVariant 文字", ko: "TextButton: secondaryVariant 배경, onSecondaryVariant 글자" }[lang]);
@@ -99,7 +100,7 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
     bits.push({ zh: "SearchBar 需配合 InputField，占位符 onSurfaceContainerHigh", en: "SearchBar needs an InputField child; placeholder uses onSurfaceContainerHigh", ja: "SearchBar は InputField を子に。プレースホルダは onSurfaceContainerHigh", ko: "SearchBar는 InputField 자식이 필요하며 자리 표시는 onSurfaceContainerHigh" }[lang]);
   }
   if (it.kind === "blur") {
-    bits.push({ zh: "这是 Modifier.textureBlur（miuix-blur），不是独立组件", en: "this is Modifier.textureBlur from miuix-blur, not a composable", ja: "これは Modifier.textureBlur（miuix-blur）でありコンポーネントではない", ko: "독립 컴포저블이 아니라 miuix-blur의 Modifier.textureBlur" }[lang]);
+    bits.push({ zh: "这是 Modifier.textureBlur（miuix-blur），不是独立组件；默认 blurRadius = 20f，先 layerBackdrop 再 textureBlur", en: "this is Modifier.textureBlur from miuix-blur, not a composable; default blurRadius = 20f after layerBackdrop", ja: "これは Modifier.textureBlur（miuix-blur）でありコンポーネントではない。既定 blurRadius = 20f。先に layerBackdrop", ko: "독립 컴포저블이 아니라 miuix-blur의 Modifier.textureBlur. 기본 blurRadius = 20f, layerBackdrop 후 적용" }[lang]);
   }
   if (it.kind === "image") {
     bits.push({ zh: "用 Compose 的 Image / coil，没有 Miuix Image 组件", en: "use Compose Image / Coil; there is no Miuix Image composable", ja: "Compose の Image / Coil を使う。Miuix の Image コンポーネントはない", ko: "Compose Image / Coil을 쓴다. Miuix Image 컴포저블은 없다" }[lang]);
