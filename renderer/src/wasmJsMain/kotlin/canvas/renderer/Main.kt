@@ -1,12 +1,18 @@
 package canvas.renderer
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.window.ComposeViewport
 import kotlinx.browser.window
+import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
+import webfont.preloadWebFonts
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 
@@ -14,6 +20,10 @@ private val json = rendererJson
 
 private var request by mutableStateOf(RenderRequest())
 private var acceptedRender = false
+private var readyTries = 0
+
+private const val MI_SANS_CSS =
+    "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify&display=swap"
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalWasmJsInterop::class)
 fun main() {
@@ -24,6 +34,15 @@ fun main() {
         })
         announceReady()
         ComposeViewport(viewportContainerId = "ComposeTarget") {
+            val fontFamilyResolver = LocalFontFamilyResolver.current
+            val fonts = rememberCoroutineScope()
+            LaunchedEffect(fontFamilyResolver) {
+                withFrameNanos {}
+                fonts.launch {
+                    preloadWebFonts(MI_SANS_CSS, fontFamilyResolver)
+                    post(RendererEvent(type = "fonts"))
+                }
+            }
             RendererApp(request = request, emit = ::post)
         }
     }.onFailure {
@@ -38,7 +57,6 @@ private fun accept(payload: String) {
             if (it.type == "render") {
                 acceptedRender = true
                 request = it
-                post(RendererEvent(type = "rendered", requestId = it.requestId))
             }
         }
         .onFailure {
@@ -49,7 +67,8 @@ private fun accept(payload: String) {
 @OptIn(ExperimentalWasmJsInterop::class)
 private fun announceReady() {
     post(RendererEvent(type = "ready"))
-    if (!acceptedRender) {
+    if (!acceptedRender && readyTries < 12) {
+        readyTries += 1
         window.setTimeout({
             if (!acceptedRender) announceReady()
             null

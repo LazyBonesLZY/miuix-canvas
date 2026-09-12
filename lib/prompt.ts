@@ -39,8 +39,8 @@ function themeLine(doc: Doc, lang: Lang): string {
     ko: doc.theme.mode === "dark" ? "다크" : "라이트",
   }[lang];
   const theme = doc.theme.monet
-    ? `MiuixTheme(controller = ThemeController(ColorSchemeMode.MonetSystem, keyColor = Color(0xFF${hex})))`
-    : `MiuixTheme(colors = ${doc.theme.mode === "dark" ? "darkColorScheme()" : "lightColorScheme()"})`;
+    ? `MiuixTheme(controller = ThemeController(ColorSchemeMode.${doc.theme.mode === "dark" ? "MonetDark" : "MonetLight"}, keyColor = Color(0xFF${hex}), colorSpec = ThemeColorSpec.Spec2021, paletteStyle = ThemePaletteStyle.Content))`
+    : `MiuixTheme(controller = ThemeController(ColorSchemeMode.${doc.theme.mode === "dark" ? "Dark" : "Light"}))`;
   if (lang === "zh") {
     return `主题：${mode}，种子色 ${seed}，用 ${theme}。背景用 surface（浅色约 #F7F7F7），卡片与 Preference 用 surfaceContainer。主色给 Button / Switch / Slider。圆角用 Miuix 默认 16.dp squircle（miuix-squircle）。`;
   }

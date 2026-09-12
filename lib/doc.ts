@@ -182,7 +182,7 @@ export function defaultDoc(lang: Lang): Doc {
   };
 
   return {
-    version: 2,
+    version: 3,
     title: loc(lang, "示例应用", "Sample app", "サンプルアプリ", "샘플 앱"),
     platform: "cmp",
     theme: { ...DEFAULT_THEME, seed: MIUIX_BLUE },

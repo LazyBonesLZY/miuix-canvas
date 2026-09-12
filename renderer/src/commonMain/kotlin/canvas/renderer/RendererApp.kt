@@ -14,7 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
@@ -28,7 +30,9 @@ import top.yukonga.miuix.kmp.nav.transition.NavTransition
 import top.yukonga.miuix.kmp.nav.transition.NavTransitions
 import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 import top.yukonga.miuix.kmp.theme.MiuixTheme
+import top.yukonga.miuix.kmp.theme.ThemeColorSpec
 import top.yukonga.miuix.kmp.theme.ThemeController
+import top.yukonga.miuix.kmp.theme.ThemePaletteStyle
 
 @Composable
 fun RendererApp(
@@ -38,16 +42,13 @@ fun RendererApp(
     val dark = request.theme.mode == "dark"
     val seed = remember(request.theme.seed) { parseHexColor(request.theme.seed) }
     val controller = remember(request.theme.mode, request.theme.monet, seed) {
-        ThemeController(
-            colorSchemeMode = when {
-                request.theme.monet && dark -> ColorSchemeMode.MonetDark
-                request.theme.monet -> ColorSchemeMode.MonetLight
-                dark -> ColorSchemeMode.Dark
-                else -> ColorSchemeMode.Light
-            },
-            keyColor = seed,
-            isDark = dark,
-        )
+        officialThemeController(dark = dark, monet = request.theme.monet, seed = seed)
+    }
+
+    LaunchedEffect(request) {
+        withFrameNanos {}
+        withFrameNanos {}
+        emit(RendererEvent(type = "rendered", requestId = request.requestId))
     }
 
     MiuixTheme(controller = controller) {
@@ -111,6 +112,30 @@ internal fun NavigableRenderer(
             )
         }
     }
+}
+
+internal fun officialThemeController(
+    dark: Boolean,
+    monet: Boolean,
+    seed: Color?,
+): ThemeController = if (monet) {
+    ThemeController(
+        colorSchemeMode = if (dark) ColorSchemeMode.MonetDark else ColorSchemeMode.MonetLight,
+        keyColor = seed,
+        colorSpec = ThemeColorSpec.Spec2021,
+        paletteStyle = ThemePaletteStyle.Content,
+    )
+} else {
+    ThemeController(
+        colorSchemeMode = if (dark) ColorSchemeMode.Dark else ColorSchemeMode.Light,
+    )
+}
+
+internal fun officialSchemeMode(mode: String, monet: Boolean): ColorSchemeMode = when {
+    monet && mode == "dark" -> ColorSchemeMode.MonetDark
+    monet -> ColorSchemeMode.MonetLight
+    mode == "dark" -> ColorSchemeMode.Dark
+    else -> ColorSchemeMode.Light
 }
 
 internal const val BACK_TARGET = "back"

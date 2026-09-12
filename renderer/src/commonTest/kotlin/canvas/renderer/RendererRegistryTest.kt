@@ -6,6 +6,7 @@ import kotlin.test.assertFalse
 import kotlinx.serialization.encodeToString
 import top.yukonga.miuix.kmp.icon.MiuixIcons
 import top.yukonga.miuix.kmp.icon.extended.Back
+import top.yukonga.miuix.kmp.theme.ColorSchemeMode
 
 class RendererRegistryTest {
     @Test
@@ -80,6 +81,14 @@ class RendererRegistryTest {
         assertEquals("modal", officialNavTransitionName("slideDown"))
         assertEquals("none", officialNavTransitionName("fade"))
         assertEquals("none", officialNavTransitionName("none"))
+    }
+
+    @Test
+    fun officialThemeUsesHyperOSUnlessMonetIsOn() {
+        assertEquals(ColorSchemeMode.Light, officialSchemeMode("light", monet = false))
+        assertEquals(ColorSchemeMode.Dark, officialSchemeMode("dark", monet = false))
+        assertEquals(ColorSchemeMode.MonetLight, officialSchemeMode("light", monet = true))
+        assertEquals(ColorSchemeMode.MonetDark, officialSchemeMode("dark", monet = true))
     }
 
     @Test

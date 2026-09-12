@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Inspector } from "@/components/Inspector";
 import { LayersPanel } from "@/components/Layers";
-import { OfficialMiuixFrame } from "@/components/OfficialMiuixFrame";
+import { OfficialMiuixStills } from "@/components/OfficialMiuixStills";
 import { PartsPalette } from "@/components/PartsPalette";
 import { Preview } from "@/components/Preview";
 import { PromptPanel } from "@/components/PromptPanel";
@@ -145,6 +145,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   const [helpOpen, setHelpOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
   const [notice, setNotice] = useState("");
+  const [stills, setStills] = useState<Record<string, string>>({});
   const [guide, setGuide] = useState<Guide | null>(null);
   const didFit = useRef(false);
   const [shareReady, setShareReady] = useState(() => !hasShareHash());
@@ -615,14 +616,11 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   const exportPng = async () => {
     const id = selectedScreenId;
     if (!id) return;
-    const node = screenRefs.current[id];
-    if (!node) return;
-    const canvas = node.querySelector("iframe")?.contentDocument?.querySelector("canvas");
-    if (!canvas) {
+    const data = stills[id];
+    if (!data) {
       setNotice(t("loadFailed", lang));
       return;
     }
-    const data = canvas.toDataURL("image/png");
     const a = document.createElement("a");
     a.href = data;
     a.download = `${doc.title || "miuix"}-${screenOf(doc, id)?.name || "screen"}.png`;
@@ -843,7 +841,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                 }),
               )}
             </svg>
-            {doc.screens.map((screen, index) => {
+            {doc.screens.map((screen) => {
               const { w, h, r } = frameSize(screen.preset);
               const selected = selection?.screenId === screen.id;
               return (
@@ -875,12 +873,18 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                       overflow: "hidden",
                     }}
                   >
-                    <OfficialMiuixFrame
-                      screen={screen}
-                      theme={doc.theme}
-                      lang={lang}
-                      deferMs={selected ? 0 : 500 + index * 400}
-                    />
+                    {stills[screen.id] ? (
+                      <img
+                        src={stills[screen.id]}
+                        alt=""
+                        draggable={false}
+                        style={{ width: "100%", height: "100%", display: "block", pointerEvents: "none" }}
+                      />
+                    ) : (
+                      <div className="pointer-events-none absolute inset-0 grid place-items-center text-[12px] text-[var(--muted)]">
+                        Miuix…
+                      </div>
+                    )}
                     {guide && selected && (
                       <>
                         {guide.gx !== undefined && <div style={{ position: "absolute", left: guide.gx, top: 0, bottom: 0, width: 1, background: palette.primary, opacity: 0.7, pointerEvents: "none" }} />}
@@ -987,6 +991,13 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           </div>
         </div>
       )}
+      <OfficialMiuixStills
+        screens={doc.screens}
+        theme={doc.theme}
+        lang={lang}
+        priorityId={selectedScreenId}
+        onSnaps={setStills}
+      />
       {preview && <Preview doc={doc} lang={lang} startId={selectedScreenId} onClose={() => setPreview(false)} />}
       {shareOpen && (
         <div className="preview-root" onClick={() => setShareOpen(false)}>

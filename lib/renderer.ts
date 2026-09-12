@@ -1,7 +1,7 @@
 import type { Lang, Screen, Theme } from "./types";
 
 export type RendererEvent = {
-  type: "ready" | "rendered" | "patch" | "navigate" | "dismiss" | "snapshot" | "error";
+  type: "ready" | "rendered" | "fonts" | "patch" | "navigate" | "dismiss" | "snapshot" | "error";
   requestId?: string;
   itemId?: string;
   action?: string;

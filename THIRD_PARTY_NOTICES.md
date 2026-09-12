@@ -34,6 +34,20 @@ Local changes are limited to:
 
 No implementation algorithm or numeric constant was changed.
 
+## compose-miuix-ui/miuix web font preload
+
+The files under `renderer/src/wasmJsMain/kotlin/webfont/` are vendored from
+[compose-miuix-ui/miuix](https://github.com/compose-miuix-ui/miuix)
+`example/shared/src/webMain/kotlin/webfont/` (`WebFontPreload.kt`,
+`WebFetch.kt`, `FontFaceDecl.kt`).
+
+Copyright 2026, compose-miuix-ui contributors.
+
+Licensed under the Apache License, Version 2.0. The source-file SPDX and
+copyright headers are retained. Local changes are limited to keeping the
+files in the `webfont` package so the Wasm renderer can preload official
+MiSans the same way the Miuix web example does.
+
 ## Apache License 2.0
 
                                  Apache License

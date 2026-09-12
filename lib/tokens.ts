@@ -5,7 +5,7 @@ import { DESKTOP_H, DESKTOP_W, MARGIN, PHONE_H, PHONE_W, contentWidth, uid } fro
 export const DEFAULT_THEME: Theme = {
   mode: "light",
   seed: MIUIX_BLUE,
-  monet: true,
+  monet: false,
 };
 
 export type KindSpec = {

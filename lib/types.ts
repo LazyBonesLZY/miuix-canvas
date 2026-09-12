@@ -152,7 +152,7 @@ export type Theme = {
 };
 
 export type Doc = {
-  version: 2;
+  version: 3;
   title: string;
   platform: Platform;
   theme: Theme;

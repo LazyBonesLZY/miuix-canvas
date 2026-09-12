@@ -27,7 +27,7 @@ data class RenderRequest(
 data class ThemeDto(
     val mode: String = "light",
     val seed: String = "#3482FF",
-    val monet: Boolean = true,
+    val monet: Boolean = false,
 )
 
 @Serializable

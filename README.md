@@ -21,7 +21,7 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 - **HyperOS look** — sketches use official Miuix sizes and colors (gray TextButton, 49×28 Switch, check-only RadioButton, 16dp Card, no Material icon wells). The sample home follows the official jsCanvas demo sections.
 - **Live sketches** — Switch, Checkbox, Radio, Slider, tabs, SearchBar, NumberPicker, ColorPalette, ColorPicker, menus and preference rows respond in preview. On the canvas, click a selected part to toggle or drag a selected slider. Infinite progress and PullToRefresh keep spinning.
 - **Tap and swipe to navigate** — parts, nav destinations and screen swipes can open another screen. Preview uses official `miuix-nav` (`NavDisplay` / `NavTransitions.MiuixDefault` or `Modal`); canvas arrows show the flow.
-- **Theme** — light / dark, a seed color (default `#3482FF`), Monet flag. Surfaces stay HyperOS; primary roles shift with the seed.
+- **Theme** — light / dark uses official HyperOS `lightColorScheme()` / `darkColorScheme()`. Monet is optional Material dynamic color (`ThemePaletteStyle.Content`), off by default. Seed color applies when Monet is on.
 - **Prompt output** — Chinese, English, Japanese or Korean brief naming real Miuix composables (`OverlayDialog`, `SwitchPreference`, …). Target Compose Multiplatform (default), Android, or CMP Web.
 - **Optional AI helper** — OpenAI, Claude, Gemini, DeepSeek, or a custom OpenAI / Claude-compatible endpoint writes a part or screen note. The key stays in the browser.
 - **Tidy, layers, guides, undo/redo**, 4dp grid, compressed share links, JSON and PNG.

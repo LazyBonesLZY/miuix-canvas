@@ -27,7 +27,7 @@ const validScreen = (value: unknown): value is Screen =>
 export function isProject(value: unknown): value is Doc {
   return (
     isRecord(value) &&
-    (value.version === 1 || value.version === 2) &&
+    (value.version === 1 || value.version === 2 || value.version === 3) &&
     typeof value.title === "string" &&
     (value.platform === "cmp" || value.platform === "android" || value.platform === "web") &&
     isRecord(value.theme) &&
@@ -79,9 +79,14 @@ function migrateItem(it: Item, preset: FramePreset): Item {
 }
 
 export function migrateDoc(doc: Doc): Doc {
+  const fromVersion = typeof doc.version === "number" ? doc.version : 1;
   return {
     ...doc,
-    version: 2,
+    version: 3,
+    theme: {
+      ...doc.theme,
+      monet: fromVersion >= 3 ? Boolean(doc.theme.monet) : false,
+    },
     screens: doc.screens.map((screen) => ({
       ...screen,
       items: screen.items.filter((it) => KIND_SET.has(it.kind)).map((it) => migrateItem(it, screen.preset)),

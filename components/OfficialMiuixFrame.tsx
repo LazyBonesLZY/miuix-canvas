@@ -60,7 +60,12 @@ export function OfficialMiuixFrame({
   useEffect(() => {
     send();
     if (ready) return;
-    const retry = window.setInterval(send, 400);
+    let tries = 0;
+    const retry = window.setInterval(() => {
+      tries += 1;
+      send();
+      if (tries > 25) window.clearInterval(retry);
+    }, 400);
     return () => window.clearInterval(retry);
   }, [ready, send]);
 

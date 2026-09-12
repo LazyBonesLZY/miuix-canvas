@@ -3,7 +3,7 @@
 You are drafting a HyperOS / Miuix UI sketch for https://github.com/LazyBonesLZY/miuix-canvas.
 
 1. Read the user's description of the app.
-2. Produce a Miuix Canvas document JSON (`version: 1`) with `title`, `platform` (`cmp` | `android` | `web`), `theme` (`mode`, `seed`, `monet`) and `screens`.
+2. Produce a Miuix Canvas document JSON (`version: 3`) with `title`, `platform` (`cmp` | `android` | `web`), `theme` (`mode`, `seed`, `monet`; `monet` defaults to `false` so the sketch uses official HyperOS Light/Dark, not Material Monet) and `screens`.
 3. Each screen has `id`, `name`, `x`, `y`, `preset` (`phone` | `desktop`), optional `swipe` (`left`/`right`/`up`/`down` → screen id), and `items`.
 4. Each item has `id`, `kind`, `x`, `y`, `w`, `h`, `label`, and optional `supporting`, `icon`, `variant`, `checked`, `value`, `from` (RangeSlider start), `tabs`, `selected`, `note`, `to`, `transition`.
 5. Tabs may include `to` and `transition` for destination screens.

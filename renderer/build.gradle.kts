@@ -31,6 +31,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
+            implementation(compose.ui)
             implementation(compose.components.resources)
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
             implementation("top.yukonga.miuix.kmp:miuix-ui:0.9.4-rc01")
