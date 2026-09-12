@@ -81,10 +81,16 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
     const start = typeof it.from === "number" ? `${Math.round(it.from * 100)}%–` : "";
     bits.push({ zh: `值 ${start}${Math.round(it.value * 100)}%`, en: `value ${start}${Math.round(it.value * 100)}%`, ja: `値 ${start}${Math.round(it.value * 100)}%`, ko: `값 ${start}${Math.round(it.value * 100)}%` }[lang]);
   }
-  if (it.kind === "floatingNav") {
+  if (it.kind === "floatingNav" && (it.variant === "iosLike" || it.variant === "glass")) {
+    bits.push({ zh: "官方 example 的 IosLiquidGlassNavigationBar：layerBackdrop + vibrancy + blur(4.dp) + lens(24.dp)，胶囊高 64.dp，选中条 onSurface 10%", en: "official example IosLiquidGlassNavigationBar: layerBackdrop + vibrancy + blur(4.dp) + lens(24.dp), 64.dp pill, selected chip 10% onSurface", ja: "公式 example の IosLiquidGlassNavigationBar：layerBackdrop + vibrancy + blur(4.dp) + lens(24.dp)、高さ 64.dp", ko: "공식 example IosLiquidGlassNavigationBar: layerBackdrop + vibrancy + blur(4.dp) + lens(24.dp), 높이 64.dp" }[lang]);
+  } else if (it.kind === "floatingNav" && it.variant === "textureBlur") {
+    bits.push({ zh: "FloatingNavigationBar + Modifier.textureBlur(blurRadius = 25f, surfaceContainer@0.6, highlight = GlassStrokeMiddle)", en: "FloatingNavigationBar + Modifier.textureBlur(blurRadius = 25f, surfaceContainer@0.6, highlight = GlassStrokeMiddle)", ja: "FloatingNavigationBar + Modifier.textureBlur(blurRadius = 25f, surfaceContainer@0.6, highlight = GlassStrokeMiddle)", ko: "FloatingNavigationBar + Modifier.textureBlur(blurRadius = 25f, surfaceContainer@0.6, highlight = GlassStrokeMiddle)" }[lang]);
+  } else if (it.kind === "floatingNav") {
     bits.push({ zh: "FloatingNavigationBar：surfaceContainer，圆角 50.dp，dropShadow 10.dp / alpha 0.2，只显示图标", en: "FloatingNavigationBar: surfaceContainer, 50.dp corners, dropShadow 10.dp / alpha 0.2, icons only", ja: "FloatingNavigationBar：surfaceContainer、角 50.dp、dropShadow 10.dp / alpha 0.2、アイコンのみ", ko: "FloatingNavigationBar: surfaceContainer, 50.dp 모서리, dropShadow 10.dp / alpha 0.2, 아이콘만" }[lang]);
   }
-  if (it.kind === "navigationBar") {
+  if (it.kind === "navigationBar" && it.variant === "textureBlur") {
+    bits.push({ zh: "官方 example：NavigationBar 外包 Modifier.textureBlur(blurRadius = 25f, surface@0.8)", en: "official example: wrap NavigationBar with Modifier.textureBlur(blurRadius = 25f, surface@0.8)", ja: "公式 example：NavigationBar を Modifier.textureBlur(blurRadius = 25f, surface@0.8) で包む", ko: "공식 example: NavigationBar를 Modifier.textureBlur(blurRadius = 25f, surface@0.8)로 감싼다" }[lang]);
+  } else if (it.kind === "navigationBar") {
     const mode = it.variant === "iconOnly" ? "IconOnly" : it.variant === "iconWithSelectedLabel" ? "IconWithSelectedLabel" : "IconAndText";
     bits.push({ zh: `NavigationBarDisplayMode.${mode}，底色 surface，顶部分割线，未选中 alpha 0.4`, en: `NavigationBarDisplayMode.${mode}, surface color, top divider, unselected alpha 0.4`, ja: `NavigationBarDisplayMode.${mode}、surface、上端の分割線、未選択 alpha 0.4`, ko: `NavigationBarDisplayMode.${mode}, surface, 상단 구분선, 미선택 alpha 0.4` }[lang]);
   }

@@ -8,11 +8,13 @@
 
 **在线版本：** https://lazyboneslzy.github.io/miuix-canvas/
 
+> **声明：** 本项目为 Vibe 实现，大佬们轻点喷。
+
 可配合 Cursor、Claude Code、Codex、Gemini CLI 等任何接受提示词的工具：复制提示词，贴进去，让它用 Miuix 把应用做出来。
 
 ## 功能
 
-- **拖放 Miuix 部件** — Button、IconButton、FAB、FloatingToolbar、TopAppBar、SmallTitle、NavigationBar（`IconAndText` / `IconOnly` / `IconWithSelectedLabel`）、FloatingNavigationBar（只显示图标）、NavigationRail、TabRow / TabRowWithContour、SearchBar、BreadcrumbBar、Card、Surface、HorizontalDivider / VerticalDivider、Snackbar、OverlayDialog / WindowDialog、OverlayBottomSheet / WindowBottomSheet、OverlayListPopup / WindowListPopup、OverlayCascadingListPopup / WindowCascadingListPopup、OverlayDropdownMenu / WindowDropdownMenu、OverlayIconDropdownMenu / WindowIconDropdownMenu、OverlayIconCascadingDropdownMenu / WindowIconCascadingDropdownMenu、Tooltip / RichTooltipBox、TextField、Switch、Checkbox、RadioButton、Slider / VerticalSlider / 刻度 / 禁用、RangeSlider、Dropdown、NumberPicker、ColorPicker、ColorPalette、Text、Image、Badge、Icon、Linear / Circular / Infinite ProgressIndicator、PullToRefresh、Vertical / Horizontal ScrollBar。`Modifier.textureBlur` 是独立修饰符，不是底栏样式。
+- **拖放 Miuix 部件** — Button、IconButton、FAB、FloatingToolbar、TopAppBar、SmallTitle、NavigationBar（`IconAndText` / `IconOnly` / `IconWithSelectedLabel`，或官方 demo 的 `textureBlur`）、FloatingNavigationBar（`default` / `textureBlur` / example 的 `iosLike` 液态玻璃）、NavigationRail、TabRow / TabRowWithContour、SearchBar、BreadcrumbBar、Card、Surface、HorizontalDivider / VerticalDivider、Snackbar、OverlayDialog / WindowDialog、OverlayBottomSheet / WindowBottomSheet、OverlayListPopup / WindowListPopup、OverlayCascadingListPopup / WindowCascadingListPopup、OverlayDropdownMenu / WindowDropdownMenu、OverlayIconDropdownMenu / WindowIconDropdownMenu、OverlayIconCascadingDropdownMenu / WindowIconCascadingDropdownMenu、Tooltip / RichTooltipBox、TextField、Switch、Checkbox、RadioButton、Slider / VerticalSlider / 刻度 / 禁用、RangeSlider、Dropdown、NumberPicker、ColorPicker、ColorPalette、Text、Image、Badge、Icon、Linear / Circular / Infinite ProgressIndicator、PullToRefresh、Vertical / Horizontal ScrollBar。玻璃效果来自 `miuix-blur`（`Modifier.textureBlur`、`Highlight.GlassStroke*`，以及 example 里的 `IosLiquidGlassNavigationBar`）。
 - **Preference 行** — BasicComponent、SwitchPreference、CheckboxPreference、RadioButtonPreference、SliderPreference、RangeSliderPreference、OverlayDropdownPreference / WindowDropdownPreference、OverlaySpinnerPreference / WindowSpinnerPreference、ArrowPreference。相邻行会磁吸拼成一张 HyperOS Card。
 - **手机和桌面屏幕** — 412×892 手机、1280×800 桌面。切换尺寸时 NavigationBar 会和 NavigationRail 互转。
 - **编辑器三端适配** — 手机用底栏 + 底部面板；平板用左侧图标轨 + 一块停靠面板；电脑左右分栏。安全区、紧凑工具栏和预览缩放会跟着视口走。

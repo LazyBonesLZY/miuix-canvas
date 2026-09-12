@@ -249,6 +249,20 @@ function navBarMode(variant?: string): "iconAndText" | "iconOnly" | "iconWithSel
   return "iconAndText";
 }
 
+/** Official example: Modifier.textureBlur(blurRadius = 25f) on the nav host. */
+function textureBlur25(fill: string): CSSProperties {
+  return {
+    background: fill,
+    backdropFilter: "blur(25px)",
+    WebkitBackdropFilter: "blur(25px)",
+  };
+}
+
+/** Highlight.GlassStrokeMiddleLight / GlassStrokeMiddleDark — 0.8.dp band, white 0.05–0.06. */
+function glassStrokeMiddle(dark: boolean): string {
+  return dark ? "inset 0 0.8px 2px rgba(255,255,255,0.06)" : "inset 0 0.8px 2.8px rgba(255,255,255,0.05)";
+}
+
 function NavBarItems({ tabs, selected, p, variant }: { tabs: NavTab[]; selected?: number; p: Palette; variant?: string }) {
   const mode = navBarMode(variant);
   const sel = selected ?? 0;
@@ -363,16 +377,88 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
           {it.label}
         </div>
       );
-    case "navigationBar":
+    case "navigationBar": {
+      const frosted = it.variant === "textureBlur";
+      const dark = p.surface === "#000000";
       return (
-        <div style={{ ...style, background: p.surface, display: "flex", flexDirection: "column" }}>
+        <div
+          style={{
+            ...style,
+            overflow: "visible",
+            display: "flex",
+            flexDirection: "column",
+            background: frosted ? undefined : p.surface,
+            ...(frosted ? textureBlur25(withAlpha(p.surface, 0.8)) : undefined),
+            boxShadow: frosted ? glassStrokeMiddle(dark) : undefined,
+          }}
+        >
           <div style={{ height: 1, background: p.dividerLine }} />
           <NavBarItems tabs={it.tabs ?? []} selected={it.selected} p={p} variant={it.variant} />
         </div>
       );
-    case "floatingNav":
+    }
+    case "floatingNav": {
+      const dark = p.surface === "#000000";
+      if (it.variant === "iosLike" || it.variant === "glass") {
+        const tabs = it.tabs ?? [];
+        const n = Math.max(tabs.length, 1);
+        const sel = it.selected ?? 0;
+        return (
+          <div
+            style={{
+              ...style,
+              overflow: "visible",
+              borderRadius: 999,
+              padding: 4,
+              display: "flex",
+              alignItems: "stretch",
+              position: "relative",
+              background: withAlpha(p.surfaceContainer, 0.4),
+              backdropFilter: "blur(4px) saturate(1.85)",
+              WebkitBackdropFilter: "blur(4px) saturate(1.85)",
+              boxShadow: `${dark ? "0 0 10px rgba(0,0,0,0.2)" : "0 0 10px rgba(0,0,0,0.1)"}, inset 0 1px 2px rgba(255,255,255,0.12)`,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 4,
+                bottom: 4,
+                left: `calc(4px + ${sel} * (100% - 8px) / ${n})`,
+                width: `calc((100% - 8px) / ${n})`,
+                borderRadius: 999,
+                background: dark ? "rgba(255,255,255,0.10)" : "rgba(0,0,0,0.10)",
+                transition: "left 220ms cubic-bezier(0.2, 0.8, 0.2, 1)",
+              }}
+            />
+            {tabs.map((tab, i) => (
+              <div key={i} style={{ flex: 1, zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 1, color: p.onSurface }}>
+                <Symbol name={tab.icon} size={22} color={p.onSurface} />
+                {tab.label ? <span style={{ fontSize: 11 }}>{tab.label}</span> : null}
+              </div>
+            ))}
+          </div>
+        );
+      }
+      const frosted = it.variant === "textureBlur";
       return (
-        <div style={{ ...style, borderRadius: 50, background: p.surfaceContainer, boxShadow: "0 0 10px rgba(0,0,0,0.2)", padding: "0 12px", display: "flex", alignItems: "center", justifyContent: "center", gap: 12 }}>
+        <div
+          style={{
+            ...style,
+            overflow: "visible",
+            borderRadius: 50,
+            padding: "0 12px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+            background: frosted ? undefined : p.surfaceContainer,
+            ...(frosted ? textureBlur25(withAlpha(p.surfaceContainer, 0.6)) : undefined),
+            boxShadow: frosted
+              ? `0 0 10px rgba(0,0,0,${dark ? "0.2" : "0.1"}), ${glassStrokeMiddle(dark)}`
+              : "0 0 10px rgba(0,0,0,0.2)",
+          }}
+        >
           {(it.tabs ?? []).map((tab, i) => (
             <div key={i} style={{ padding: 10, opacity: i === (it.selected ?? 0) ? 1 : 0.4 }}>
               <Symbol name={tab.icon} size={28} color={p.onSurfaceContainer} />
@@ -380,6 +466,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
           ))}
         </div>
       );
+    }
     case "navigationRail":
       return (
         <div style={{ ...style, background: p.surface, display: "flex" }}>
