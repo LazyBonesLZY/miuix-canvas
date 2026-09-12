@@ -28,8 +28,10 @@ describe("migrateDoc", () => {
       ],
     };
     expect(isProject(raw)).toBe(true);
-    const next = migrateDoc(raw as Doc);
+    const next = migrateDoc(raw as unknown as Doc);
+    expect(next.version).toBe(2);
     expect(next.screens[0].items.map((it) => it.kind)).toEqual(["button"]);
+    expect(next.screens[0].items[0]).toMatchObject({ enabled: true, show: true, slot: "content" });
   });
 
   it("maps old glass/blur names onto official example styles", () => {
@@ -49,8 +51,8 @@ describe("migrateDoc", () => {
         },
       ],
     };
-    const next = migrateDoc(raw as Doc);
-    expect(next.screens[0].items[0]).toMatchObject({ kind: "floatingNav", w: 364, h: 64, variant: "iosLike" });
-    expect(next.screens[0].items[1]).toMatchObject({ kind: "navigationBar", variant: "textureBlur" });
+    const next = migrateDoc(raw as unknown as Doc);
+    expect(next.screens[0].items[0]).toMatchObject({ kind: "floatingNav", x: 0, y: 792, w: 412, h: 100, variant: "iosLike" });
+    expect(next.screens[0].items[1]).toMatchObject({ kind: "navigationBar", variant: "iconAndText", effect: "textureBlur" });
   });
 });

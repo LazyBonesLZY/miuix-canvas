@@ -169,7 +169,7 @@ export function defaultDoc(lang: Lang): Doc {
       item("badge", 172, 692, 16, 16, "3", { variant: "number" }),
       item("badge", 200, 698, 6, 6, "", { variant: "dot" }),
       item("image", 0, 700, 412, 192, ""),
-      item("floatingNav", 24, 760, 364, 64, "", {
+      item("floatingNav", 0, 792, 412, 100, "", {
         variant: "iosLike",
         tabs: [
           { icon: "home", label: loc(lang, "首页", "Home", "ホーム", "홈") },
@@ -182,7 +182,7 @@ export function defaultDoc(lang: Lang): Doc {
   };
 
   return {
-    version: 1,
+    version: 2,
     title: loc(lang, "示例应用", "Sample app", "サンプルアプリ", "샘플 앱"),
     platform: "cmp",
     theme: { ...DEFAULT_THEME, seed: MIUIX_BLUE },

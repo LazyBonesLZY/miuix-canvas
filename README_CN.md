@@ -14,13 +14,13 @@
 
 ## 功能
 
-- **拖放 Miuix 部件** — Button、IconButton、FAB、FloatingToolbar、TopAppBar、SmallTitle、NavigationBar（`IconAndText` / `IconOnly` / `IconWithSelectedLabel`，或官方 demo 的 `textureBlur`）、FloatingNavigationBar（`default` / `textureBlur` / example 的 `iosLike` 液态玻璃）、NavigationRail、TabRow / TabRowWithContour、SearchBar、BreadcrumbBar、Card、Surface、HorizontalDivider / VerticalDivider、Snackbar、OverlayDialog / WindowDialog、OverlayBottomSheet / WindowBottomSheet、OverlayListPopup / WindowListPopup、OverlayCascadingListPopup / WindowCascadingListPopup、OverlayDropdownMenu / WindowDropdownMenu、OverlayIconDropdownMenu / WindowIconDropdownMenu、OverlayIconCascadingDropdownMenu / WindowIconCascadingDropdownMenu、Tooltip / RichTooltipBox、TextField、Switch、Checkbox、RadioButton、Slider / VerticalSlider / 刻度 / 禁用、RangeSlider、Dropdown、NumberPicker、ColorPicker、ColorPalette、Text、Image、Badge、Icon、Linear / Circular / Infinite ProgressIndicator、PullToRefresh、Vertical / Horizontal ScrollBar。玻璃效果来自 `miuix-blur`（`Modifier.textureBlur`、`Highlight.GlassStroke*`，以及 example 里的 `IosLiquidGlassNavigationBar`）。
+- **拖放 Miuix 部件** — Button、IconButton、FAB、FloatingToolbar、TopAppBar、SmallTitle、NavigationBar（`IconAndText` / `IconOnly` / `IconWithSelectedLabel`）、FloatingNavigationBar（`default` / example 的 `iosLike` 液态玻璃）；`textureBlur` 和 `progressiveTextureBlur` 是真实 Modifier 效果、NavigationRail、TabRow / TabRowWithContour、SearchBar、BreadcrumbBar、Card、Surface、HorizontalDivider / VerticalDivider、Snackbar、OverlayDialog / WindowDialog、OverlayBottomSheet / WindowBottomSheet、OverlayListPopup / WindowListPopup、OverlayCascadingListPopup / WindowCascadingListPopup、OverlayDropdownMenu / WindowDropdownMenu、OverlayIconDropdownMenu / WindowIconDropdownMenu、OverlayIconCascadingDropdownMenu / WindowIconCascadingDropdownMenu、Tooltip / RichTooltipBox、TextField、Switch、Checkbox、RadioButton、Slider / VerticalSlider / 刻度 / 禁用、RangeSlider、Dropdown、NumberPicker、ColorPicker、ColorPalette、Text、Image、Badge、Icon、Linear / Circular / Infinite ProgressIndicator、PullToRefresh、Vertical / Horizontal ScrollBar。玻璃效果来自 `miuix-blur`（`Modifier.textureBlur`、`Highlight.GlassStroke*`，以及 example 里的 `IosLiquidGlassNavigationBar`）。
 - **Preference 行** — BasicComponent、SwitchPreference、CheckboxPreference、RadioButtonPreference、SliderPreference、RangeSliderPreference、OverlayDropdownPreference / WindowDropdownPreference、OverlaySpinnerPreference / WindowSpinnerPreference、ArrowPreference。相邻行会磁吸拼成一张 HyperOS Card。
 - **手机和桌面屏幕** — 412×892 手机、1280×800 桌面。切换尺寸时 NavigationBar 会和 NavigationRail 互转。
 - **编辑器三端适配** — 手机用底栏 + 底部面板；平板用左侧图标轨 + 一块停靠面板；电脑左右分栏。安全区、紧凑工具栏和预览缩放会跟着视口走。
 - **HyperOS 外观** — 草图按官方尺寸和颜色来（灰色 TextButton、49×28 Switch、只有勾的 RadioButton、16dp Card，没有 Material 色块图标井）。示例首页按官方 jsCanvas demo 的区块来排。
 - **动态草图** — 预览里可以拨开关、拖滑条、切标签、展开搜索、滚数字、点色板和菜单。画布上先选中部件再点一下就会切换；已选中的滑条可以拖数值。无限进度和下拉刷新会一直转。
-- **点击和滑动跳转** — 部件、导航项、屏幕滑动都可以打开另一屏。预览会播过渡；画布上有流程箭头。
+- **点击和滑动跳转** — 部件、导航项、屏幕滑动都可以打开另一屏。预览用官方 `miuix-nav`（`NavDisplay` / `NavTransitions.MiuixDefault` 或 `Modal`）；画布上有流程箭头。
 - **主题** — 浅色 / 深色、种子色（默认 `#3482FF`）、Monet。表面色保持 HyperOS，主色随种子色偏移。
 - **提示词** — 中 / 英 / 日 / 韩，会写出真实的 Miuix composable 名（`OverlayDialog`、`SwitchPreference` 等）。目标可以是 Compose Multiplatform（默认）、Android 或 CMP Web。
 - **可选 AI 辅助** — OpenAI / Claude / Gemini / DeepSeek，或自定义 OpenAI / Claude 兼容接口，用来写行为说明。密钥只留在浏览器里。
@@ -50,6 +50,8 @@
 
 ## 开发
 
+需要 JDK 21 和 Node.js 22+。构建时会先编译 Compose Wasm 渲染器，再静态导出 Next.js 编辑器。
+
 ```bash
 npm install
 npm run dev        # http://localhost:3000
@@ -68,4 +70,4 @@ npm test
 
 MIT © LazyBonesLZY
 
-Miuix 本身是 Apache-2.0。本项目只在浏览器里重做外观供草图使用，不内嵌 Kotlin 源码。
+Miuix 本身是 Apache-2.0。渲染器直接依赖已发布的 Miuix 库，并包含 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) 所列、保留归属和 Apache-2.0 许可的官方液态玻璃 example 源码。

@@ -10,6 +10,10 @@
 /.next/
 /out/
 /build
+/renderer/.gradle/
+/renderer/.kotlin/
+/renderer/build/
+/public/renderer/
 .DS_Store
 *.pem
 npm-debug.log*

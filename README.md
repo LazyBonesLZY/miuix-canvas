@@ -14,13 +14,13 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 
 ## What it does
 
-- **Drag-and-drop Miuix parts** — Button, IconButton, FAB, FloatingToolbar, TopAppBar, SmallTitle, NavigationBar (`IconAndText` / `IconOnly` / `IconWithSelectedLabel`, or official-demo `textureBlur`), FloatingNavigationBar (`default` / `textureBlur` / example `iosLike` liquid glass), NavigationRail, TabRow / TabRowWithContour, SearchBar, BreadcrumbBar, Card, Surface, HorizontalDivider / VerticalDivider, Snackbar, OverlayDialog / WindowDialog, OverlayBottomSheet / WindowBottomSheet, OverlayListPopup / WindowListPopup, OverlayCascadingListPopup / WindowCascadingListPopup, OverlayDropdownMenu / WindowDropdownMenu, OverlayIconDropdownMenu / WindowIconDropdownMenu, OverlayIconCascadingDropdownMenu / WindowIconCascadingDropdownMenu, Tooltip / RichTooltipBox, TextField, Switch, Checkbox, RadioButton, Slider / VerticalSlider / stepped / disabled, RangeSlider, Dropdown, NumberPicker, ColorPicker, ColorPalette, Text, Image, Badge, Icon, Linear / Circular / Infinite ProgressIndicator, PullToRefresh, Vertical / Horizontal ScrollBar. Glass comes from `miuix-blur` (`Modifier.textureBlur`, `Highlight.GlassStroke*`, and the example `IosLiquidGlassNavigationBar`).
+- **Drag-and-drop Miuix parts** — Button, IconButton, FAB, FloatingToolbar, TopAppBar, SmallTitle, NavigationBar (`IconAndText` / `IconOnly` / `IconWithSelectedLabel`), FloatingNavigationBar (`default` / example `iosLike` liquid glass); `textureBlur` and `progressiveTextureBlur` are real modifier effects, NavigationRail, TabRow / TabRowWithContour, SearchBar, BreadcrumbBar, Card, Surface, HorizontalDivider / VerticalDivider, Snackbar, OverlayDialog / WindowDialog, OverlayBottomSheet / WindowBottomSheet, OverlayListPopup / WindowListPopup, OverlayCascadingListPopup / WindowCascadingListPopup, OverlayDropdownMenu / WindowDropdownMenu, OverlayIconDropdownMenu / WindowIconDropdownMenu, OverlayIconCascadingDropdownMenu / WindowIconCascadingDropdownMenu, Tooltip / RichTooltipBox, TextField, Switch, Checkbox, RadioButton, Slider / VerticalSlider / stepped / disabled, RangeSlider, Dropdown, NumberPicker, ColorPicker, ColorPalette, Text, Image, Badge, Icon, Linear / Circular / Infinite ProgressIndicator, PullToRefresh, Vertical / Horizontal ScrollBar. Glass comes from `miuix-blur` (`Modifier.textureBlur`, `Highlight.GlassStroke*`, and the example `IosLiquidGlassNavigationBar`).
 - **Preference rows** — BasicComponent, SwitchPreference, CheckboxPreference, RadioButtonPreference, SliderPreference, RangeSliderPreference, OverlayDropdownPreference / WindowDropdownPreference, OverlaySpinnerPreference / WindowSpinnerPreference, ArrowPreference. Adjacent rows magnetically join into one HyperOS Card.
 - **Phone and desktop screens** — 412×892 phone and 1280×800 desktop. Switching size converts NavigationBar ↔ NavigationRail.
 - **Editor chrome on three sizes** — phone uses a bottom bar and sheet; tablet uses a left rail and one docked panel; desktop keeps parts and inspector on both sides. Safe areas, compact toolbars, and preview scaling follow the viewport.
 - **HyperOS look** — sketches use official Miuix sizes and colors (gray TextButton, 49×28 Switch, check-only RadioButton, 16dp Card, no Material icon wells). The sample home follows the official jsCanvas demo sections.
 - **Live sketches** — Switch, Checkbox, Radio, Slider, tabs, SearchBar, NumberPicker, ColorPalette, ColorPicker, menus and preference rows respond in preview. On the canvas, click a selected part to toggle or drag a selected slider. Infinite progress and PullToRefresh keep spinning.
-- **Tap and swipe to navigate** — parts, nav destinations and screen swipes can open another screen. Preview plays the transition; canvas arrows show the flow.
+- **Tap and swipe to navigate** — parts, nav destinations and screen swipes can open another screen. Preview uses official `miuix-nav` (`NavDisplay` / `NavTransitions.MiuixDefault` or `Modal`); canvas arrows show the flow.
 - **Theme** — light / dark, a seed color (default `#3482FF`), Monet flag. Surfaces stay HyperOS; primary roles shift with the seed.
 - **Prompt output** — Chinese, English, Japanese or Korean brief naming real Miuix composables (`OverlayDialog`, `SwitchPreference`, …). Target Compose Multiplatform (default), Android, or CMP Web.
 - **Optional AI helper** — OpenAI, Claude, Gemini, DeepSeek, or a custom OpenAI / Claude-compatible endpoint writes a part or screen note. The key stays in the browser.
@@ -50,6 +50,8 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 
 ## Develop
 
+JDK 21 and Node.js 22+ are required. The build compiles the Compose Wasm renderer first, then exports the Next.js editor.
+
 ```bash
 npm install
 npm run dev        # http://localhost:3000
@@ -68,4 +70,4 @@ The app is a static Next.js export. To host it under a sub-path (for example a G
 
 MIT © LazyBonesLZY
 
-Miuix itself is Apache-2.0. This project reimplements the look in the browser for sketching; it does not vendor the Kotlin sources.
+Miuix itself is Apache-2.0. The renderer links the published Miuix libraries and includes the attributed, Apache-2.0 liquid-glass example sources listed in [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md).

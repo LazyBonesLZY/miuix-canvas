@@ -6,14 +6,14 @@
     "node": "^22.12.0 || ^24.0.0 || >=26.0.0"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "npm run build:renderer && next dev",
+    "build": "npm run build:renderer && next build",
+    "build:renderer": "node scripts/build-renderer.mjs && node scripts/copy-renderer.mjs",
     "start": "npx serve out",
     "typecheck": "tsc --noEmit -p .",
     "test": "vitest run"
   },
   "dependencies": {
-    "html-to-image": "^1.11.13",
     "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8"

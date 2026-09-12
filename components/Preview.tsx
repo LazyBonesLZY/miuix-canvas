@@ -1,22 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { MiuixNode, StatusBar } from "@/components/MiuixNode";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { OfficialMiuixFrame } from "@/components/OfficialMiuixFrame";
 import { schemeFromSeed } from "@/lib/color";
 import { t, type Lang } from "@/lib/i18n";
-import { isLiveKind, isValueDragKind, livePatch } from "@/lib/interact";
-import { prefJoin, previewScale } from "@/lib/layout";
+import { previewScale } from "@/lib/layout";
+import type { RendererEvent } from "@/lib/renderer";
 import type { Doc, Item, Transition } from "@/lib/types";
-import { BACK_TARGET, GESTURE_H, frameSize } from "@/lib/types";
-
-const ANIM: Record<Transition, string> = {
-  slide: "preview-slide",
-  slideLeft: "preview-slide-left",
-  slideUp: "preview-slide-up",
-  slideDown: "preview-slide-down",
-  fade: "preview-fade",
-  none: "",
-};
+import { BACK_TARGET, frameSize } from "@/lib/types";
 
 export function Preview({
   doc,
@@ -30,15 +21,11 @@ export function Preview({
   onClose: () => void;
 }) {
   const [stack, setStack] = useState<string[]>([startId ?? doc.screens[0]?.id].filter(Boolean));
-  const [anim, setAnim] = useState("");
   const [local, setLocal] = useState<Record<string, Partial<Item>>>({});
   const [box, setBox] = useState(() => ({
     vw: typeof window !== "undefined" ? window.innerWidth : 412,
     vh: typeof window !== "undefined" ? window.innerHeight : 800,
   }));
-  const swipe = useRef<{ x: number; y: number } | null>(null);
-  const swiped = useRef(false);
-  const liveDrag = useRef(false);
   const currentId = stack.at(-1);
   const screen = doc.screens.find((s) => s.id === currentId) ?? doc.screens[0];
   const palette = schemeFromSeed(doc.theme.seed, doc.theme.mode === "dark");
@@ -52,23 +39,56 @@ export function Preview({
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const go = (to: string | undefined, transition?: Transition) => {
+  const go = useCallback((to: string | undefined, _transition?: Transition) => {
     if (!to) return;
-    setAnim(ANIM[transition ?? "slide"]);
     if (to === BACK_TARGET) setStack((s) => (s.length > 1 ? s.slice(0, -1) : s));
     else if (doc.screens.some((s) => s.id === to)) setStack((s) => [...s, to]);
-  };
+  }, [doc.screens]);
 
-  const itemOf = (it: Item): Item => ({ ...it, ...local[it.id] });
+  const renderedScreens = useMemo(() => doc.screens.map((entry) => ({
+    ...entry,
+    items: entry.items.map((it) => ({ ...it, ...local[it.id] })),
+  })), [doc.screens, local]);
+  const renderedScreen = renderedScreens.find((entry) => entry.id === screen?.id) ?? null;
 
-  const applyLive = (it: Item, nx: number, ny: number) => {
-    const patch = livePatch(it, nx, ny);
-    if (!patch) return null;
-    setLocal((prev) => ({ ...prev, [it.id]: { ...prev[it.id], ...patch } }));
-    return { ...it, ...local[it.id], ...patch };
-  };
+  const onRendererEvent = useCallback((event: RendererEvent) => {
+    if (event.type === "patch" && event.itemId) {
+      const patch: Partial<Item> = {};
+      if (event.checked !== undefined) patch.checked = event.checked;
+      if (event.value !== undefined) patch.value = event.value;
+      if (event.from !== undefined) patch.from = event.from;
+      if (event.selected !== undefined) patch.selected = event.selected;
+      if (event.label !== undefined) patch.label = event.label;
+      if (event.color !== undefined) patch.color = event.color;
+      if (event.variant !== undefined) patch.variant = event.variant;
+      if (event.refreshing !== undefined) patch.refreshing = event.refreshing;
+      setLocal((prev) => ({ ...prev, [event.itemId!]: { ...prev[event.itemId!], ...patch } }));
+      const source = renderedScreen?.items.find((item) => item.id === event.itemId);
+      if (event.checked === true && source && (source.kind === "radio" || source.kind === "radioPref")) {
+        setLocal((prev) => {
+          const next = { ...prev };
+          for (const peer of renderedScreen?.items ?? []) {
+            if (
+              peer.id !== source.id &&
+              peer.kind === source.kind &&
+              (source.group ? peer.group === source.group : peer.parentId === source.parentId)
+            ) {
+              next[peer.id] = { ...next[peer.id], checked: false };
+            }
+          }
+          return next;
+        });
+      }
+    }
+    if (event.type === "dismiss" && event.itemId) {
+      setLocal((prev) => ({ ...prev, [event.itemId!]: { ...prev[event.itemId!], show: false } }));
+    }
+    if (event.type === "navigate") {
+      go(event.to, event.action as Transition | undefined);
+    }
+  }, [go, renderedScreen?.items]);
 
-  if (!screen) return null;
+  if (!screen || !renderedScreen) return null;
 
   return (
     <div className="preview-root" onClick={onClose}>
@@ -78,7 +98,7 @@ export function Preview({
           style={{ width: w * scale, height: h * scale }}
         >
           <div
-            className={`absolute left-0 top-0 overflow-hidden ${anim}`}
+            className="absolute left-0 top-0 overflow-hidden"
             style={{
               width: w,
               height: h,
@@ -89,80 +109,8 @@ export function Preview({
               background: palette.surface,
               boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
             }}
-            onAnimationEnd={() => setAnim("")}
-            onPointerDown={(e) => { swipe.current = { x: e.clientX, y: e.clientY }; }}
-            onPointerUp={(e) => {
-              const start = swipe.current;
-              swipe.current = null;
-              if (liveDrag.current) {
-                liveDrag.current = false;
-                swiped.current = false;
-                return;
-              }
-              if (!start) return;
-              const dx = e.clientX - start.x;
-              const dy = e.clientY - start.y;
-              if (Math.hypot(dx, dy) < 48) return;
-              swiped.current = true;
-              const dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? "left" : "right") : dy < 0 ? "up" : "down";
-              go(screen.swipe?.[dir], dir === "left" ? "slide" : dir === "right" ? "slideLeft" : dir === "up" ? "slideUp" : "slideDown");
-            }}
           >
-            <StatusBar palette={palette} dark={doc.theme.mode === "dark"} />
-            {screen.items.map((raw) => {
-              const it = itemOf(raw);
-              const dest = it.to;
-              const live = isLiveKind(it.kind);
-              return (
-                <button
-                  key={it.id}
-                  type="button"
-                  onPointerDown={() => {
-                    if (isValueDragKind(it.kind)) liveDrag.current = true;
-                  }}
-                  onPointerMove={(e) => {
-                    if (e.buttons !== 1 || !isValueDragKind(it.kind)) return;
-                    liveDrag.current = true;
-                    const boxEl = e.currentTarget.getBoundingClientRect();
-                    applyLive(it, (e.clientX - boxEl.left) / boxEl.width, (e.clientY - boxEl.top) / boxEl.height);
-                  }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (swiped.current) {
-                      swiped.current = false;
-                      return;
-                    }
-                    const boxEl = e.currentTarget.getBoundingClientRect();
-                    const next = applyLive(it, (e.clientX - boxEl.left) / boxEl.width, (e.clientY - boxEl.top) / boxEl.height);
-                    const selected = next?.selected ?? it.selected ?? 0;
-                    const tab = it.tabs?.[selected];
-                    if (tab?.to) {
-                      go(tab.to, tab.transition ?? it.transition);
-                      return;
-                    }
-                    if (dest && !isValueDragKind(it.kind) && it.kind !== "searchBar" && it.kind !== "numberPicker" && it.kind !== "colorPalette") {
-                      go(dest, it.transition);
-                    }
-                  }}
-                  style={{
-                    position: "absolute",
-                    left: it.x,
-                    top: it.y,
-                    width: it.w,
-                    height: it.h,
-                    padding: 0,
-                    border: 0,
-                    background: "transparent",
-                    cursor: dest || live ? "pointer" : "default",
-                  }}
-                >
-                  <MiuixNode item={it} palette={palette} interactive lang={lang} join={prefJoin(screen.items.map(itemOf), it)} />
-                </button>
-              );
-            })}
-            <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: GESTURE_H, display: "grid", placeItems: "center", pointerEvents: "none" }}>
-              <div style={{ width: 96, height: 4, borderRadius: 4, background: doc.theme.mode === "dark" ? "rgba(255,255,255,0.35)" : "rgba(0,0,0,0.28)" }} />
-            </div>
+            <OfficialMiuixFrame screen={renderedScreen} screens={renderedScreens} theme={doc.theme} lang={lang} interactive onEvent={onRendererEvent} />
           </div>
         </div>
         <div className="flex max-w-full items-center gap-2 rounded-[16px] bg-[var(--chrome)] px-3 py-1.5 text-[13px] text-[var(--ink)]">

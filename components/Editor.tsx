@@ -1,10 +1,9 @@
 "use client";
 
-import { toPng } from "html-to-image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Inspector } from "@/components/Inspector";
 import { LayersPanel } from "@/components/Layers";
-import { MiuixNode, StatusBar } from "@/components/MiuixNode";
+import { OfficialMiuixFrame } from "@/components/OfficialMiuixFrame";
 import { PartsPalette } from "@/components/PartsPalette";
 import { Preview } from "@/components/Preview";
 import { PromptPanel } from "@/components/PromptPanel";
@@ -13,14 +12,14 @@ import { ConfirmDialog, Logo, Toolbar } from "@/components/Toolbar";
 import { schemeFromSeed } from "@/lib/color";
 import { cloneDoc, defaultDoc, emptyScreen, loadDoc, nextScreenOrigin, saveDoc, screenOf, UI_KEY } from "@/lib/doc";
 import { detectLang, isLang, setGlobalLang, SHORTCUTS, t, type Lang } from "@/lib/i18n";
-import { centerItem, centerViewOnScreen, convertPreset, duplicateItem, fitView, flowLinks, moveLayer, pinItem, prefJoin, snapMove, zoomAt } from "@/lib/layout";
+import { centerItem, centerViewOnScreen, convertPreset, duplicateItem, fitView, flowLinks, moveLayer, pinItem, snapMove, zoomAt } from "@/lib/layout";
 import { readProject, saveProject } from "@/lib/project";
 import { consumeShareHash, hasShareHash, readShareHash, shareUrl } from "@/lib/share";
 import { tidyScreen } from "@/lib/tidy";
 import { isLiveKind, isValueDragKind, livePatch } from "@/lib/interact";
 import { KIND_SPEC, defaultPosition, makeItem } from "@/lib/tokens";
 import type { Doc, FramePreset, Guide, Kind, Platform, Screen, Selection } from "@/lib/types";
-import { BEZEL, FRAME_LABEL_H, GESTURE_H, HISTORY_MAX, clamp, frameSize, isTypingTarget, onGrid, uid } from "@/lib/types";
+import { BEZEL, FRAME_LABEL_H, HISTORY_MAX, clamp, frameSize, isTypingTarget, onGrid, uid } from "@/lib/types";
 import { useLayoutMode, type LayoutMode } from "@/lib/viewport";
 
 const GITHUB = "https://github.com/LazyBonesLZY/miuix-canvas";
@@ -618,7 +617,12 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     if (!id) return;
     const node = screenRefs.current[id];
     if (!node) return;
-    const data = await toPng(node, { pixelRatio: 2, cacheBust: true });
+    const canvas = node.querySelector("iframe")?.contentDocument?.querySelector("canvas");
+    if (!canvas) {
+      setNotice(t("loadFailed", lang));
+      return;
+    }
+    const data = canvas.toDataURL("image/png");
     const a = document.createElement("a");
     a.href = data;
     a.download = `${doc.title || "miuix"}-${screenOf(doc, id)?.name || "screen"}.png`;
@@ -871,7 +875,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                       overflow: "hidden",
                     }}
                   >
-                    <StatusBar palette={palette} dark={doc.theme.mode === "dark"} />
+                    <OfficialMiuixFrame screen={screen} theme={doc.theme} lang={lang} />
                     {guide && selected && (
                       <>
                         {guide.gx !== undefined && <div style={{ position: "absolute", left: guide.gx, top: 0, bottom: 0, width: 1, background: palette.primary, opacity: 0.7, pointerEvents: "none" }} />}
@@ -894,16 +898,12 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
                             borderRadius: 4,
                           }}
                         >
-                          <MiuixNode item={it} palette={palette} lang={lang} join={prefJoin(screen.items, it)} />
                           {it.to && (
                             <span className="ms" style={{ position: "absolute", right: 2, top: 2, fontSize: 12, color: palette.primary, pointerEvents: "none" }}>south_east</span>
                           )}
                         </div>
                       );
                     })}
-                    <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: GESTURE_H, display: "grid", placeItems: "center", pointerEvents: "none" }}>
-                      <div style={{ width: 96, height: 4, borderRadius: 4, background: doc.theme.mode === "dark" ? "rgba(255,255,255,0.28)" : "rgba(0,0,0,0.22)" }} />
-                    </div>
                   </div>
                 </div>
               );

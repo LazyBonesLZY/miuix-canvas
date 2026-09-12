@@ -87,7 +87,10 @@ export type Kind =
   | "spinnerPref"
   | "arrowPref";
 
-export type NavTab = { icon: string; label: string; to?: string; transition?: Transition };
+export type NavTab = { icon: string; label: string; to?: string; transition?: Transition; badge?: string };
+export type ScaffoldSlot = "content" | "topBar" | "bottomBar" | "floatingActionButton" | "floatingToolbar" | "snackbarHost" | "overlay";
+export type MiuixTextStyle = "body1" | "body2" | "button" | "footnote1" | "footnote2" | "headline1" | "headline2" | "subtitle" | "title1" | "title2" | "title3" | "title4";
+export type MiuixEffect = "none" | "textureBlur" | "progressiveTextureBlur";
 
 export type Item = {
   id: string;
@@ -108,6 +111,25 @@ export type Item = {
   note?: string;
   to?: string;
   transition?: Transition;
+  enabled?: boolean;
+  show?: boolean;
+  refreshing?: boolean;
+  badge?: string;
+  parentId?: string;
+  slot?: ScaffoldSlot;
+  subtitle?: string;
+  largeTitle?: string;
+  actionLabel?: string;
+  textStyle?: MiuixTextStyle;
+  multiline?: boolean;
+  source?: string;
+  contentDescription?: string;
+  color?: string;
+  effect?: MiuixEffect;
+  blurRadius?: number;
+  effectDirection?: "top" | "bottom" | "left" | "right";
+  noiseCoefficient?: number;
+  group?: string;
 };
 
 export type Swipe = Partial<Record<SwipeDir, string>>;
@@ -130,7 +152,7 @@ export type Theme = {
 };
 
 export type Doc = {
-  version: 1;
+  version: 2;
   title: string;
   platform: Platform;
   theme: Theme;

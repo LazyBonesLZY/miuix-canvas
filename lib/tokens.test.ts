@@ -26,8 +26,9 @@ describe("KIND_SPEC coverage", () => {
     expect(KIND_SPEC.tabRow.h).toBe(42);
     expect(KIND_SPEC.slider.h).toBe(28);
     expect(KIND_SPEC.floatingNav.h).toBe(52);
-    expect(KIND_SPEC.floatingNav.variants).toEqual(["default", "textureBlur", "iosLike"]);
-    expect(KIND_SPEC.navigationBar.variants).toEqual(["iconAndText", "iconOnly", "iconWithSelectedLabel", "textureBlur"]);
+    expect(KIND_SPEC.floatingNav.variants).toEqual(["default", "iosLike"]);
+    expect(KIND_SPEC.navigationBar.variants).toEqual(["iconAndText", "iconOnly", "iconWithSelectedLabel"]);
+    expect(KIND_SPEC.navigationRail.variants).toEqual(["classic", "collapsed", "expanded"]);
     expect(KIND_SPEC.rangeSlider.from).toBe(0.2);
     expect(KIND_SPEC.button.variants?.[0]).toBe("secondary");
     expect(KIND_SPEC.topAppBar.h).toBe(72);

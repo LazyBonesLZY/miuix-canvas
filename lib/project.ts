@@ -1,5 +1,6 @@
 import { KIND_SET } from "./tokens";
-import type { Doc, Item, Screen } from "./types";
+import type { Doc, FramePreset, Item, Screen } from "./types";
+import { frameSize } from "./types";
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === "object" && value !== null;
 
@@ -26,7 +27,7 @@ const validScreen = (value: unknown): value is Screen =>
 export function isProject(value: unknown): value is Doc {
   return (
     isRecord(value) &&
-    value.version === 1 &&
+    (value.version === 1 || value.version === 2) &&
     typeof value.title === "string" &&
     (value.platform === "cmp" || value.platform === "android" || value.platform === "web") &&
     isRecord(value.theme) &&
@@ -35,25 +36,50 @@ export function isProject(value: unknown): value is Doc {
   );
 }
 
-function migrateItem(it: Item): Item {
-  if (it.kind === "floatingNav" && it.variant === "glass") {
-    return { ...it, variant: "iosLike", w: Math.max(it.w, 364), h: 64 };
+function defaultSlot(it: Item): Item["slot"] {
+  if (it.kind === "topAppBar") return "topBar";
+  if (it.kind === "navigationBar" || it.kind === "floatingNav") return "bottomBar";
+  if (it.kind === "fab") return "floatingActionButton";
+  if (it.kind === "floatingToolbar") return "floatingToolbar";
+  if (it.kind === "snackbar") return "snackbarHost";
+  if (["dialog", "bottomSheet", "listPopup", "cascadingPopup", "dropdownMenu", "iconDropdownMenu", "iconCascadingMenu"].includes(it.kind)) return "overlay";
+  return "content";
+}
+
+function migrateItem(it: Item, preset: FramePreset): Item {
+  const base: Item = {
+    ...it,
+    enabled: it.enabled ?? true,
+    show: it.show ?? true,
+    slot: it.slot ?? defaultSlot(it),
+  };
+  if (it.kind === "floatingNav" && (it.variant === "glass" || (it.variant === "iosLike" && it.h < 100))) {
+    const size = frameSize(preset);
+    return { ...base, variant: "iosLike", x: 0, y: size.h - 100, w: size.w, h: 100 };
   }
   if (it.kind === "navigationBar" && it.variant === "blur") {
-    return { ...it, variant: "textureBlur" };
+    return { ...base, variant: "iconAndText", effect: "textureBlur" };
+  }
+  if ((it.kind === "navigationBar" || it.kind === "floatingNav") && it.variant === "textureBlur") {
+    return {
+      ...base,
+      variant: it.kind === "navigationBar" ? "iconAndText" : "default",
+      effect: "textureBlur",
+    };
   }
   if (it.kind === "navigationBar" && (it.variant === "default" || !it.variant)) {
-    return { ...it, variant: "iconAndText" };
+    return { ...base, variant: "iconAndText" };
   }
-  return it;
+  return base;
 }
 
 export function migrateDoc(doc: Doc): Doc {
   return {
     ...doc,
+    version: 2,
     screens: doc.screens.map((screen) => ({
       ...screen,
-      items: screen.items.filter((it) => KIND_SET.has(it.kind)).map(migrateItem),
+      items: screen.items.filter((it) => KIND_SET.has(it.kind)).map((it) => migrateItem(it, screen.preset)),
     })),
   };
 }

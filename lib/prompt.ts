@@ -83,12 +83,12 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
   }
   if (it.kind === "floatingNav" && (it.variant === "iosLike" || it.variant === "glass")) {
     bits.push({ zh: "官方 example 的 IosLiquidGlassNavigationBar：layerBackdrop + vibrancy + blur(4.dp) + lens(24.dp)，胶囊高 64.dp，选中条 onSurface 10%", en: "official example IosLiquidGlassNavigationBar: layerBackdrop + vibrancy + blur(4.dp) + lens(24.dp), 64.dp pill, selected chip 10% onSurface", ja: "公式 example の IosLiquidGlassNavigationBar：layerBackdrop + vibrancy + blur(4.dp) + lens(24.dp)、高さ 64.dp", ko: "공식 example IosLiquidGlassNavigationBar: layerBackdrop + vibrancy + blur(4.dp) + lens(24.dp), 높이 64.dp" }[lang]);
-  } else if (it.kind === "floatingNav" && it.variant === "textureBlur") {
+  } else if (it.kind === "floatingNav" && it.effect === "textureBlur") {
     bits.push({ zh: "FloatingNavigationBar + Modifier.textureBlur(blurRadius = 25f, surfaceContainer@0.6, highlight = GlassStrokeMiddle)", en: "FloatingNavigationBar + Modifier.textureBlur(blurRadius = 25f, surfaceContainer@0.6, highlight = GlassStrokeMiddle)", ja: "FloatingNavigationBar + Modifier.textureBlur(blurRadius = 25f, surfaceContainer@0.6, highlight = GlassStrokeMiddle)", ko: "FloatingNavigationBar + Modifier.textureBlur(blurRadius = 25f, surfaceContainer@0.6, highlight = GlassStrokeMiddle)" }[lang]);
   } else if (it.kind === "floatingNav") {
     bits.push({ zh: "FloatingNavigationBar：surfaceContainer，圆角 50.dp，dropShadow 10.dp / alpha 0.2，只显示图标", en: "FloatingNavigationBar: surfaceContainer, 50.dp corners, dropShadow 10.dp / alpha 0.2, icons only", ja: "FloatingNavigationBar：surfaceContainer、角 50.dp、dropShadow 10.dp / alpha 0.2、アイコンのみ", ko: "FloatingNavigationBar: surfaceContainer, 50.dp 모서리, dropShadow 10.dp / alpha 0.2, 아이콘만" }[lang]);
   }
-  if (it.kind === "navigationBar" && it.variant === "textureBlur") {
+  if (it.kind === "navigationBar" && it.effect === "textureBlur") {
     bits.push({ zh: "官方 example：NavigationBar 外包 Modifier.textureBlur(blurRadius = 25f, surface@0.8)", en: "official example: wrap NavigationBar with Modifier.textureBlur(blurRadius = 25f, surface@0.8)", ja: "公式 example：NavigationBar を Modifier.textureBlur(blurRadius = 25f, surface@0.8) で包む", ko: "공식 example: NavigationBar를 Modifier.textureBlur(blurRadius = 25f, surface@0.8)로 감싼다" }[lang]);
   } else if (it.kind === "navigationBar") {
     const mode = it.variant === "iconOnly" ? "IconOnly" : it.variant === "iconWithSelectedLabel" ? "IconWithSelectedLabel" : "IconAndText";
@@ -107,6 +107,11 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
   }
   if (it.kind === "blur") {
     bits.push({ zh: "这是 Modifier.textureBlur（miuix-blur），不是独立组件；默认 blurRadius = 20f，先 layerBackdrop 再 textureBlur", en: "this is Modifier.textureBlur from miuix-blur, not a composable; default blurRadius = 20f after layerBackdrop", ja: "これは Modifier.textureBlur（miuix-blur）でありコンポーネントではない。既定 blurRadius = 20f。先に layerBackdrop", ko: "독립 컴포저블이 아니라 miuix-blur의 Modifier.textureBlur. 기본 blurRadius = 20f, layerBackdrop 후 적용" }[lang]);
+  }
+  if (it.kind !== "blur" && it.effect && it.effect !== "none") {
+    const radius = it.blurRadius ?? 20;
+    const direction = it.effect === "progressiveTextureBlur" ? `, gradient = ProgressiveBlur.${(it.effectDirection ?? "top")[0].toUpperCase()}${(it.effectDirection ?? "top").slice(1)}` : "";
+    bits.push({ zh: `应用 Modifier.${it.effect}(blurRadius = ${radius}f${direction})，背景先接 layerBackdrop`, en: `apply Modifier.${it.effect}(blurRadius = ${radius}f${direction}) after layerBackdrop`, ja: `layerBackdrop の上で Modifier.${it.effect}(blurRadius = ${radius}f${direction})`, ko: `layerBackdrop 후 Modifier.${it.effect}(blurRadius = ${radius}f${direction}) 적용` }[lang]);
   }
   if (it.kind === "image") {
     bits.push({ zh: "用 Compose 的 Image / coil，没有 Miuix Image 组件", en: "use Compose Image / Coil; there is no Miuix Image composable", ja: "Compose の Image / Coil を使う。Miuix の Image コンポーネントはない", ko: "Compose Image / Coil을 쓴다. Miuix Image 컴포저블은 없다" }[lang]);

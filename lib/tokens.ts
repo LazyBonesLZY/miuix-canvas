@@ -1,5 +1,5 @@
 import { MIUIX_BLUE } from "./color";
-import type { Category, FramePreset, Item, Kind, Lang, Localized, NavTab, Theme } from "./types";
+import type { Category, FramePreset, Item, Kind, Lang, Localized, NavTab, ScaffoldSlot, Theme } from "./types";
 import { DESKTOP_H, DESKTOP_W, MARGIN, PHONE_H, PHONE_W, contentWidth, uid } from "./types";
 
 export const DEFAULT_THEME: Theme = {
@@ -62,9 +62,9 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   floatingToolbar: { kind: "floatingToolbar", category: "actions", icon: "construction", w: () => 220, h: 52, defaultLabel: L("工具", "Tools", "ツール", "도구"), tabs: [{ icon: "edit", label: "" }, { icon: "content_copy", label: "" }, { icon: "delete", label: "" }], composable: "FloatingToolbar" },
   topAppBar: { kind: "topAppBar", category: "navigation", icon: "web_asset", w: edge, h: 72, edge: "top", variants: ["small", "large"], defaultLabel: L("标题", "Title", "タイトル", "제목"), composable: "SmallTopAppBar" },
   smallTitle: { kind: "smallTitle", category: "navigation", icon: "title", w: full, h: 36, defaultLabel: L("常用功能", "Shortcuts", "ショートカット", "바로가기"), composable: "SmallTitle" },
-  navigationBar: { kind: "navigationBar", category: "navigation", icon: "dock_to_bottom", w: edge, h: 64, edge: "bottom", variants: ["iconAndText", "iconOnly", "iconWithSelectedLabel", "textureBlur"], defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationBar" },
-  floatingNav: { kind: "floatingNav", category: "navigation", icon: "dock_to_bottom", w: () => 280, h: 52, variants: ["default", "textureBlur", "iosLike"], defaultLabel: L("悬浮导航", "Floating nav", "フローティングナビ", "플로팅 탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "FloatingNavigationBar" },
-  navigationRail: { kind: "navigationRail", category: "navigation", icon: "view_sidebar", w: () => 80, h: 400, edge: "start", defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationRail" },
+  navigationBar: { kind: "navigationBar", category: "navigation", icon: "dock_to_bottom", w: edge, h: 64, edge: "bottom", variants: ["iconAndText", "iconOnly", "iconWithSelectedLabel"], defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationBar" },
+  floatingNav: { kind: "floatingNav", category: "navigation", icon: "dock_to_bottom", w: () => 280, h: 52, variants: ["default", "iosLike"], defaultLabel: L("悬浮导航", "Floating nav", "フローティングナビ", "플로팅 탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "FloatingNavigationBar" },
+  navigationRail: { kind: "navigationRail", category: "navigation", icon: "view_sidebar", w: () => 80, h: 400, edge: "start", variants: ["classic", "collapsed", "expanded"], defaultLabel: L("导航", "Navigation", "ナビ", "탐색"), tabs: [{ icon: "home", label: "首页" }, { icon: "explore", label: "发现" }, { icon: "person", label: "我的" }], composable: "NavigationRail" },
   tabRow: { kind: "tabRow", category: "navigation", icon: "tabs", w: full, h: 42, variants: ["default", "contour"], defaultLabel: L("标签", "Tabs", "タブ", "탭"), tabs: [{ icon: "", label: "推荐" }, { icon: "", label: "关注" }, { icon: "", label: "热门" }], composable: "TabRow" },
   searchBar: { kind: "searchBar", category: "navigation", icon: "search", w: full, h: 45, variants: ["field", "expanded"], defaultLabel: L("搜索", "Search", "検索", "검색"), composable: "SearchBar" },
   breadcrumb: { kind: "breadcrumb", category: "navigation", icon: "more_horiz", w: full, h: 48, defaultLabel: L("设置 / 显示", "Settings / Display", "設定 / 表示", "설정 / 디스플레이"), composable: "BreadcrumbBar" },
@@ -113,6 +113,16 @@ export const KIND_ORDER = Object.keys(KIND_SPEC) as Kind[];
 export const KIND_SET = new Set<string>(KIND_ORDER);
 export const CATEGORIES: Category[] = ["actions", "navigation", "containment", "inputs", "content", "progress", "preference"];
 
+function defaultSlot(kind: Kind): ScaffoldSlot {
+  if (kind === "topAppBar") return "topBar";
+  if (kind === "navigationBar" || kind === "floatingNav") return "bottomBar";
+  if (kind === "fab") return "floatingActionButton";
+  if (kind === "floatingToolbar") return "floatingToolbar";
+  if (kind === "snackbar") return "snackbarHost";
+  if (["dialog", "bottomSheet", "listPopup", "cascadingPopup", "dropdownMenu", "iconDropdownMenu", "iconCascadingMenu"].includes(kind)) return "overlay";
+  return "content";
+}
+
 export function makeItem(kind: Kind, preset: FramePreset, lang: Lang, x: number, y: number): Item {
   const spec = KIND_SPEC[kind];
   const screenW = preset === "desktop" ? DESKTOP_W : PHONE_W;
@@ -129,6 +139,9 @@ export function makeItem(kind: Kind, preset: FramePreset, lang: Lang, x: number,
     supporting: spec.defaultSupporting?.[lang],
     icon: ["iconButton", "fab", "icon", "pullToRefresh"].includes(kind) ? spec.icon : undefined,
     variant: spec.variants?.[0],
+    enabled: true,
+    show: true,
+    slot: defaultSlot(kind),
     checked: spec.checked,
     value: spec.value,
     from: spec.from,
@@ -148,7 +161,10 @@ export function applyVariant(it: Item, variant: string): Partial<Item> {
     return variant === "vertical" ? { ...patch, w: 28, h: Math.max(it.h, 160) } : { ...patch, w: Math.max(it.w, 200), h: 28 };
   }
   if (it.kind === "floatingNav") {
-    return variant === "iosLike" || variant === "glass" ? { ...patch, w: Math.max(it.w, 364), h: 64 } : { ...patch, w: 280, h: 52 };
+    return variant === "iosLike" || variant === "glass" ? { ...patch, x: 0, w: Math.max(it.w, PHONE_W), h: 100 } : { ...patch, w: 280, h: 52 };
+  }
+  if (it.kind === "navigationRail") {
+    return variant === "expanded" ? { ...patch, w: 240 } : { ...patch, w: 80 };
   }
   if (it.kind === "topAppBar") {
     return variant === "large" ? { ...patch, h: 88 } : { ...patch, h: 72 };
