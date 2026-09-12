@@ -5,22 +5,22 @@ import { BACK_TARGET, SWIPE_DIRS, frameSize } from "./types";
 
 const STACK: Record<Platform, Record<Lang, string>> = {
   cmp: {
-    zh: "用 Compose Multiplatform 实现，依赖 top.yukonga.miuix.kmp 的 miuix-ui、miuix-preference、miuix-icons、miuix-nav。根节点包在 MiuixTheme 里。",
-    en: "Implement with Compose Multiplatform using top.yukonga.miuix.kmp miuix-ui, miuix-preference, miuix-icons and miuix-nav. Wrap the root in MiuixTheme.",
-    ja: "Compose Multiplatform で実装する。依存は top.yukonga.miuix.kmp の miuix-ui、miuix-preference、miuix-icons、miuix-nav。ルートを MiuixTheme で包む。",
-    ko: "Compose Multiplatform으로 구현한다. top.yukonga.miuix.kmp의 miuix-ui, miuix-preference, miuix-icons, miuix-nav에 의존한다. 루트를 MiuixTheme으로 감싼다.",
+    zh: "用 Compose Multiplatform 实现，依赖 top.yukonga.miuix.kmp 的 miuix-ui、miuix-preference、miuix-icons、miuix-nav、miuix-blur。根节点包在 MiuixTheme 里。",
+    en: "Implement with Compose Multiplatform using top.yukonga.miuix.kmp miuix-ui, miuix-preference, miuix-icons, miuix-nav and miuix-blur. Wrap the root in MiuixTheme.",
+    ja: "Compose Multiplatform で実装する。依存は top.yukonga.miuix.kmp の miuix-ui、miuix-preference、miuix-icons、miuix-nav、miuix-blur。ルートを MiuixTheme で包む。",
+    ko: "Compose Multiplatform으로 구현한다. top.yukonga.miuix.kmp의 miuix-ui, miuix-preference, miuix-icons, miuix-nav, miuix-blur에 의존한다. 루트를 MiuixTheme으로 감싼다.",
   },
   android: {
-    zh: "用 Jetpack Compose（Android）实现，依赖 top.yukonga.miuix.kmp 的 miuix-ui、miuix-preference、miuix-icons。根节点包在 MiuixTheme 里。",
-    en: "Implement with Jetpack Compose on Android using top.yukonga.miuix.kmp miuix-ui, miuix-preference and miuix-icons. Wrap the root in MiuixTheme.",
-    ja: "Jetpack Compose（Android）で実装する。依存は top.yukonga.miuix.kmp の miuix-ui、miuix-preference、miuix-icons。ルートを MiuixTheme で包む。",
-    ko: "Jetpack Compose(Android)로 구현한다. top.yukonga.miuix.kmp의 miuix-ui, miuix-preference, miuix-icons에 의존한다. 루트를 MiuixTheme으로 감싼다.",
+    zh: "用 Jetpack Compose（Android）实现，依赖 top.yukonga.miuix.kmp 的 miuix-ui、miuix-preference、miuix-icons、miuix-blur。根节点包在 MiuixTheme 里。",
+    en: "Implement with Jetpack Compose on Android using top.yukonga.miuix.kmp miuix-ui, miuix-preference, miuix-icons and miuix-blur. Wrap the root in MiuixTheme.",
+    ja: "Jetpack Compose（Android）で実装する。依存は top.yukonga.miuix.kmp の miuix-ui、miuix-preference、miuix-icons、miuix-blur。ルートを MiuixTheme で包む。",
+    ko: "Jetpack Compose(Android)로 구현한다. top.yukonga.miuix.kmp의 miuix-ui, miuix-preference, miuix-icons, miuix-blur에 의존한다. 루트를 MiuixTheme으로 감싼다.",
   },
   web: {
-    zh: "用 Compose Multiplatform 的 Web（Wasm/JS）目标实现，依赖 top.yukonga.miuix.kmp 的 miuix-ui、miuix-preference、miuix-icons。根节点包在 MiuixTheme 里。",
-    en: "Implement with Compose Multiplatform for Web (Wasm/JS) using top.yukonga.miuix.kmp miuix-ui, miuix-preference and miuix-icons. Wrap the root in MiuixTheme.",
-    ja: "Compose Multiplatform の Web（Wasm/JS）向けに実装する。依存は top.yukonga.miuix.kmp の miuix-ui、miuix-preference、miuix-icons。ルートを MiuixTheme で包む。",
-    ko: "Compose Multiplatform Web(Wasm/JS)으로 구현한다. top.yukonga.miuix.kmp의 miuix-ui, miuix-preference, miuix-icons에 의존한다. 루트를 MiuixTheme으로 감싼다.",
+    zh: "用 Compose Multiplatform 的 Web（Wasm/JS）目标实现，依赖 top.yukonga.miuix.kmp 的 miuix-ui、miuix-preference、miuix-icons、miuix-blur。根节点包在 MiuixTheme 里。",
+    en: "Implement with Compose Multiplatform for Web (Wasm/JS) using top.yukonga.miuix.kmp miuix-ui, miuix-preference, miuix-icons and miuix-blur. Wrap the root in MiuixTheme.",
+    ja: "Compose Multiplatform の Web（Wasm/JS）向けに実装する。依存は top.yukonga.miuix.kmp の miuix-ui、miuix-preference、miuix-icons、miuix-blur。ルートを MiuixTheme で包む。",
+    ko: "Compose Multiplatform Web(Wasm/JS)으로 구현한다. top.yukonga.miuix.kmp의 miuix-ui, miuix-preference, miuix-icons, miuix-blur에 의존한다. 루트를 MiuixTheme으로 감싼다.",
   },
 };
 
@@ -38,19 +38,19 @@ function themeLine(doc: Doc, lang: Lang): string {
     ja: doc.theme.mode === "dark" ? "ダーク" : "ライト",
     ko: doc.theme.mode === "dark" ? "다크" : "라이트",
   }[lang];
-  const monet = doc.theme.monet
-    ? `ThemeController(ColorSchemeMode.MonetSystem, keyColor = Color(0xFF${hex}))`
-    : "lightColorScheme() / darkColorScheme()";
+  const theme = doc.theme.monet
+    ? `MiuixTheme(controller = ThemeController(ColorSchemeMode.MonetSystem, keyColor = Color(0xFF${hex})))`
+    : `MiuixTheme(colors = ${doc.theme.mode === "dark" ? "darkColorScheme()" : "lightColorScheme()"})`;
   if (lang === "zh") {
-    return `主题：${mode}，种子色 ${seed}，用 ${monet}。背景用 surface（浅色约 #F7F7F7），卡片与 Preference 用 surfaceContainer。主色给 Button / Switch / Slider。圆角用 Miuix 默认 16.dp squircle（miuix-squircle）。`;
+    return `主题：${mode}，种子色 ${seed}，用 ${theme}。背景用 surface（浅色约 #F7F7F7），卡片与 Preference 用 surfaceContainer。主色给 Button / Switch / Slider。圆角用 Miuix 默认 16.dp squircle（miuix-squircle）。`;
   }
   if (lang === "ja") {
-    return `テーマ：${mode}、シード色 ${seed}、${monet} を使う。背景は surface（ライト時は約 #F7F7F7）。カードと Preference は surfaceContainer。主色は Button / Switch / Slider。角は Miuix 既定の 16.dp squircle（miuix-squircle）。`;
+    return `テーマ：${mode}、シード色 ${seed}、${theme} を使う。背景は surface（ライト時は約 #F7F7F7）。カードと Preference は surfaceContainer。主色は Button / Switch / Slider。角は Miuix 既定の 16.dp squircle（miuix-squircle）。`;
   }
   if (lang === "ko") {
-    return `테마: ${mode}, 시드 색 ${seed}, ${monet}를 쓴다. 배경은 surface(라이트는 약 #F7F7F7). 카드와 Preference는 surfaceContainer. 주색은 Button / Switch / Slider. 모서리는 Miuix 기본 16.dp squircle(miuix-squircle).`;
+    return `테마: ${mode}, 시드 색 ${seed}, ${theme}를 쓴다. 배경은 surface(라이트는 약 #F7F7F7). 카드와 Preference는 surfaceContainer. 주색은 Button / Switch / Slider. 모서리는 Miuix 기본 16.dp squircle(miuix-squircle).`;
   }
-  return `Theme: ${mode}, seed ${seed}, using ${monet}. Background is surface (~#F7F7F7 in light). Cards and preferences sit on surfaceContainer. Primary tints Button, Switch and Slider. Use Miuix 16.dp squircle corners (miuix-squircle).`;
+  return `Theme: ${mode}, seed ${seed}, using ${theme}. Background is surface (~#F7F7F7 in light). Cards and preferences sit on surfaceContainer. Primary tints Button, Switch and Slider. Use Miuix 16.dp squircle corners (miuix-squircle).`;
 }
 
 function destName(doc: Doc, to: string | undefined, lang: Lang): string {
@@ -90,14 +90,35 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
   if (it.kind === "button" && it.variant === "text") {
     bits.push({ zh: "TextButton：secondaryVariant 底，onSecondaryVariant 字", en: "TextButton: secondaryVariant fill, onSecondaryVariant label", ja: "TextButton：secondaryVariant 背景、onSecondaryVariant 文字", ko: "TextButton: secondaryVariant 배경, onSecondaryVariant 글자" }[lang]);
   }
-  if (it.kind === "tabRow") {
-    bits.push({ zh: "未选中标签带 1.dp outline，选中是滑动 surfaceContainer 指示条", en: "unselected tabs have a 1.dp outline; selected uses a sliding surfaceContainer indicator", ja: "未選択タブは 1.dp outline、選択はスライドする surfaceContainer", ko: "미선택 탭은 1.dp outline, 선택은 미끄러지는 surfaceContainer" }[lang]);
+  if (it.kind === "tabRow" && it.variant === "contour") {
+    bits.push({ zh: "TabRowWithContour：8.dp 轮廓胶囊，高 45.dp，间距 5.dp", en: "TabRowWithContour: 8.dp contour pills, height 45.dp, 5.dp gap", ja: "TabRowWithContour：8.dp 輪郭カプセル、高さ 45.dp、間隔 5.dp", ko: "TabRowWithContour: 8.dp 윤곽 캡슐, 높이 45.dp, 간격 5.dp" }[lang]);
+  } else if (it.kind === "tabRow") {
+    bits.push({ zh: "未选中标签带 1.dp outline，选中是滑动 surfaceContainer 指示条", en: "unselected tabs have a 1.dp outline; selected uses a sliding surfaceContainer indicator", ja: "未選択タブは 1.dp の輪郭、選択はスライドする surfaceContainer", ko: "미선택 탭은 1.dp 윤곽, 선택은 미끄러지는 surfaceContainer" }[lang]);
+  }
+  if (it.kind === "searchBar") {
+    bits.push({ zh: "SearchBar 需配合 InputField，占位符 onSurfaceContainerHigh", en: "SearchBar needs an InputField child; placeholder uses onSurfaceContainerHigh", ja: "SearchBar は InputField を子に。プレースホルダは onSurfaceContainerHigh", ko: "SearchBar는 InputField 자식이 필요하며 자리 표시는 onSurfaceContainerHigh" }[lang]);
+  }
+  if (it.kind === "blur") {
+    bits.push({ zh: "这是 Modifier.textureBlur（miuix-blur），不是独立组件", en: "this is Modifier.textureBlur from miuix-blur, not a composable", ja: "これは Modifier.textureBlur（miuix-blur）でありコンポーネントではない", ko: "독립 컴포저블이 아니라 miuix-blur의 Modifier.textureBlur" }[lang]);
+  }
+  if (it.kind === "image") {
+    bits.push({ zh: "用 Compose 的 Image / coil，没有 Miuix Image 组件", en: "use Compose Image / Coil; there is no Miuix Image composable", ja: "Compose の Image / Coil を使う。Miuix の Image コンポーネントはない", ko: "Compose Image / Coil을 쓴다. Miuix Image 컴포저블은 없다" }[lang]);
+  }
+  if (it.kind === "button" && it.variant === "primary") {
+    bits.push({ zh: "用 ButtonDefaults.buttonColorsPrimary()", en: "use ButtonDefaults.buttonColorsPrimary()", ja: "ButtonDefaults.buttonColorsPrimary() を使う", ko: "ButtonDefaults.buttonColorsPrimary()를 쓴다" }[lang]);
+  }
+  if (api.startsWith("Overlay")) {
+    bits.push({ zh: "须在 Scaffold 内", en: "must live inside Scaffold", ja: "Scaffold 内に置く", ko: "Scaffold 안에 둔다" }[lang]);
+  }
+  if (typeof it.selected === "number" && it.tabs?.length) {
+    const name = it.tabs[it.selected]?.label;
+    bits.push({ zh: `选中第 ${it.selected + 1} 项${name ? q(name, lang) : ""}`, en: `selected item ${it.selected + 1}${name ? ` ${q(name, lang)}` : ""}`, ja: `選択は ${it.selected + 1} 番目${name ? q(name, lang) : ""}`, ko: `${it.selected + 1}번째 선택${name ? ` ${q(name, lang)}` : ""}` }[lang]);
   }
   if (it.kind === "breadcrumb") {
     bits.push({ zh: "胶囊分段，高亮 primary@20%", en: "capsule chips, highlight primary@20%", ja: "カプセル、ハイライトは primary@20%", ko: "캡슐 조각, 강조는 primary@20%" }[lang]);
   }
   if (it.kind === "progress" && it.variant === "circular") {
-    bits.push({ zh: "30.dp 描边圆弧，从 -90° 起", en: "30.dp stroke arc from -90°", ja: "30.dp ストローク円弧、-90° から", ko: "30.dp 스트로크 호, -90°부터" }[lang]);
+    bits.push({ zh: "直径 30.dp、描边 4.dp，从 -90° 起", en: "30.dp size, 4.dp stroke from -90°", ja: "直径 30.dp、線幅 4.dp、-90° から", ko: "지름 30.dp, 선 4.dp, -90°부터" }[lang]);
   }
   if (it.kind === "progress" && it.variant === "infinite") {
     bits.push({ zh: "20.dp 灰环、2.dp 轨道点", en: "20.dp gray ring, 2.dp orbiting dot", ja: "20.dp グレー環、2.dp 軌道点", ko: "20.dp 회색 고리, 2.dp 궤도 점" }[lang]);
@@ -107,7 +128,14 @@ function describeItem(doc: Doc, it: Item, lang: Lang): string {
       const dest = destName(doc, tab.to, lang);
       return dest ? `${tab.label || tab.icon}→${dest}` : tab.label || tab.icon;
     }).join(cjk(lang) ? "、" : ", ");
-    bits.push({ zh: `目的地：${names}`, en: `destinations: ${names}`, ja: `行き先：${names}`, ko: `목적지: ${names}` }[lang]);
+    const list = it.kind === "dropdown" || it.kind === "dropdownPref" || it.kind === "spinnerPref"
+      ? { zh: "选项", en: "options", ja: "選択肢", ko: "옵션" }[lang]
+      : it.kind === "listPopup" || it.kind === "dropdownMenu" || it.kind === "iconDropdownMenu" || it.kind === "iconCascadingMenu" || it.kind === "cascadingPopup" || it.kind === "bottomSheet"
+        ? { zh: "菜单项", en: "menu items", ja: "メニュー項目", ko: "메뉴 항목" }[lang]
+        : it.kind === "navigationBar" || it.kind === "floatingNav" || it.kind === "navigationRail"
+          ? { zh: "目的地", en: "destinations", ja: "行き先", ko: "목적지" }[lang]
+          : { zh: "标签", en: "tabs", ja: "タブ", ko: "탭" }[lang];
+    bits.push(`${list}${colon(lang)}${names}`);
   }
   const dest = destName(doc, it.to, lang);
   if (dest) {
@@ -145,17 +173,17 @@ export function buildPrompt(doc: Doc, lang: Lang, onlyScreenId?: string): string
   }[lang];
 
   const nav = {
-    zh: "用 Scaffold + TopAppBar / NavigationBar（桌面宽度改 NavigationRail）。所有 Overlay* 弹层必须包在 Scaffold 里。对话框用 OverlayDialog 或 WindowDialog，底栏用 OverlayBottomSheet 或 WindowBottomSheet。悬浮底栏用 FloatingNavigationBar（默认只显示图标）。屏幕之间用 miuix-nav 或普通导航；标明返回的走返回栈。",
-    en: "Use Scaffold with TopAppBar / NavigationBar (NavigationRail on desktop widths). Every Overlay* popup must live inside Scaffold. Dialogs are OverlayDialog or WindowDialog, sheets are OverlayBottomSheet or WindowBottomSheet. Floating bottom nav is FloatingNavigationBar (icons only by default). Navigate with miuix-nav or a regular back stack.",
-    ja: "Scaffold + TopAppBar / NavigationBar（デスクトップ幅では NavigationRail）。Overlay* のポップアップは必ず Scaffold の中に置く。ダイアログは OverlayDialog または WindowDialog、シートは OverlayBottomSheet または WindowBottomSheet。フローティング下ナビは FloatingNavigationBar（既定はアイコンのみ）。画面遷移は miuix-nav か通常のバックスタック。",
-    ko: "Scaffold + TopAppBar / NavigationBar(데스크톱 폭은 NavigationRail). Overlay* 팝업은 반드시 Scaffold 안에 둔다. 대화상자는 OverlayDialog 또는 WindowDialog, 시트는 OverlayBottomSheet 또는 WindowBottomSheet. 플로팅 하단 탐색은 FloatingNavigationBar(기본은 아이콘만). 화면 이동은 miuix-nav 또는 일반 백 스택.",
+    zh: "用 Scaffold + TopAppBar / NavigationBar（桌面宽度改 NavigationRail）。OverlayDialog、OverlayBottomSheet、OverlayListPopup、OverlayDropdownPreference、OverlaySpinnerPreference 等 Overlay* 必须包在 Scaffold 里；Window* 版不需要。悬浮底栏用 FloatingNavigationBar（默认只显示图标）。屏幕之间用 miuix-nav 或普通导航；标明返回的走返回栈。",
+    en: "Use Scaffold with TopAppBar / NavigationBar (NavigationRail on desktop widths). OverlayDialog, OverlayBottomSheet, OverlayListPopup, OverlayDropdownPreference, OverlaySpinnerPreference and other Overlay* widgets must live inside Scaffold; Window* variants do not. Floating bottom nav is FloatingNavigationBar (icons only by default). Navigate with miuix-nav or a regular back stack.",
+    ja: "Scaffold + TopAppBar / NavigationBar（デスクトップ幅では NavigationRail）。OverlayDialog、OverlayBottomSheet、OverlayListPopup、OverlayDropdownPreference、OverlaySpinnerPreference など Overlay* は Scaffold 内。Window* は不要。フローティング下ナビは FloatingNavigationBar（既定はアイコンのみ）。画面遷移は miuix-nav か通常のバックスタック。",
+    ko: "Scaffold + TopAppBar / NavigationBar(데스크톱 폭은 NavigationRail). OverlayDialog, OverlayBottomSheet, OverlayListPopup, OverlayDropdownPreference, OverlaySpinnerPreference 등 Overlay*는 Scaffold 안; Window*는 필요 없다. 플로팅 하단 탐색은 FloatingNavigationBar(기본은 아이콘만). 화면 이동은 miuix-nav 또는 일반 백 스택.",
   }[lang];
 
   const footer = {
-    zh: `实现提示：相邻 Preference 合成一组 Card（首尾圆角 16.dp，中间无缝）。Preference 标题用 onBackground，内边距 16.dp。TextButton 用 secondaryVariant 底和 onSecondaryVariant 字，不要做成 Material 透明文字按钮。TabRow 未选中带 1.dp outline。BreadcrumbBar 是胶囊分段。CircularProgressIndicator 是 30.dp 描边圆弧。InfiniteProgressIndicator / PullToRefresh 是 20.dp 灰环加轨道点。NumberPicker 用淡出缩放，不要选中条。Snackbar 动作是主色胶囊 TextButton。Surface 默认 surface，Card 才是 surfaceContainer。SearchBar 占位用 onSurfaceContainerHigh。列表垂直排列，左右边距 16.dp。保持 Miuix 默认间距与排版。目标平台：${PLATFORM_TEXT[lang][doc.platform]}。`,
-    en: `Implementation notes: adjacent Preference rows share one Card (16.dp on the outer corners). Preference titles use onBackground with 16.dp padding. TextButton is secondaryVariant / onSecondaryVariant — not a transparent Material text button. Unselected TabRow tabs have a 1.dp outline. BreadcrumbBar uses capsule chips. CircularProgressIndicator is a 30.dp stroke arc. InfiniteProgressIndicator and PullToRefresh are a 20.dp gray ring with an orbiting dot. NumberPicker fades and scales; no highlight bar. Snackbar actions are a primary pill TextButton. Surface defaults to surface; Card uses surfaceContainer. SearchBar placeholders use onSurfaceContainerHigh. Vertical list, 16.dp side margins. Keep Miuix default spacing and type. Target: ${PLATFORM_TEXT[lang][doc.platform]}.`,
-    ja: `実装メモ：隣り合う Preference は 1 枚の Card にまとめる（外側の角だけ 16.dp）。Preference のタイトルは onBackground、余白 16.dp。TextButton は secondaryVariant / onSecondaryVariant で、Material の透明テキストボタンにはしない。TabRow の未選択は 1.dp の outline。BreadcrumbBar はカプセル。CircularProgressIndicator は 30.dp のストローク円弧。InfiniteProgressIndicator / PullToRefresh は 20.dp のグレー環と軌道点。NumberPicker はフェードとスケールで、選択バーは付けない。Snackbar のアクションは主色カプセルの TextButton。Surface の既定は surface、Card は surfaceContainer。SearchBar のプレースホルダは onSurfaceContainerHigh。縦リスト、左右余白 16.dp。Miuix の既定スペースと書体を保つ。実装先：${PLATFORM_TEXT[lang][doc.platform]}。`,
-    ko: `구현 메모: 인접 Preference는 하나의 Card로 묶는다(바깥 모서리만 16.dp). Preference 제목은 onBackground, 안쪽 여백 16.dp. TextButton은 secondaryVariant / onSecondaryVariant이며 Material 투명 텍스트 버튼이 아니다. TabRow 미선택은 1.dp outline. BreadcrumbBar는 캡슐 조각. CircularProgressIndicator는 30.dp 스트로크 호. InfiniteProgressIndicator / PullToRefresh는 20.dp 회색 고리와 궤도 점. NumberPicker는 페이드·스케일이며 선택 막대가 없다. Snackbar 동작은 주색 캡슐 TextButton. Surface 기본은 surface, Card는 surfaceContainer. SearchBar 자리 표시는 onSurfaceContainerHigh. 세로 목록, 좌우 여백 16.dp. Miuix 기본 간격과 서체를 유지한다. 대상: ${PLATFORM_TEXT[lang][doc.platform]}.`,
+    zh: `实现提示：相邻 Preference 合成一组 Card（首尾圆角 16.dp，中间无缝）。Preference 标题用 onBackground，内边距 16.dp。TextButton 用 secondaryVariant 底和 onSecondaryVariant 字，不要做成 Material 透明文字按钮。TabRow 未选中带 1.dp outline。BreadcrumbBar 是胶囊分段。CircularProgressIndicator 直径 30.dp、描边 4.dp。InfiniteProgressIndicator 是 20.dp 灰环加 2.dp 轨道点。PullToRefresh 用 PullToRefreshDefaults.circleSize = 20.dp，不要复用 InfiniteProgressIndicator。NumberPicker 用淡出缩放，不要选中条。Snackbar 动作是主色胶囊 TextButton。Surface 默认 surface，Card 才是 surfaceContainer。SearchBar 需配合 InputField。列表垂直排列，左右边距 16.dp。保持 Miuix 默认间距与排版。目标平台：${PLATFORM_TEXT[lang][doc.platform]}。`,
+    en: `Implementation notes: adjacent Preference rows share one Card (16.dp on the outer corners). Preference titles use onBackground with 16.dp padding. TextButton is secondaryVariant / onSecondaryVariant — not a transparent Material text button. Unselected TabRow tabs have a 1.dp outline. BreadcrumbBar uses capsule chips. CircularProgressIndicator is 30.dp wide with a 4.dp stroke. InfiniteProgressIndicator is a 20.dp gray ring with a 2.dp orbiting dot. PullToRefresh uses PullToRefreshDefaults.circleSize = 20.dp; do not reuse InfiniteProgressIndicator. NumberPicker fades and scales; no highlight bar. Snackbar actions are a primary pill TextButton. Surface defaults to surface; Card uses surfaceContainer. SearchBar needs InputField. Vertical list, 16.dp side margins. Keep Miuix default spacing and type. Target: ${PLATFORM_TEXT[lang][doc.platform]}.`,
+    ja: `実装メモ：隣り合う Preference は 1 枚の Card にまとめる（外側の角だけ 16.dp）。Preference のタイトルは onBackground、余白 16.dp。TextButton は secondaryVariant / onSecondaryVariant で、Material の透明テキストボタンにはしない。TabRow の未選択は 1.dp の輪郭。BreadcrumbBar はカプセル。CircularProgressIndicator は直径 30.dp、線幅 4.dp。InfiniteProgressIndicator は 20.dp のグレー環と 2.dp の軌道点。PullToRefresh は PullToRefreshDefaults.circleSize = 20.dp で、InfiniteProgressIndicator を流用しない。NumberPicker はフェードとスケールで、選択バーは付けない。Snackbar のアクションは主色カプセルの TextButton。Surface の既定は surface、Card は surfaceContainer。SearchBar は InputField と組み合わせる。縦リスト、左右余白 16.dp。Miuix の既定スペースと書体を保つ。実装先：${PLATFORM_TEXT[lang][doc.platform]}。`,
+    ko: `구현 메모: 인접 Preference는 하나의 Card로 묶는다(바깥 모서리만 16.dp). Preference 제목은 onBackground, 안쪽 여백 16.dp. TextButton은 secondaryVariant / onSecondaryVariant이며 Material 투명 텍스트 버튼이 아니다. TabRow 미선택은 1.dp 윤곽. BreadcrumbBar는 캡슐 조각. CircularProgressIndicator는 지름 30.dp, 선 4.dp. InfiniteProgressIndicator는 20.dp 회색 고리와 2.dp 궤도 점. PullToRefresh는 PullToRefreshDefaults.circleSize = 20.dp이며 InfiniteProgressIndicator를 재사용하지 않는다. NumberPicker는 페이드·스케일이며 선택 막대가 없다. Snackbar 동작은 주색 캡슐 TextButton. Surface 기본은 surface, Card는 surfaceContainer. SearchBar는 InputField와 함께 쓴다. 세로 목록, 좌우 여백 16.dp. Miuix 기본 간격과 서체를 유지한다. 대상: ${PLATFORM_TEXT[lang][doc.platform]}.`,
   }[lang];
 
   return [intro, themeLine(doc, lang), nav, screens.map((s) => describeScreen(doc, s, lang)).join("\n\n"), footer].join("\n\n");

@@ -48,6 +48,8 @@ describe("KIND_SPEC coverage", () => {
     expect(composableOf({ kind: "cascadingPopup", variant: "overlay" })).toBe("OverlayCascadingListPopup");
     expect(composableOf({ kind: "button", variant: "text" })).toBe("TextButton");
     expect(composableOf({ kind: "topAppBar", variant: "small" })).toBe("SmallTopAppBar");
+    expect(composableOf({ kind: "dropdown", variant: "overlay" })).toBe("OverlayDropdownPreference");
+    expect(composableOf({ kind: "dropdown", variant: "window" })).toBe("WindowDropdownPreference");
   });
 
   it("can name every public composable from the official component index", () => {

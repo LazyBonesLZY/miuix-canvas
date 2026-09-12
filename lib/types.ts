@@ -30,7 +30,7 @@ export const LANGS: { key: Lang; label: string }[] = [
 export type Platform = "cmp" | "android" | "web";
 export type FramePreset = "phone" | "desktop";
 export type ThemeMode = "light" | "dark";
-export type Transition = "slide" | "slideLeft" | "slideUp" | "fade" | "none";
+export type Transition = "slide" | "slideLeft" | "slideUp" | "slideDown" | "fade" | "none";
 export type Category = "actions" | "navigation" | "containment" | "inputs" | "content" | "progress" | "preference";
 export type SwipeDir = "left" | "right" | "up" | "down";
 
@@ -146,7 +146,7 @@ export type Join = { top: boolean; bottom: boolean };
 export type Guide = { x?: number; y?: number; gx?: number; gy?: number };
 
 export const BACK_TARGET = "back";
-export const TRANSITIONS: Transition[] = ["slide", "slideLeft", "slideUp", "fade", "none"];
+export const TRANSITIONS: Transition[] = ["slide", "slideLeft", "slideUp", "slideDown", "fade", "none"];
 export const SWIPE_DIRS: SwipeDir[] = ["left", "right", "up", "down"];
 
 export function frameSize(preset: FramePreset) {

@@ -104,6 +104,9 @@ const ZH = {
   zoomOut: "缩小",
   searchParts: "搜索部件",
   noParts: "没有匹配的部件",
+  fieldHint: "输入内容",
+  loadFailed: "无法打开这个 JSON 文件。",
+  shareFailed: "分享链接无效或已损坏。",
 } as const;
 
 const EN: Record<keyof typeof ZH, string> = {
@@ -208,6 +211,9 @@ const EN: Record<keyof typeof ZH, string> = {
   zoomOut: "Zoom out",
   searchParts: "Search parts",
   noParts: "No matching parts",
+  fieldHint: "Enter text",
+  loadFailed: "Could not open that JSON file.",
+  shareFailed: "This share link is invalid or damaged.",
 };
 
 const JA: Record<keyof typeof ZH, string> = {
@@ -312,6 +318,9 @@ const JA: Record<keyof typeof ZH, string> = {
   zoomOut: "縮小",
   searchParts: "部品を検索",
   noParts: "一致する部品がありません",
+  fieldHint: "入力",
+  loadFailed: "この JSON ファイルを開けません。",
+  shareFailed: "共有リンクが無効か壊れています。",
 };
 
 const KO: Record<keyof typeof ZH, string> = {
@@ -416,6 +425,9 @@ const KO: Record<keyof typeof ZH, string> = {
   zoomOut: "축소",
   searchParts: "부품 검색",
   noParts: "일치하는 부품이 없습니다",
+  fieldHint: "입력",
+  loadFailed: "이 JSON 파일을 열 수 없습니다.",
+  shareFailed: "공유 링크가 잘못되었거나 손상되었습니다.",
 };
 
 const DICT: Record<Lang, Record<keyof typeof ZH, string>> = { zh: ZH, en: EN, ja: JA, ko: KO };
@@ -473,7 +485,7 @@ const KIND_ZH: Record<Kind, string> = {
   radio: "单选 RadioButton",
   slider: "滑块 Slider",
   rangeSlider: "范围滑块 RangeSlider",
-  dropdown: "下拉 Dropdown",
+  dropdown: "下拉 OverlayDropdownPreference",
   numberPicker: "数字选择 NumberPicker",
   colorPicker: "取色 ColorPicker",
   colorPalette: "色板 ColorPalette",
@@ -484,15 +496,15 @@ const KIND_ZH: Record<Kind, string> = {
   progress: "进度 ProgressIndicator",
   pullToRefresh: "下拉刷新 PullToRefresh",
   scrollBar: "滚动条 ScrollBar",
-  blur: "模糊 textureBlur",
+  blur: "模糊 · Modifier.textureBlur",
   basicPref: "基础设置项 BasicComponent",
   switchPref: "开关设置 SwitchPreference",
   checkboxPref: "复选设置 CheckboxPreference",
   radioPref: "单选设置 RadioButtonPreference",
   sliderPref: "滑块设置 SliderPreference",
   rangeSliderPref: "范围滑块设置 RangeSliderPreference",
-  dropdownPref: "下拉设置 DropdownPreference",
-  spinnerPref: "高级选择 SpinnerPreference",
+  dropdownPref: "下拉设置 OverlayDropdownPreference",
+  spinnerPref: "高级选择 OverlaySpinnerPreference",
   arrowPref: "箭头设置 ArrowPreference",
 };
 
@@ -527,7 +539,7 @@ const KIND_EN: Record<Kind, string> = {
   radio: "RadioButton",
   slider: "Slider",
   rangeSlider: "RangeSlider",
-  dropdown: "Dropdown",
+  dropdown: "Dropdown OverlayDropdownPreference",
   numberPicker: "NumberPicker",
   colorPicker: "ColorPicker",
   colorPalette: "ColorPalette",
@@ -538,15 +550,15 @@ const KIND_EN: Record<Kind, string> = {
   progress: "Progress ProgressIndicator",
   pullToRefresh: "Refresh PullToRefresh",
   scrollBar: "Scroll bar ScrollBar",
-  blur: "Blur textureBlur",
+  blur: "Blur · Modifier.textureBlur",
   basicPref: "Basic row BasicComponent",
   switchPref: "Switch row SwitchPreference",
   checkboxPref: "Checkbox row CheckboxPreference",
   radioPref: "Radio row RadioButtonPreference",
   sliderPref: "Slider row SliderPreference",
   rangeSliderPref: "Range slider RangeSliderPreference",
-  dropdownPref: "Dropdown row DropdownPreference",
-  spinnerPref: "Spinner row SpinnerPreference",
+  dropdownPref: "Dropdown row OverlayDropdownPreference",
+  spinnerPref: "Spinner row OverlaySpinnerPreference",
   arrowPref: "Arrow row ArrowPreference",
 };
 
@@ -581,7 +593,7 @@ const KIND_JA: Record<Kind, string> = {
   radio: "ラジオ RadioButton",
   slider: "スライダー Slider",
   rangeSlider: "レンジスライダー RangeSlider",
-  dropdown: "ドロップダウン Dropdown",
+  dropdown: "ドロップダウン OverlayDropdownPreference",
   numberPicker: "数値ピッカー NumberPicker",
   colorPicker: "カラーピッカー ColorPicker",
   colorPalette: "カラーパレット ColorPalette",
@@ -592,15 +604,15 @@ const KIND_JA: Record<Kind, string> = {
   progress: "進捗 ProgressIndicator",
   pullToRefresh: "プル更新 PullToRefresh",
   scrollBar: "スクロールバー ScrollBar",
-  blur: "ブラー textureBlur",
+  blur: "ブラー · Modifier.textureBlur",
   basicPref: "基本項目 BasicComponent",
   switchPref: "スイッチ設定 SwitchPreference",
   checkboxPref: "チェック設定 CheckboxPreference",
   radioPref: "ラジオ設定 RadioButtonPreference",
   sliderPref: "スライダー設定 SliderPreference",
   rangeSliderPref: "レンジ設定 RangeSliderPreference",
-  dropdownPref: "ドロップダウン設定 DropdownPreference",
-  spinnerPref: "詳細選択 SpinnerPreference",
+  dropdownPref: "ドロップダウン設定 OverlayDropdownPreference",
+  spinnerPref: "詳細選択 OverlaySpinnerPreference",
   arrowPref: "矢印設定 ArrowPreference",
 };
 
@@ -635,7 +647,7 @@ const KIND_KO: Record<Kind, string> = {
   radio: "라디오 RadioButton",
   slider: "슬라이더 Slider",
   rangeSlider: "범위 슬라이더 RangeSlider",
-  dropdown: "드롭다운 Dropdown",
+  dropdown: "드롭다운 OverlayDropdownPreference",
   numberPicker: "숫자 선택 NumberPicker",
   colorPicker: "색 선택 ColorPicker",
   colorPalette: "색 팔레트 ColorPalette",
@@ -646,15 +658,15 @@ const KIND_KO: Record<Kind, string> = {
   progress: "진행 ProgressIndicator",
   pullToRefresh: "당겨서 새로고침 PullToRefresh",
   scrollBar: "스크롤바 ScrollBar",
-  blur: "블러 textureBlur",
+  blur: "블러 · Modifier.textureBlur",
   basicPref: "기본 항목 BasicComponent",
   switchPref: "스위치 설정 SwitchPreference",
   checkboxPref: "체크 설정 CheckboxPreference",
   radioPref: "라디오 설정 RadioButtonPreference",
   sliderPref: "슬라이더 설정 SliderPreference",
   rangeSliderPref: "범위 슬라이더 설정 RangeSliderPreference",
-  dropdownPref: "드롭다운 설정 DropdownPreference",
-  spinnerPref: "고급 선택 SpinnerPreference",
+  dropdownPref: "드롭다운 설정 OverlayDropdownPreference",
+  spinnerPref: "고급 선택 OverlaySpinnerPreference",
   arrowPref: "화살표 설정 ArrowPreference",
 };
 
@@ -676,10 +688,10 @@ export function kindShort(kind: Kind, lang: Lang): string {
 }
 
 export const TRANSITION_TEXT: Record<Lang, Record<Transition, string>> = {
-  zh: { slide: "从右滑入", slideLeft: "从左滑入", slideUp: "从下滑入", fade: "淡入", none: "无" },
-  en: { slide: "Slide from right", slideLeft: "Slide from left", slideUp: "Slide from bottom", fade: "Fade", none: "None" },
-  ja: { slide: "右からスライド", slideLeft: "左からスライド", slideUp: "下からスライド", fade: "フェード", none: "なし" },
-  ko: { slide: "오른쪽에서 슬라이드", slideLeft: "왼쪽에서 슬라이드", slideUp: "아래에서 슬라이드", fade: "페이드", none: "없음" },
+  zh: { slide: "从右滑入", slideLeft: "从左滑入", slideUp: "从下滑入", slideDown: "从上滑入", fade: "淡入", none: "无" },
+  en: { slide: "Slide from right", slideLeft: "Slide from left", slideUp: "Slide from bottom", slideDown: "Slide from top", fade: "Fade", none: "None" },
+  ja: { slide: "右からスライド", slideLeft: "左からスライド", slideUp: "下からスライド", slideDown: "上からスライド", fade: "フェード", none: "なし" },
+  ko: { slide: "오른쪽에서 슬라이드", slideLeft: "왼쪽에서 슬라이드", slideUp: "아래에서 슬라이드", slideDown: "위에서 슬라이드", fade: "페이드", none: "없음" },
 };
 
 export const SWIPE_TEXT: Record<Lang, Record<SwipeDir, string>> = {

@@ -56,8 +56,11 @@ export async function readShareHash(hash = typeof location === "undefined" ? "" 
     }
     const plain = params.get(DOC);
     if (plain) {
-      const value: unknown = JSON.parse(plain.startsWith("{") ? plain : decodeURIComponent(plain));
-      return isProject(value) ? migrateDoc(value) : null;
+      if (plain.startsWith("{")) {
+        const value: unknown = JSON.parse(plain);
+        return isProject(value) ? migrateDoc(value) : null;
+      }
+      return decodeShare(plain);
     }
     const legacy = raw.split("&").find((part) => part.startsWith("d=") && !part.startsWith("dz="));
     if (legacy) return decodeShare(legacy.slice(2));

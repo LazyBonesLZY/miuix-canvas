@@ -10,12 +10,10 @@ export function PartsPalette({
   lang,
   onAdd,
   onDragStart,
-  wide = false,
 }: {
   lang: Lang;
   onAdd: (kind: Kind) => void;
   onDragStart: (kind: Kind) => void;
-  wide?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const needle = query.trim().toLowerCase();
@@ -49,7 +47,7 @@ export function PartsPalette({
           <div className="mb-2 px-2 text-[13px] font-medium text-[var(--muted-strong)]">
             {categoryLabel(cat, lang)}
           </div>
-          <div className={`grid gap-2 ${wide ? "grid-cols-3" : "grid-cols-2"}`}>
+          <div className="grid grid-cols-2 gap-2">
             {kinds.map((kind) => {
               const short = kindShort(kind, lang);
               const full = KIND_TEXT[lang][kind];

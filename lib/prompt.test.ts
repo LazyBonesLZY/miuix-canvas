@@ -12,6 +12,9 @@ describe("buildPrompt", () => {
     expect(text).toContain("Scaffold");
     expect(text).toContain("TextButton");
     expect(text).toContain("Overlay");
+    expect(text).toContain("MiuixTheme");
+    expect(text).toContain("OverlayDropdownPreference");
+    expect(text).not.toMatch(/组件 Dropdown[^P]/);
   });
 
   it("can describe a single screen", () => {

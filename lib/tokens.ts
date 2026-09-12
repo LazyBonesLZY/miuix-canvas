@@ -86,7 +86,7 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   radio: { kind: "radio", category: "inputs", icon: "radio_button_checked", w: () => 26, h: 26, defaultLabel: L("", "", "", ""), checked: true, composable: "RadioButton" },
   slider: { kind: "slider", category: "inputs", icon: "tune", w: full, h: 28, variants: ["horizontal", "vertical", "steps", "disabled"], defaultLabel: L("", "", "", ""), value: 0.6, composable: "Slider" },
   rangeSlider: { kind: "rangeSlider", category: "inputs", icon: "linear_scale", w: full, h: 28, defaultLabel: L("", "", "", ""), value: 0.8, from: 0.2, composable: "RangeSlider" },
-  dropdown: { kind: "dropdown", category: "inputs", icon: "arrow_drop_down_circle", w: full, h: 50, variants: ["overlay", "window"], defaultLabel: L("请选择", "Choose", "選択", "선택"), tabs: [{ icon: "", label: "选项一" }, { icon: "", label: "选项二" }, { icon: "", label: "选项三" }], composable: "Dropdown" },
+  dropdown: { kind: "dropdown", category: "inputs", icon: "arrow_drop_down_circle", w: full, h: 50, variants: ["overlay", "window"], defaultLabel: L("请选择", "Choose", "選択", "선택"), tabs: [{ icon: "", label: "选项一" }, { icon: "", label: "选项二" }, { icon: "", label: "选项三" }], composable: "OverlayDropdownPreference" },
   numberPicker: { kind: "numberPicker", category: "inputs", icon: "pin", w: () => 160, h: 140, defaultLabel: L("12", "12", "12", "12"), composable: "NumberPicker" },
   colorPicker: { kind: "colorPicker", category: "inputs", icon: "palette", w: full, h: 180, defaultLabel: L("取色", "Color", "カラー", "색상"), composable: "ColorPicker" },
   colorPalette: { kind: "colorPalette", category: "inputs", icon: "grid_view", w: full, h: 96, defaultLabel: L("", "", "", ""), composable: "ColorPalette" },
@@ -97,7 +97,7 @@ export const KIND_SPEC: Record<Kind, KindSpec> = {
   progress: { kind: "progress", category: "progress", icon: "progress_activity", w: full, h: 6, variants: ["linear", "circular", "infinite"], defaultLabel: L("", "", "", ""), value: 0.45, composable: "ProgressIndicator" },
   pullToRefresh: { kind: "pullToRefresh", category: "progress", icon: "refresh", w: () => 20, h: 20, defaultLabel: L("", "", "", ""), composable: "PullToRefresh" },
   scrollBar: { kind: "scrollBar", category: "progress", icon: "linear_scale", w: () => 6, h: 80, variants: ["vertical", "horizontal"], defaultLabel: L("", "", "", ""), composable: "ScrollBar" },
-  blur: { kind: "blur", category: "containment", icon: "blur_on", w: full, h: 160, defaultLabel: L("模糊", "Blur", "ブラー", "블러"), composable: "textureBlur" },
+  blur: { kind: "blur", category: "containment", icon: "blur_on", w: full, h: 160, defaultLabel: L("模糊", "Blur", "ブラー", "블러"), composable: "Modifier.textureBlur" },
   basicPref: { kind: "basicPref", category: "preference", icon: "view_agenda", w: full, h: 64, defaultLabel: L("通用项", "Basic row", "基本項目", "기본 항목"), defaultSupporting: L("自定义右侧内容", "Custom trailing slot", "末尾スロットをカスタム", "오른쪽 슬롯 사용자화"), composable: "BasicComponent" },
   switchPref: { kind: "switchPref", category: "preference", icon: "toggle_on", w: full, h: 64, defaultLabel: L("深色模式", "Dark mode", "ダークモード", "다크 모드"), defaultSupporting: L("跟随系统", "Follow system", "システムに合わせる", "시스템 따름"), checked: true, composable: "SwitchPreference" },
   checkboxPref: { kind: "checkboxPref", category: "preference", icon: "check_box", w: full, h: 64, defaultLabel: L("同步数据", "Sync data", "データを同期", "데이터 동기화"), defaultSupporting: L("使用移动网络时同步", "Sync on mobile data", "モバイル通信でも同期", "모바일 데이터에서도 동기화"), checked: false, composable: "CheckboxPreference" },
@@ -196,7 +196,7 @@ export function composableOf(it: Pick<Item, "kind" | "variant">): string {
     case "bottomSheet":
       return v === "window" ? "WindowBottomSheet" : "OverlayBottomSheet";
     case "dropdown":
-      return v === "window" ? "WindowDropdownPopup" : "Dropdown";
+      return v === "window" ? "WindowDropdownPreference" : "OverlayDropdownPreference";
     case "dropdownMenu":
       return v === "window" ? "WindowDropdownMenu" : "OverlayDropdownMenu";
     case "iconDropdownMenu":

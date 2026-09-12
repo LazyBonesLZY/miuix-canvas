@@ -145,6 +145,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
   const [shareCopied, setShareCopied] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [resetOpen, setResetOpen] = useState(false);
+  const [notice, setNotice] = useState("");
   const [guide, setGuide] = useState<Guide | null>(null);
   const didFit = useRef(false);
   const [shareReady, setShareReady] = useState(() => !hasShareHash());
@@ -171,11 +172,13 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     (async () => {
       if (hasShareHash()) {
         const shared = await readShareHash();
+        consumeShareHash();
         if (!cancelled && shared) {
           setDoc(shared, false);
           setSelection(shared.screens[0] ? { kind: "screen", screenId: shared.screens[0].id } : null);
-          consumeShareHash();
           didFit.current = false;
+        } else if (!cancelled && !shared) {
+          setNotice(t("shareFailed", lang));
         }
       }
       if (!cancelled) {
@@ -186,7 +189,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     return () => {
       cancelled = true;
     };
-  }, [onReady, setDoc]);
+  }, [lang, onReady, setDoc]);
 
   useEffect(() => {
     setGlobalLang(lang);
@@ -398,7 +401,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
           setSelection({ kind: "item", screenId: selection.screenId, itemId: copy.id });
         }
       }
-      if ((e.key === "Delete" || e.key === "Backspace")) {
+      if ((e.key === "Delete" || e.key === "Backspace") && selection) {
         e.preventDefault();
         deleteSelection();
       }
@@ -654,7 +657,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
       )}
       <div className="panel-scroll min-h-0 flex-1">
         {left === "parts" ? (
-          <PartsPalette lang={lang} wide={layout === "phone"} onAdd={(k) => { addItem(k); }} onDragStart={(k) => { dragKind.current = k; }} />
+          <PartsPalette lang={lang} onAdd={(k) => { addItem(k); }} onDragStart={(k) => { dragKind.current = k; }} />
         ) : (
           <LayersPanel
             doc={doc}
@@ -709,6 +712,11 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
 
   return (
     <div className="app-root flex flex-col" data-theme={doc.theme.mode} data-lang={lang} data-layout={layout}>
+      {notice && (
+        <button type="button" className="fixed left-1/2 top-3 z-50 -translate-x-1/2 rounded-2xl bg-[var(--chrome)] px-4 py-2 text-sm shadow-[0_8px_24px_rgba(0,0,0,0.16)]" onClick={() => setNotice("")}>
+          {notice}
+        </button>
+      )}
       <Toolbar
         lang={lang}
         layout={layout}
@@ -747,6 +755,8 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
             setDoc(next);
             setSelection(next.screens[0] ? { kind: "screen", screenId: next.screens[0].id } : null);
             didFit.current = false;
+          } else {
+            setNotice(t("loadFailed", lang));
           }
         }}
       />

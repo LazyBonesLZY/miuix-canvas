@@ -13,6 +13,7 @@ const ANIM: Record<Transition, string> = {
   slide: "preview-slide",
   slideLeft: "preview-slide-left",
   slideUp: "preview-slide-up",
+  slideDown: "preview-slide-down",
   fade: "preview-fade",
   none: "",
 };
@@ -104,7 +105,7 @@ export function Preview({
               if (Math.hypot(dx, dy) < 48) return;
               swiped.current = true;
               const dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? "left" : "right") : dy < 0 ? "up" : "down";
-              go(screen.swipe?.[dir], dir === "left" ? "slide" : dir === "right" ? "slideLeft" : "slideUp");
+              go(screen.swipe?.[dir], dir === "left" ? "slide" : dir === "right" ? "slideLeft" : dir === "up" ? "slideUp" : "slideDown");
             }}
           >
             <StatusBar palette={palette} dark={doc.theme.mode === "dark"} />

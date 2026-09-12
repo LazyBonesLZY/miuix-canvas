@@ -84,6 +84,24 @@ function CircularRing({ value, track, ink }: { value: number; track: string; ink
   );
 }
 
+function GlassNoise() {
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "absolute",
+        inset: 0,
+        borderRadius: "inherit",
+        pointerEvents: "none",
+        opacity: 0.22,
+        mixBlendMode: "overlay",
+        backgroundImage:
+          "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='80' height='80'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>\")",
+      }}
+    />
+  );
+}
+
 function ColorBand({ colors, value }: { colors: string; value: number }) {
   return (
     <div style={{ height: 26, borderRadius: 999, background: colors, position: "relative", boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.06)" }}>
@@ -348,7 +366,8 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
     case "navigationBar": {
       const blur = it.variant === "blur";
       return (
-        <div style={{ ...style, background: blur ? withAlpha(p.surface, 0.72) : p.surface, backdropFilter: blur ? "blur(28px) saturate(1.3)" : undefined, WebkitBackdropFilter: blur ? "blur(28px) saturate(1.3)" : undefined, display: "flex", flexDirection: "column" }}>
+        <div style={{ ...style, position: "relative", overflow: "hidden", background: blur ? withAlpha(p.surface, 0.42) : p.surface, backdropFilter: blur ? "blur(28px) saturate(1.8)" : undefined, WebkitBackdropFilter: blur ? "blur(28px) saturate(1.8)" : undefined, display: "flex", flexDirection: "column" }}>
+          {blur && <GlassNoise />}
           <div style={{ height: 0.5, background: p.dividerLine }} />
           <div style={{ flex: 1 }}>
             <Tabs tabs={it.tabs ?? []} selected={it.selected} p={p} />
@@ -366,16 +385,18 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
             style={{
               ...style,
               borderRadius: 999,
-              background: withAlpha(p.surfaceContainer, 0.6),
-              backdropFilter: "blur(20px) saturate(1.6)",
-              WebkitBackdropFilter: "blur(20px) saturate(1.6)",
-              boxShadow: `0 10px 24px ${withAlpha("#000", 0.12)}, inset 0 0.6px 0 rgba(255,255,255,0.5)`,
+              background: withAlpha(p.surfaceContainer, 0.28),
+              backdropFilter: "blur(32px) saturate(2)",
+              WebkitBackdropFilter: "blur(32px) saturate(2)",
+              boxShadow: `0 10px 28px ${withAlpha("#000", 0.16)}, inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(255,255,255,0.18)`,
               padding: 4,
               display: "flex",
               alignItems: "stretch",
               position: "relative",
+              overflow: "hidden",
             }}
           >
+            <GlassNoise />
             <div
               style={{
                 position: "absolute",
@@ -543,14 +564,33 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "surface":
       return <div style={{ ...style, ...sq(16), background: p.surface }} />;
-    case "blur":
+    case "blur": {
+      const scene = `radial-gradient(120% 80% at 10% 20%, ${p.primary} 0%, transparent 55%), radial-gradient(90% 70% at 90% 10%, #7C4DFF 0%, transparent 50%), linear-gradient(150deg, #E11D48 0%, ${p.primary} 48%, #0F9D58 100%)`;
       return (
-        <div style={{ ...style, ...sq(16), position: "relative", overflow: "hidden", background: `linear-gradient(135deg, ${p.primary} 0%, #7C4DFF 50%, #E11D48 100%)` }}>
-          <div style={{ position: "absolute", inset: 24, ...sq(16), background: withAlpha(p.surfaceContainer, 0.55), backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", display: "grid", placeItems: "center", fontSize: 17, fontWeight: 500, color: p.onSurface }}>
-            {it.label}
+        <div style={{ ...style, ...sq(16), position: "relative", overflow: "hidden" }}>
+          <div style={{ position: "absolute", inset: 0, background: scene }} />
+          <div style={{ position: "absolute", inset: -28, background: scene, filter: "blur(26px) saturate(1.6)", transform: "scale(1.12)" }} />
+          <div
+            style={{
+              position: "absolute",
+              inset: 22,
+              ...sq(16),
+              background: withAlpha(p.surfaceContainer, 0.32),
+              boxShadow: "inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -1px 0 rgba(255,255,255,0.14)",
+              display: "grid",
+              placeItems: "center",
+              fontSize: 17,
+              fontWeight: 500,
+              color: p.onSurface,
+              overflow: "hidden",
+            }}
+          >
+            <GlassNoise />
+            <span style={{ zIndex: 1 }}>{it.label}</span>
           </div>
         </div>
       );
+    }
     case "divider":
       return it.variant === "vertical"
         ? <div style={{ ...style, background: p.dividerLine, width: 1, margin: "0 auto" }} />
@@ -588,7 +628,7 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
             boxShadow: interactive ? `inset 0 0 0 2px ${p.primary}` : undefined,
           }}
         >
-          {it.label || t("empty", lang)}
+          {it.label || t("fieldHint", lang)}
           {interactive && <span className="miuix-caret" style={{ background: p.primary }} />}
         </div>
       );
@@ -675,8 +715,8 @@ export function MiuixNode({ item: it, palette: p, interactive = false, join, lan
       );
     case "image":
       return (
-        <div style={{ ...style, ...sq(16), background: `linear-gradient(160deg, ${p.surfaceContainerHigh}, ${p.tertiaryContainer})`, display: "grid", placeItems: "center" }}>
-          <Symbol name={it.icon || "image"} size={36} color={p.onSurfaceVariantActions} />
+        <div style={{ ...style, ...sq(16), background: `radial-gradient(90% 70% at 18% 22%, ${p.primary} 0%, transparent 56%), radial-gradient(80% 60% at 92% 8%, #7C4DFF 0%, transparent 52%), linear-gradient(160deg, #E11D48, ${p.tertiaryContainer})`, display: "grid", placeItems: "center" }}>
+          <Symbol name={it.icon || "image"} size={36} color="rgba(255,255,255,0.72)" />
         </div>
       );
     case "badge":
