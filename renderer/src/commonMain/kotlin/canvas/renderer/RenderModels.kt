@@ -21,7 +21,6 @@ data class RenderRequest(
     val screen: ScreenDto = ScreenDto(),
     val screens: List<ScreenDto> = emptyList(),
     val currentScreenId: String? = null,
-    val layoutScale: Float = 1f,
 )
 
 @Serializable

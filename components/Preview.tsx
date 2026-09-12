@@ -102,19 +102,28 @@ export function Preview({
             width: displayW,
             height: displayH,
             borderRadius: r * scale,
-            background: palette.surface,
             boxShadow: "0 24px 80px rgba(0,0,0,0.35)",
           }}
         >
-          <OfficialMiuixFrame
-            screen={renderedScreen}
-            screens={renderedScreens}
-            theme={doc.theme}
-            lang={lang}
-            interactive
-            layoutScale={scale}
-            onEvent={onRendererEvent}
-          />
+          <div
+            className="relative"
+            style={{
+              width: w,
+              height: h,
+              transform: `scale(${scale})`,
+              transformOrigin: "top left",
+              background: palette.surface,
+            }}
+          >
+            <OfficialMiuixFrame
+              screen={renderedScreen}
+              screens={renderedScreens}
+              theme={doc.theme}
+              lang={lang}
+              interactive
+              onEvent={onRendererEvent}
+            />
+          </div>
         </div>
         <div className="flex max-w-full items-center gap-2 rounded-[16px] bg-[var(--chrome)] px-3 py-1.5 text-[13px] text-[var(--ink)]">
           <span className="hidden min-w-0 text-pretty min-[520px]:inline">{t("ready", lang)}</span>

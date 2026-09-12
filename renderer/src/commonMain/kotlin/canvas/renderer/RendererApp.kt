@@ -23,7 +23,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import top.yukonga.miuix.kmp.basic.Card
 import top.yukonga.miuix.kmp.basic.CardDefaults
@@ -59,16 +58,10 @@ fun RendererApp(
 
     MiuixTheme(controller = controller) {
         CompositionLocalProvider(LocalRendererLang provides request.lang) {
-            val density = LocalDensity.current
-            val layoutScale = request.layoutScale.takeIf { it > 0f } ?: 1f
-            CompositionLocalProvider(
-                LocalDensity provides Density(density.density * layoutScale, density.fontScale),
-            ) {
-                if (request.screens.isNotEmpty()) {
-                    NavigableRenderer(request = request, emit = emit)
-                } else {
-                    ScreenRenderer(request = request, emit = emit)
-                }
+            if (request.screens.isNotEmpty()) {
+                NavigableRenderer(request = request, emit = emit)
+            } else {
+                ScreenRenderer(request = request, emit = emit)
             }
         }
     }

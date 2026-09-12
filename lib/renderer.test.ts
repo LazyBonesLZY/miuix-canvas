@@ -14,12 +14,6 @@ describe("renderer bridge", () => {
       currentScreenId: doc.screens[0].id,
     });
     expect(request.screens?.map((screen) => screen.id)).toEqual(doc.screens.map((screen) => screen.id));
-    expect(request.layoutScale).toBe(1);
-  });
-
-  it("passes the preview layout scale so Compose can rasterize at the displayed size", () => {
-    const doc = defaultDoc("zh");
-    expect(renderRequest(doc.screens[0], doc.theme, "zh", true, doc.screens, 0.72).layoutScale).toBe(0.72);
   });
 
   it("turns null labels into empty strings so Kotlin can decode the screen", () => {

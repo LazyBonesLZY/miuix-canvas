@@ -11,7 +11,6 @@ export function OfficialMiuixFrame({
   lang,
   interactive = false,
   screens,
-  layoutScale = 1,
   deferMs = 0,
   active = true,
   className,
@@ -23,7 +22,6 @@ export function OfficialMiuixFrame({
   lang: Lang;
   interactive?: boolean;
   screens?: Screen[];
-  layoutScale?: number;
   deferMs?: number;
   active?: boolean;
   className?: string;
@@ -50,8 +48,8 @@ export function OfficialMiuixFrame({
   const send = useCallback(() => {
     const target = frame.current?.contentWindow;
     if (!target) return;
-    target.postMessage(JSON.stringify(renderRequest(screen, theme, lang, interactive, screens, layoutScale)), window.location.origin);
-  }, [interactive, lang, layoutScale, screen, screens, theme]);
+    target.postMessage(JSON.stringify(renderRequest(screen, theme, lang, interactive, screens)), window.location.origin);
+  }, [interactive, lang, screen, screens, theme]);
 
   useEffect(() => {
     const receive = (event: MessageEvent) => {
