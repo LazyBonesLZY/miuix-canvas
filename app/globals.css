@@ -530,10 +530,17 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .selection-bar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-height: 48px;
   min-width: 48px;
   padding: 0 16px;
+  border: 0;
   border-radius: 24px;
+  background: var(--tile);
+  color: var(--ink);
   font-size: 15px;
   font-weight: 600;
 }
@@ -544,7 +551,12 @@ input[type="range"]::-moz-range-thumb {
 }
 
 .selection-bar button[data-danger="1"] {
+  background: #fde8e6;
   color: #e94634;
+}
+
+.app-root[data-theme="dark"] .selection-bar button[data-danger="1"] {
+  background: #3d2322;
 }
 
 .mobile-bar {

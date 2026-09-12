@@ -53,7 +53,11 @@ function SelectionBar({
   onDelete: () => void;
 }) {
   return (
-    <div className="selection-bar">
+    <div
+      className="selection-bar"
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+    >
       <button type="button" className="press" data-accent="1" onClick={onEdit}>
         <span className="ms text-[20px]">tune</span>
         {t("edit", lang)}
@@ -197,6 +201,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     moved?: boolean;
     liveValue?: boolean;
     alreadySelected?: boolean;
+    clearItem?: boolean;
   } | null>(null);
 
   useEffect(() => {
@@ -232,6 +237,9 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
 
   const palette = useMemo(() => schemeFromSeed(doc.theme.seed, doc.theme.mode === "dark"), [doc.theme]);
   const selectedScreenId = selection?.screenId ?? doc.screens[0]?.id;
+  const liveScreenId = useRef(selectedScreenId);
+  if (selection?.screenId) liveScreenId.current = selection.screenId;
+  const paintedScreenId = selection?.screenId ?? liveScreenId.current ?? selectedScreenId;
 
   const markPainted = useCallback(() => {
     if (painted.current) return;
@@ -517,8 +525,14 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     }
     const hit = screenAt(e.clientX, e.clientY);
     if (!hit) {
-      setSelection(null);
-      drag.current = { type: "pan", sx: e.clientX, sy: e.clientY, ox: view.x, oy: view.y };
+      drag.current = {
+        type: "pan",
+        sx: e.clientX,
+        sy: e.clientY,
+        ox: view.x,
+        oy: view.y,
+        clearItem: tool === "select" && !e.altKey,
+      };
       return;
     }
     const el = canvasRef.current!;
@@ -554,6 +568,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     const d = drag.current;
     if (!d) return;
     if (d.type === "pan") {
+      if (!d.moved && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) >= 6) d.moved = true;
       setView((v) => ({ ...v, x: d.ox + (e.clientX - d.sx), y: d.oy + (e.clientY - d.sy) }));
       return;
     }
@@ -627,6 +642,10 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
     const d = drag.current;
     drag.current = null;
     setGuide(null);
+    if (d?.type === "pan" && d.clearItem && !d.moved && selection?.kind === "item") {
+      setSelection({ kind: "screen", screenId: selection.screenId });
+      return;
+    }
     if (!d || d.type !== "item" || d.moved || d.liveValue || !d.alreadySelected || !d.screenId || !d.itemId) return;
     const el = canvasRef.current;
     if (!el) return;
@@ -907,7 +926,7 @@ export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: (
             </svg>
             {doc.screens.map((screen) => {
               const { w, h, r } = frameSize(screen.preset);
-              const selected = selection?.screenId === screen.id;
+              const selected = paintedScreenId === screen.id;
               return (
                 <div key={screen.id} style={{ position: "absolute", left: screen.x, top: screen.y, width: w + BEZEL * 2 }}>
                   <div className={`mb-1 flex items-center justify-between px-1 text-[12px] ${selected ? "text-[var(--accent)]" : "text-[var(--muted)]"}`} style={{ height: FRAME_LABEL_H - 8 }}>

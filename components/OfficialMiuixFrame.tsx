@@ -34,12 +34,7 @@ export function OfficialMiuixFrame({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!active) {
-      setSrc("");
-      setReady(false);
-      setError("");
-      return;
-    }
+    if (!active) return;
     const boot = rendererBoot(src, deferMs);
     if (boot === "keep") return;
     if (boot === "now") {
@@ -82,12 +77,12 @@ export function OfficialMiuixFrame({
   }, [onEvent, onPainted, send]);
 
   useEffect(() => {
-    if (!active || !src) return;
+    if (!src) return;
     send();
     if (ready) return;
     const retry = window.setInterval(send, 400);
     return () => window.clearInterval(retry);
-  }, [active, ready, send, src]);
+  }, [ready, send, src]);
 
   return (
     <div className={`absolute inset-0 ${className ?? ""}`}>
@@ -107,7 +102,7 @@ export function OfficialMiuixFrame({
           }}
         />
       )}
-      {active && !ready && !error && (
+      {!!src && !ready && !error && (
         <div className="miuix-loader pointer-events-none absolute inset-0">
           <div className="miuix-spinner" />
           <span className="max-w-full px-3 text-center">{t("loading", lang)}</span>
