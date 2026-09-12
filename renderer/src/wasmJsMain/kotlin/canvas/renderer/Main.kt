@@ -9,6 +9,9 @@ import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.window.ComposeViewport
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.network.ktor3.KtorNetworkFetcherFactory
 import kotlinx.browser.window
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -33,6 +36,11 @@ fun main() {
         })
         announceReady()
         ComposeViewport(viewportContainerId = "ComposeTarget") {
+            setSingletonImageLoaderFactory { context ->
+                ImageLoader.Builder(context)
+                    .components { add(KtorNetworkFetcherFactory()) }
+                    .build()
+            }
             val fontFamilyResolver = LocalFontFamilyResolver.current
             val fonts = rememberCoroutineScope()
             LaunchedEffect(fontFamilyResolver) {

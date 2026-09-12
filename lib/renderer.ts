@@ -34,6 +34,12 @@ export function rendererUrl() {
   return `${base}/renderer/index.html`;
 }
 
+/** A deferred iframe must start immediately if the screen is selected before its timeout. */
+export function rendererBoot(src: string, deferMs: number): "keep" | "now" | "later" {
+  if (src) return "keep";
+  return deferMs <= 0 ? "now" : "later";
+}
+
 function finite(value: number, fallback = 0) {
   return Number.isFinite(value) ? value : fallback;
 }

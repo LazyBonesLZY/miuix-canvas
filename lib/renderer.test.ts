@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseRendererEvent, renderRequest } from "./renderer";
+import { parseRendererEvent, rendererBoot, renderRequest } from "./renderer";
 import { defaultDoc } from "./doc";
 
 describe("renderer bridge", () => {
@@ -49,5 +49,11 @@ describe("renderer bridge", () => {
     });
     expect(parseRendererEvent({ type: "patch" })).toBeNull();
     expect(parseRendererEvent("not json")).toBeNull();
+  });
+
+  it("starts a deferred renderer as soon as the screen is selected", () => {
+    expect(rendererBoot("", 900)).toBe("later");
+    expect(rendererBoot("", 0)).toBe("now");
+    expect(rendererBoot("/renderer/index.html", 0)).toBe("keep");
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { parseRendererEvent, rendererUrl, renderRequest, type RendererEvent } from "@/lib/renderer";
+import { parseRendererEvent, rendererBoot, rendererUrl, renderRequest, type RendererEvent } from "@/lib/renderer";
 import type { Lang, Screen, Theme } from "@/lib/types";
 
 export function OfficialMiuixFrame({
@@ -29,7 +29,12 @@ export function OfficialMiuixFrame({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (src || deferMs <= 0) return;
+    const boot = rendererBoot(src, deferMs);
+    if (boot === "keep") return;
+    if (boot === "now") {
+      setSrc(rendererUrl());
+      return;
+    }
     const start = window.setTimeout(() => setSrc(rendererUrl()), deferMs);
     return () => window.clearTimeout(start);
   }, [deferMs, src]);
