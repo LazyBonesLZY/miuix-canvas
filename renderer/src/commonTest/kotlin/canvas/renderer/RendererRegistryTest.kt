@@ -29,6 +29,13 @@ class RendererRegistryTest {
     }
 
     @Test
+    fun ignoresComposeInternalPostMessages() {
+        assertEquals(false, isRenderPayload("dispatchCoroutine"))
+        assertEquals(false, isRenderPayload("ready"))
+        assertEquals(true, isRenderPayload("""{"type":"render","screen":{}}"""))
+    }
+
+    @Test
     fun requestIgnoresForwardCompatibleFields() {
         val request = testJson.decodeFromString<RenderRequest>(
             """{"type":"render","future":true,"screen":{"items":[{"id":"a","kind":"button","label":"OK","future":1}]}}""",

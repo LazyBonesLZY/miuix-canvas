@@ -87,6 +87,11 @@ data class NavTabDto(
     val badge: String? = null,
 )
 
+internal fun isRenderPayload(payload: String): Boolean {
+    val text = payload.trimStart()
+    return text.startsWith('{') && text.contains("\"type\"") && text.contains("\"render\"")
+}
+
 @Serializable
 data class RendererEvent(
     val type: String,

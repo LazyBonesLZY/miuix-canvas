@@ -36,6 +36,7 @@ fun main() {
 }
 
 private fun accept(payload: String) {
+    if (!isRenderPayload(payload)) return
     runCatching { json.decodeFromString<RenderRequest>(payload) }
         .onSuccess {
             if (it.type == "render") {
@@ -65,7 +66,7 @@ private fun post(event: RendererEvent) {
 }
 
 @OptIn(ExperimentalWasmJsInterop::class)
-@JsFun("(event, origin) => (event && event.origin === origin && typeof event.data === 'string') ? event.data : null")
+@JsFun("(event, origin) => { if (!event || event.origin !== origin || event.source !== window.parent) return null; const data = event.data; return (typeof data === 'string' && data.charCodeAt(0) === 123) ? data : null; }")
 private external fun stringMessage(event: JsAny, origin: String): String?
 
 @OptIn(ExperimentalWasmJsInterop::class)
