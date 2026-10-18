@@ -1,38 +1,41 @@
 import { spawnSync } from "node:child_process";
-import { access } from "node:fs/promises";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { copyRenderer } from "./copy-renderer.mjs";
 
 const root = resolve(import.meta.dirname, "..");
-const gradlew = resolve(root, "renderer/gradlew");
-const production = resolve(root, "renderer/build/dist/wasmJs/productionExecutable");
-const development = resolve(root, "renderer/build/dist/wasmJs/developmentExecutable");
-const preferProduction = process.env.CI === "true" || process.env.MIUIX_RENDERER_PRODUCTION === "1";
 
 function gradle(task) {
-  const result = spawnSync(gradlew, ["-p", "renderer", task, "--console=plain"], {
+  const windows = process.platform === "win32";
+  const wrapper = resolve(root, windows ? "renderer/gradlew.bat" : "renderer/gradlew");
+  const result = spawnSync(windows ? `"${wrapper}"` : wrapper, ["-p", "renderer", task, "--console=plain"], {
     cwd: root,
     stdio: "inherit",
+    shell: windows,
   });
+  if (result.error) console.error(result.error.message);
   return result.status === 0;
 }
 
-async function exists(path) {
-  try {
-    await access(path);
-    return true;
-  } catch {
-    return false;
+export async function buildRenderer({
+  projectRoot = root,
+  production = false,
+  runGradle = gradle,
+} = {}) {
+  if (production && runGradle("wasmJsBrowserDistribution")) {
+    await copyRenderer(projectRoot, "production");
+    return;
   }
+  if (production) console.warn("Production Wasm optimize failed; building the development executable.");
+  if (!runGradle("wasmJsBrowserDevelopmentExecutableDistribution")) {
+    throw new Error("Wasm renderer build failed.");
+  }
+  // Copy the distribution built by THIS invocation, even when stale production output exists.
+  await copyRenderer(projectRoot, "development");
 }
 
-if (preferProduction && gradle("wasmJsBrowserDistribution") && (await exists(production))) {
-  process.exit(0);
-}
-
-if (preferProduction) {
-  console.warn("Production Wasm optimize failed; building the development executable.");
-}
-
-if (!gradle("wasmJsBrowserDevelopmentExecutableDistribution") || !(await exists(development))) {
-  process.exit(1);
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
+  await buildRenderer({
+    production: process.argv.includes("--production") || process.env.CI === "true" || process.env.MIUIX_RENDERER_PRODUCTION === "1",
+  });
 }

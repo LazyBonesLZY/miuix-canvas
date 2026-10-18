@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { Inspector } from "@/components/Inspector";
 import { LayersPanel } from "@/components/Layers";
 import { OfficialMiuixFrame } from "@/components/OfficialMiuixFrame";
@@ -9,8 +9,9 @@ import { Preview } from "@/components/Preview";
 import { PromptPanel } from "@/components/PromptPanel";
 import { ThemePanel } from "@/components/ThemePanel";
 import { ConfirmDialog, Logo, Toolbar } from "@/components/Toolbar";
+import { createHistory } from "@/lib/history";
 import { schemeFromSeed } from "@/lib/color";
-import { cloneDoc, defaultDoc, emptyScreen, loadDoc, nextScreenOrigin, saveDoc, screenOf, UI_KEY } from "@/lib/doc";
+import { defaultDoc, emptyScreen, loadDoc, nextScreenOrigin, saveDoc, screenOf, UI_KEY } from "@/lib/doc";
 import { detectLang, isLang, setGlobalLang, SHORTCUTS, t, type Lang } from "@/lib/i18n";
 import { centerItem, centerViewOnScreen, convertPreset, duplicateItem, fitView, flowLinks, moveLayer, pinItem, snapMove, zoomAt } from "@/lib/layout";
 import { readProject, saveProject } from "@/lib/project";
@@ -19,7 +20,7 @@ import { tidyScreen } from "@/lib/tidy";
 import { isLiveKind, isValueDragKind, livePatch } from "@/lib/interact";
 import { KIND_SPEC, defaultPosition, makeItem } from "@/lib/tokens";
 import type { Doc, FramePreset, Guide, Kind, Platform, Screen, Selection } from "@/lib/types";
-import { BEZEL, FRAME_LABEL_H, HISTORY_MAX, clamp, frameSize, isTypingTarget, onGrid, uid } from "@/lib/types";
+import { BEZEL, FRAME_LABEL_H, clamp, frameSize, isTypingTarget, onGrid, uid } from "@/lib/types";
 import { useLayoutMode, type LayoutMode } from "@/lib/viewport";
 
 const GITHUB = "https://github.com/LazyBonesLZY/miuix-canvas";
@@ -102,63 +103,31 @@ function ToolRail({
 }
 
 function useHistory(initial: Doc) {
-  const [doc, setDocState] = useState(initial);
-  const [marks, setMarks] = useState({ undo: 0, redo: 0 });
-  const past = useRef<Doc[]>([]);
-  const future = useRef<Doc[]>([]);
-  const now = useRef(initial);
-  now.current = doc;
-
+  const [history] = useState(() => createHistory(initial));
+  const snapshot = useSyncExternalStore(history.subscribe, history.getSnapshot, history.getSnapshot);
+  const { doc } = snapshot;
   const skipSave = useRef(true);
   useEffect(() => {
     if (skipSave.current) {
       skipSave.current = false;
       return;
     }
-    saveDoc(doc);
+    // Coalesce pointer-move updates instead of serializing the document on every move.
+    const timer = window.setTimeout(() => saveDoc(doc), 250);
+    return () => window.clearTimeout(timer);
   }, [doc]);
-
-  const bump = () => setMarks({ undo: past.current.length, redo: future.current.length });
-
-  const setDoc = useCallback((next: Doc | ((prev: Doc) => Doc), record = true) => {
-    setDocState((prev) => {
-      const value = typeof next === "function" ? next(prev) : next;
-      if (record) {
-        past.current = [...past.current, cloneDoc(prev)].slice(-HISTORY_MAX);
-        future.current = [];
-      }
-      return value;
-    });
-    queueMicrotask(bump);
-  }, []);
-
-  const beginHistory = useCallback(() => {
-    past.current = [...past.current, cloneDoc(now.current)].slice(-HISTORY_MAX);
-    future.current = [];
-    bump();
-  }, []);
-
-  const undo = useCallback(() => {
-    const prev = past.current.pop();
-    if (!prev) return;
-    setDocState((cur) => {
-      future.current.push(cloneDoc(cur));
-      return prev;
-    });
-    queueMicrotask(bump);
-  }, []);
-
-  const redo = useCallback(() => {
-    const nxt = future.current.pop();
-    if (!nxt) return;
-    setDocState((cur) => {
-      past.current.push(cloneDoc(cur));
-      return nxt;
-    });
-    queueMicrotask(bump);
-  }, []);
-
-  return { doc, setDoc, beginHistory, undo, redo, canUndo: marks.undo > 0, canRedo: marks.redo > 0 };
+  useEffect(() => {
+    const flush = () => saveDoc(history.getSnapshot().doc);
+    const hidden = () => { if (document.visibilityState === "hidden") flush(); };
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", hidden);
+    return () => {
+      window.removeEventListener("pagehide", flush);
+      document.removeEventListener("visibilitychange", hidden);
+      flush();
+    };
+  }, [history]);
+  return { ...history, doc, canUndo: snapshot.undo > 0, canRedo: snapshot.redo > 0 };
 }
 
 export function Editor({ initialLang, onReady }: { initialLang: Lang; onReady: () => void }) {

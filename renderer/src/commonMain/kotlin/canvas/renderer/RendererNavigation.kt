@@ -3,6 +3,7 @@ package canvas.renderer
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -189,11 +190,7 @@ internal fun RenderNavigationRail(item: ItemDto, modifier: Modifier, events: Ren
         "expanded" -> androidx.compose.runtime.remember(item.variant) { NavigationRailState(NavigationRailValue.Expanded) }
         else -> null
     }
-    NavigationRail(
-        modifier = modifier,
-        state = state,
-        defaultWindowInsetsPadding = false,
-    ) {
+    val content: @Composable ColumnScope.() -> Unit = {
         item.options().forEachIndexed { index, tab ->
             NavigationRailItem(
                 selected = index == item.selectedIndex(),
@@ -204,6 +201,11 @@ internal fun RenderNavigationRail(item: ItemDto, modifier: Modifier, events: Ren
                 badge = tab.badge?.let { badge -> { Badge { Text(badge) } } },
             )
         }
+    }
+    if (state == null) {
+        NavigationRail(modifier = modifier, defaultWindowInsetsPadding = false, content = content)
+    } else {
+        NavigationRail(state = state, modifier = modifier, defaultWindowInsetsPadding = false, content = content)
     }
 }
 

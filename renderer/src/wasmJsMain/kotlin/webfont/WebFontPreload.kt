@@ -3,63 +3,149 @@
 
 package webfont
 
+import androidx.compose.runtime.InternalComposeApi
+import androidx.compose.ui.text.UnresolvedSymbolsRegistry
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontVariation
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.platform.Font
-import kotlinx.coroutines.coroutineScope
+import androidx.compose.ui.text.platform.WebUnresolvedSymbolsRegistry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
-/**
- * Eagerly downloads every subset declared by the web-font [cssUrl] and registers each one with the
- * shared [FontFamily.Resolver]. The preloaded typefaces join the app-wide glyph fallback chain, so
- * every text composable renders CJK automatically, with no per-call wrappers.
- *
- * Fonts are fetched over plain HTTP and pushed into the resolver up front: no lazy per-glyph
- * machinery, and no local-font permission prompt. The set is fetched once; the browser HTTP cache
- * keeps repeat visits cheap.
- *
- * [onProgress] reports `(completed, total)` subset counts so the caller can drive a loading bar: it
- * fires once with the total known before any download starts, then after each subset settles —
- * whether it loaded or failed, so the count always reaches the total.
- */
-suspend fun preloadWebFonts(
-    cssUrl: String,
-    resolver: FontFamily.Resolver,
-    onProgress: (completed: Int, total: Int) -> Unit = { _, _ -> },
-) {
-    if (cssUrl.isBlank()) {
-        onProgress(0, 0)
-        return
-    }
-    val css = fetchTextOrNull(cssUrl)
-    if (css == null) {
-        onProgress(0, 0)
-        return
-    }
-    // Official CSS is frequency-sorted. The first slices cover everyday UI CJK; skipping the
-    // long tail avoids downloading ~50 TTF/WOFF faces per phone iframe.
-    val decls = parseCssFontFaces(css, baseUrl = cssUrl).distinctBy { it.url }.take(8)
-    onProgress(0, decls.size)
-    if (decls.isEmpty()) return
-    var completed = 0
-    coroutineScope {
-        for (decl in decls) {
-            launch {
-                val bytes = fetchBytesOrNull(decl.url)
-                val font = bytes?.let { data ->
-                    runCatching {
-                        Font(identity = decl.url, getData = { data }, weight = decl.weight, style = decl.style)
-                    }.getOrNull()
+@OptIn(InternalComposeApi::class)
+class OnDemandWebFontManager(
+    val cssUrl: String,
+    private val resolver: FontFamily.Resolver,
+    parentScope: CoroutineScope,
+    private val onFontsLoaded: () -> Unit = {},
+) : UnresolvedSymbolsRegistry.Listener,
+    AutoCloseable {
+
+    private val scope = CoroutineScope(parentScope.coroutineContext + SupervisorJob(parentScope.coroutineContext[Job]))
+
+    private var decls: List<FontFaceDecl>? = null
+    private val pendingCodepoints = mutableSetOf<Int>()
+    private val downloadedUrls = mutableSetOf<String>()
+    private val inFlightUrls = mutableSetOf<String>()
+    private val failedUrls = mutableSetOf<String>()
+    private val semaphore = Semaphore(permits = 4)
+
+    init {
+        scope.launch {
+            if (cssUrl.isBlank()) return@launch
+            val css = fetchTextOrNull(cssUrl)
+            if (css != null) {
+                val parsed = parseCssFontFaces(css, baseUrl = cssUrl)
+                decls = parsed
+                handleUnresolved((0x20..0x7e).toSet())
+                if (pendingCodepoints.isNotEmpty()) {
+                    val batch = pendingCodepoints.toSet()
+                    pendingCodepoints.clear()
+                    handleUnresolved(batch)
                 }
-                if (bytes != null && font == null) {
-                    consoleWarn("[webfont] Skia rejected font bytes for ${decl.url}")
-                }
-                if (font != null) {
-                    runCatching { resolver.preload(FontFamily(font)) }
-                }
-                // Count settled subsets (loaded or failed) so the bar always reaches the total.
-                completed++
-                onProgress(completed, decls.size)
+            } else {
+                consoleWarn("[webfont] Failed to fetch font CSS: $cssUrl")
             }
         }
     }
+
+    override fun onUnresolvedCodepoints(codepoints: Set<Int>) {
+        val currentDecls = decls
+        if (currentDecls == null) {
+            pendingCodepoints.addAll(codepoints)
+            return
+        }
+        handleUnresolved(codepoints)
+    }
+
+    private fun handleUnresolved(codepoints: Set<Int>) {
+        val currentDecls = decls ?: return
+        val needed = linkedMapOf<String, FontFaceDecl>()
+
+        for (decl in currentDecls) {
+            if (decl.url in downloadedUrls || decl.url in inFlightUrls || decl.url in failedUrls) {
+                continue
+            }
+            for (cp in codepoints) {
+                if (decl.covers(cp)) {
+                    needed[decl.url] = decl
+                    break
+                }
+            }
+        }
+
+        if (needed.isEmpty()) return
+
+        for (decl in needed.values) {
+            inFlightUrls.add(decl.url)
+            scope.launch {
+                semaphore.withPermit {
+                    val bytes = fetchBytesOrNull(decl.url)
+                    inFlightUrls.remove(decl.url)
+                    if (bytes != null) {
+                        downloadedUrls.add(decl.url)
+                        val family = createVariableFontFamily(decl.url, bytes, decl.style)
+                        if (family != null) {
+                            runCatching { resolver.preload(family) }
+                            WebUnresolvedSymbolsRegistry.onNewFontInstalled()
+                            onFontsLoaded()
+                        } else {
+                            failedUrls.add(decl.url)
+                            consoleWarn("[webfont] Skia rejected font bytes for ${decl.url}")
+                        }
+                    } else {
+                        failedUrls.add(decl.url)
+                    }
+                }
+            }
+        }
+    }
+
+    override fun close() {
+        WebUnresolvedSymbolsRegistry.removeListener(this)
+        scope.cancel()
+    }
 }
+
+@OptIn(InternalComposeApi::class)
+fun installOnDemandWebFonts(
+    cssUrl: String,
+    resolver: FontFamily.Resolver,
+    scope: CoroutineScope,
+    onFontsLoaded: () -> Unit = {},
+): AutoCloseable {
+    val manager = OnDemandWebFontManager(cssUrl, resolver, scope, onFontsLoaded)
+    WebUnresolvedSymbolsRegistry.addListener(manager)
+    return manager
+}
+
+private val miSansFullWeights = listOf(
+    FontWeight.W400 to 330, // MiSans Regular (default regular weight)
+    FontWeight.W500 to 430, // MiSans Medium
+    FontWeight.W600 to 570, // MiSans Semibold
+    FontWeight.W700 to 660, // MiSans Bold
+    FontWeight.W800 to 700, // MiSans Heavy
+    FontWeight.W900 to 700, // MiSans Heavy
+    FontWeight.W300 to 250, // MiSans Light
+    FontWeight.W200 to 200, // MiSans ExtraLight
+    FontWeight.W100 to 150, // MiSans Thin
+)
+
+private fun createVariableFontFamily(url: String, bytes: ByteArray, style: androidx.compose.ui.text.font.FontStyle): FontFamily? = runCatching {
+    val fonts = miSansFullWeights.map { (fw, wght) ->
+        Font(
+            identity = "$url-$wght",
+            getData = { bytes },
+            weight = fw,
+            style = style,
+            variationSettings = FontVariation.Settings(FontVariation.weight(wght)),
+        )
+    }
+    FontFamily(fonts)
+}.getOrNull()

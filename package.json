@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "npm run build:renderer && next dev",
-    "build": "npm run build:renderer && next build",
-    "build:renderer": "node scripts/build-renderer.mjs && node scripts/copy-renderer.mjs",
+    "build": "npm run build:renderer -- --production && next build",
+    "build:renderer": "node scripts/build-renderer.mjs",
     "start": "npx serve out",
     "typecheck": "tsc --noEmit -p .",
     "test": "vitest run"

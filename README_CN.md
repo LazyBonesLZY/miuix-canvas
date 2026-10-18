@@ -48,15 +48,26 @@
 | `?` | 快捷键说明 |
 | `Esc` | 关闭预览、帮助或面板 |
 
+## 上游兼容
+
+渲染器使用已发布的 **Miuix 0.9.4**，搭配 Kotlin **2.4.21** 和 Compose
+Multiplatform **1.12.2**。所有 Miuix 依赖共用 `renderer/build.gradle.kts`
+中的版本号，分别适配 NavigationRail 的固定与可展开重载。导出的提示词也面向
+0.9.4 API，并注明 Android SDK 要求。
+
+网页字体采用上游的按需字形加载方案，只下载实际需要的 MiSans 字体分片，
+每个渲染器最多同时下载四个。拖动时合并保存操作，离开页面时立即保存。
+
 ## 开发
 
 需要 JDK 21 和 Node.js 22+。构建时会先编译 Compose Wasm 渲染器，再静态导出 Next.js 编辑器。
 
 ```bash
-npm install
+npm ci
 npm run dev        # http://localhost:3000
 npm run build      # 静态导出到 ./out
 npm test
+npm run typecheck
 ```
 
 应用是 Next.js 静态导出。如果要挂在子路径下（例如 GitHub Pages 项目站），构建时设置 `NEXT_PUBLIC_BASE_PATH=/your-repo`。`.github/workflows/deploy.yml` 会在每次推送到 `main` 时自动带上这个变量，并把 `out/` 发布到 GitHub Pages。

@@ -36,4 +36,14 @@ describe("buildPrompt", () => {
     expect(text).toContain("画面「ホーム」");
     expect(text).toContain("Material 3 は使わない");
   });
+  it("pins the published API contract in every export language", () => {
+    for (const lang of ["zh", "en", "ja", "ko"] as const) {
+      const text = buildPrompt(defaultDoc(lang), lang);
+      expect(text).toContain("0.9.4");
+      expect(text).toContain("32.dp");
+      expect(text).toContain("API 33");
+      expect(text).not.toContain("rc01");
+    }
+  });
+
 });

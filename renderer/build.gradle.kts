@@ -1,14 +1,16 @@
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
-    kotlin("multiplatform") version "2.4.20"
-    kotlin("plugin.serialization") version "2.4.20"
-    id("org.jetbrains.compose") version "1.12.0"
-    id("org.jetbrains.kotlin.plugin.compose") version "2.4.20"
+    kotlin("multiplatform") version "2.4.21"
+    kotlin("plugin.serialization") version "2.4.21"
+    id("org.jetbrains.compose") version "1.12.2"
+    id("org.jetbrains.kotlin.plugin.compose") version "2.4.21"
 }
 
 group = "io.github.lazyboneslzy.miuixcanvas"
 version = "0.1.0"
+
+val miuixVersion = "0.9.4"
 
 kotlin {
     @OptIn(ExperimentalWasmDsl::class)
@@ -34,11 +36,11 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
-            implementation("top.yukonga.miuix.kmp:miuix-ui:0.9.4-rc01")
-            implementation("top.yukonga.miuix.kmp:miuix-preference:0.9.4-rc01")
-            implementation("top.yukonga.miuix.kmp:miuix-icons:0.9.4-rc01")
-            implementation("top.yukonga.miuix.kmp:miuix-blur:0.9.4-rc01")
-            implementation("top.yukonga.miuix.kmp:miuix-nav:0.9.4-rc01")
+            implementation("top.yukonga.miuix.kmp:miuix-ui:$miuixVersion")
+            implementation("top.yukonga.miuix.kmp:miuix-preference:$miuixVersion")
+            implementation("top.yukonga.miuix.kmp:miuix-icons:$miuixVersion")
+            implementation("top.yukonga.miuix.kmp:miuix-blur:$miuixVersion")
+            implementation("top.yukonga.miuix.kmp:miuix-nav:$miuixVersion")
             implementation("io.coil-kt.coil3:coil-compose:3.5.0")
             implementation("io.coil-kt.coil3:coil-network-ktor3:3.5.0")
             implementation("io.ktor:ktor-client-core:3.3.1")

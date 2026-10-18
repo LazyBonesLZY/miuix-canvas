@@ -3,15 +3,14 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -29,9 +28,10 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run typecheck
       - run: npm test
-      - name: Compile Miuix renderer tests
-        run: ./renderer/gradlew -p renderer compileTestKotlinWasmJs
+      - name: Run Miuix renderer tests
+        run: ./renderer/gradlew -p renderer wasmJsBrowserTest
       - name: Build static site
         run: npm run build
         env:
@@ -45,10 +45,15 @@ jobs:
           fi
       - run: touch out/.nojekyll
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: out
 
   deploy:
+    if: github.event_name != 'pull_request'
+    permissions:
+      pages: write
+      id-token: write
     needs: build
     runs-on: ubuntu-latest
     environment:

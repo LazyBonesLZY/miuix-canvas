@@ -158,7 +158,7 @@ const STYLE_NOTES: Record<Lang, Partial<Record<Kind, string>>> = {
     smallTitle: "SmallTitle：分组小标题，高 40.dp，左右 16.dp。",
     navigationBar: "NavigationBar：高 64.dp，底色 surface，顶部分割线，未选中 alpha 0.4。可用 IconAndText / IconOnly / IconWithSelectedLabel。",
     floatingNav: "FloatingNavigationBar：默认只显示图标，圆角 50.dp。iosLike 用官方 example 的 IosLiquidGlassNavigationBar（layerBackdrop + vibrancy）。",
-    navigationRail: "宽屏用 NavigationRail，不要用手机底栏硬拉宽。",
+    navigationRail: "宽屏用 NavigationRail；固定布局省略 state，展开动画使用非空 NavigationRailState，不要传 state = null。",
     tabRow: "TabRow 未选中带 1.dp outline，选中是滑动 surfaceContainer 指示条。TabRowWithContour 是 8.dp 轮廓胶囊。",
     searchBar: "SearchBar 必须配合 InputField，占位符 onSurfaceContainerHigh。",
     card: "Card：16.dp squircle，padding 16.dp，背景 surfaceContainer。标题约 19.sp，摘要 17.sp。",
@@ -192,7 +192,7 @@ const STYLE_NOTES: Record<Lang, Partial<Record<Kind, string>>> = {
     smallTitle: "SmallTitle: 40.dp section label with 16.dp side inset.",
     navigationBar: "NavigationBar: 64.dp, surface, top divider, unselected alpha 0.4. Modes: IconAndText / IconOnly / IconWithSelectedLabel.",
     floatingNav: "FloatingNavigationBar is icons-only by default with 50.dp corners. iosLike uses the official IosLiquidGlassNavigationBar example.",
-    navigationRail: "Use NavigationRail on wide layouts instead of stretching a phone nav bar.",
+    navigationRail: "Use NavigationRail on wide layouts. Omit state for fixed layouts; pass a non-null NavigationRailState for animated expansion, never state = null.",
     tabRow: "Unselected TabRow tabs have a 1.dp outline; selected uses a sliding surfaceContainer indicator.",
     searchBar: "SearchBar must wrap an InputField; placeholder uses onSurfaceContainerHigh.",
     card: "Card: 16.dp squircle, 16.dp padding, surfaceContainer. Title ~19.sp, summary 17.sp.",
@@ -226,7 +226,7 @@ const STYLE_NOTES: Record<Lang, Partial<Record<Kind, string>>> = {
     smallTitle: "SmallTitle：グループ見出し、高さ 40.dp、左右 16.dp。",
     navigationBar: "NavigationBar：高さ 64.dp、surface、上端の分割線、未選択 alpha 0.4。",
     floatingNav: "FloatingNavigationBar は既定でアイコンのみ、角 50.dp。",
-    navigationRail: "広い幅では NavigationRail を使う。",
+    navigationRail: "広い幅では NavigationRail。固定配置は state を省略し、展開アニメーションは非 null の NavigationRailState を使う。",
     tabRow: "TabRow の未選択は 1.dp の輪郭。",
     searchBar: "SearchBar は InputField を子に置く。",
     card: "Card：16.dp squircle、余白 16.dp、surfaceContainer。",
@@ -260,7 +260,7 @@ const STYLE_NOTES: Record<Lang, Partial<Record<Kind, string>>> = {
     smallTitle: "SmallTitle: 40.dp 구역 제목, 좌우 16.dp.",
     navigationBar: "NavigationBar: 높이 64.dp, surface, 상단 구분선, 미선택 alpha 0.4.",
     floatingNav: "FloatingNavigationBar는 기본 아이콘만, 모서리 50.dp.",
-    navigationRail: "넓은 폭에서는 NavigationRail을 쓴다.",
+    navigationRail: "넓은 폭에서는 NavigationRail. 고정 배치는 state를 생략하고 확장 애니메이션은 null이 아닌 NavigationRailState를 쓴다.",
     tabRow: "TabRow 미선택은 1.dp 윤곽.",
     searchBar: "SearchBar는 InputField 자식이 필요하다.",
     card: "Card: 16.dp squircle, 안쪽 여백 16.dp, surfaceContainer.",
@@ -415,10 +415,10 @@ export function buildPrompt(doc: Doc, lang: Lang, onlyScreenId?: string): string
   }[lang];
 
   const shape = {
-    zh: `- 圆角用 Miuix 默认 16.dp squircle（miuix-squircle），不要改成 Material 全胶囊。\n- 字体跟随 HyperOS / 系统默认，标题与 Preference 用 onBackground。\n- 动效用 Miuix 默认，屏幕跳转可用 miuix-nav。`,
-    en: `- Corners are Miuix 16.dp squircles (miuix-squircle), not Material pills.\n- Type follows HyperOS / the system font; titles and preferences use onBackground.\n- Motion stays on Miuix defaults; navigate with miuix-nav.`,
-    ja: `- 角は Miuix 既定の 16.dp squircle（miuix-squircle）。\n- 書体は HyperOS / システム。タイトルと Preference は onBackground。\n- モーションは Miuix 既定。遷移は miuix-nav。`,
-    ko: `- 모서리는 Miuix 기본 16.dp squircle(miuix-squircle).\n- 글꼴은 HyperOS / 시스템. 제목과 Preference는 onBackground.\n- 모션은 Miuix 기본, 이동은 miuix-nav.`,
+    zh: `- 卡片圆角用 Miuix 默认 16.dp squircle（miuix-squircle）；居中 Dialog 默认 32.dp，保留官方组件各自的默认值。\n- 字体跟随 HyperOS / 系统默认，标题与 Preference 用 onBackground。\n- 动效用 Miuix 默认，屏幕跳转可用 miuix-nav。`,
+    en: `- Cards use Miuix 16.dp squircles (miuix-squircle); centered dialogs default to 32.dp. Keep each component’s own defaults.\n- Type follows HyperOS / the system font; titles and preferences use onBackground.\n- Motion stays on Miuix defaults; navigate with miuix-nav.`,
+    ja: `- Card は 16.dp squircle、中央 Dialog は 32.dp。各部品の既定値を使う。\n- 書体は HyperOS / システム。タイトルと Preference は onBackground。\n- モーションは Miuix 既定。遷移は miuix-nav。`,
+    ko: `- Card는 16.dp squircle, 중앙 Dialog는 32.dp. 각 부품의 기본값을 쓴다.\n- 글꼴은 HyperOS / 시스템. 제목과 Preference는 onBackground.\n- 모션은 Miuix 기본, 이동은 miuix-nav.`,
   }[lang];
 
   const names = screens.map((s) => q(s.name, lang));
@@ -438,6 +438,12 @@ export function buildPrompt(doc: Doc, lang: Lang, onlyScreenId?: string): string
   const behavior = behaviorNotes(doc, screens, lang);
   const parts = [
     intro,
+    {
+      zh: "所有 Miuix 模块统一使用已发布的 0.9.4 正式版。Android minSdk 至少为 24；miuix-blur 要求 API 33。",
+      en: "Use published Miuix 0.9.4 for every Miuix module. Android minSdk is at least 24; miuix-blur requires API 33.",
+      ja: "Miuix の全モジュールは正式版 0.9.4 に統一する。Android minSdk は 24 以上、miuix-blur は API 33 が必要。",
+      ko: "모든 Miuix 모듈은 정식 0.9.4로 통일한다. Android minSdk는 24 이상이며 miuix-blur는 API 33이 필요하다.",
+    }[lang],
     `${hColor}\n${colorIntro}\n${paletteLines(doc).join("\n")}`,
     `${hShape}\n${shape}`,
     `${hLayout}\n${[screenList, screens.map((s) => describeScreen(doc, s, lang)).join("\n\n")].filter(Boolean).join("\n")}`,

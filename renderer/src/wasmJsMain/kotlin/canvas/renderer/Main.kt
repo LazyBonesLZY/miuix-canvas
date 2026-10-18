@@ -1,11 +1,10 @@
 package canvas.renderer
 
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.platform.LocalFontFamilyResolver
 import androidx.compose.ui.window.ComposeViewport
@@ -13,10 +12,8 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import kotlinx.browser.window
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.encodeToString
-import webfont.preloadWebFonts
+import webfont.installOnDemandWebFonts
 import kotlin.js.ExperimentalWasmJsInterop
 import kotlin.js.JsAny
 
@@ -27,7 +24,6 @@ private var acceptedRender = false
 
 private const val MI_SANS_CSS =
     "https://cdn-font.hyperos.mi.com/font/css?family=MiSans_VF:VF:Chinese_Simplify&display=swap"
-private const val LOADING_FONT_TIMEOUT_MS = 3_000L
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalWasmJsInterop::class)
 fun main() {
@@ -45,16 +41,11 @@ fun main() {
             }
             val fontFamilyResolver = LocalFontFamilyResolver.current
             val fonts = rememberCoroutineScope()
-            LaunchedEffect(fontFamilyResolver) {
-                withFrameNanos {}
-                fonts.launch {
-                    runCatching {
-                        withTimeoutOrNull(LOADING_FONT_TIMEOUT_MS) {
-                            preloadWebFonts(MI_SANS_CSS, fontFamilyResolver)
-                        }
-                    }
+            DisposableEffect(fontFamilyResolver) {
+                val manager = installOnDemandWebFonts(MI_SANS_CSS, fontFamilyResolver, fonts) {
                     post(RendererEvent(type = "fonts"))
                 }
+                onDispose { manager.close() }
             }
             RendererApp(request = request, emit = ::post)
         }
@@ -70,7 +61,6 @@ private fun accept(payload: String) {
             if (it.type == "render") {
                 acceptedRender = true
                 request = it
-                post(RendererEvent(type = "rendered", requestId = it.requestId))
             }
         }
         .onFailure {

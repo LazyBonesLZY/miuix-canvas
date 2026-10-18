@@ -60,7 +60,7 @@ import top.yukonga.miuix.kmp.blur.LayerBackdrop
 import top.yukonga.miuix.kmp.theme.MiuixTheme
 
 /**
- * Renders one DTO with actual Miuix 0.9.4-rc01 composables (generic Compose Image for `image`).
+ * Renders one DTO with actual Miuix 0.9.4 composables (generic Compose Image for `image`).
  *
  * Position and freeform size remain the caller's responsibility: [modifier] is always received
  * from and applied at the component boundary.

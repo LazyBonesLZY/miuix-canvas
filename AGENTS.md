@@ -7,8 +7,8 @@ Browser canvas for sketching [Miuix](https://github.com/compose-miuix-ui/miuix) 
 - Next.js static export (`output: "export"`)
 - React 19 + TypeScript
 - Tailwind CSS 4
-- Compose Web/Wasm renderer (Kotlin 2.4.20, Compose 1.12.0)
-- Published Miuix 0.9.4-rc01 libraries
+- Compose Web/Wasm renderer (Kotlin 2.4.21, Compose 1.12.2)
+- Published Miuix 0.9.4 libraries
 - No server. Documents live in `localStorage` (`miuix:doc`).
 
 ## Layout

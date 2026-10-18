@@ -34,19 +34,23 @@ Local changes are limited to:
 
 No implementation algorithm or numeric constant was changed.
 
-## compose-miuix-ui/miuix web font preload
+## compose-miuix-ui/miuix on-demand web fonts
 
 The files under `renderer/src/wasmJsMain/kotlin/webfont/` are vendored from
 [compose-miuix-ui/miuix](https://github.com/compose-miuix-ui/miuix)
 `example/shared/src/webMain/kotlin/webfont/` (`WebFontPreload.kt`,
-`WebFetch.kt`, `FontFaceDecl.kt`).
+`WebFetch.kt`, `FontFaceDecl.kt`). The on-demand manager and Unicode-range
+matching were synchronized from revision
+`8972f941c194bd3c4e14c34543d5ebc7b39e40da`.
 
 Copyright 2026, compose-miuix-ui contributors.
 
 Licensed under the Apache License, Version 2.0. The source-file SPDX and
-copyright headers are retained. Local changes are limited to keeping the
-files in the `webfont` package so the Wasm renderer can preload official
-MiSans the same way the Miuix web example does.
+copyright headers are retained. Local adaptations use the existing remote MiSans
+CSS for Latin subsets instead of a bundled font, retain WOFF2-first URL selection,
+normalize Unicode ranges (including wildcards), notify the editor when fonts load,
+and cancel the manager's child scope on disposal. The manager follows the upstream
+unresolved-glyph registry instead of eagerly loading a fixed subset count.
 
 ## Apache License 2.0
 

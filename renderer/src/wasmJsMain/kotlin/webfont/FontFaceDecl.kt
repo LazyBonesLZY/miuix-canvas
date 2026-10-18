@@ -11,7 +11,26 @@ internal data class FontFaceDecl(
     val weight: FontWeight,
     val style: FontStyle,
     val url: String,
-)
+    val ranges: List<IntRange> = emptyList(),
+) {
+    fun covers(codePoint: Int): Boolean {
+        if (ranges.isEmpty()) return true
+        var low = 0
+        var high = ranges.size - 1
+        while (low <= high) {
+            val mid = (low + high) ushr 1
+            val r = ranges[mid]
+            if (codePoint < r.first) {
+                high = mid - 1
+            } else if (codePoint > r.last) {
+                low = mid + 1
+            } else {
+                return true
+            }
+        }
+        return false
+    }
+}
 
 internal fun parseCssFontFaces(css: String, baseUrl: String? = null): List<FontFaceDecl> {
     val out = mutableListOf<FontFaceDecl>()
@@ -21,7 +40,7 @@ internal fun parseCssFontFaces(css: String, baseUrl: String? = null): List<FontF
         val weight = parseWeight(pickKey(body, "font-weight"))
         val style = parseStyle(pickKey(body, "font-style"))
         val url = pickFontUrl(pickKey(body, "src"), baseUrl) ?: continue
-        out += FontFaceDecl(weight, style, url)
+        out += FontFaceDecl(weight, style, url, parseUnicodeRanges(pickKey(body, "unicode-range")))
     }
     return out
 }
@@ -48,6 +67,44 @@ private fun parseWeight(raw: String?): FontWeight {
 }
 
 private fun parseStyle(raw: String?): FontStyle = if (raw?.trim()?.lowercase() == "italic") FontStyle.Italic else FontStyle.Normal
+
+private fun parseUnicodeRanges(raw: String?): List<IntRange> {
+    if (raw == null) return emptyList()
+    val out = mutableListOf<IntRange>()
+    val tokens = raw.split(',')
+    for (token in tokens) {
+        val trimmed = token.trim()
+        if (trimmed.isEmpty()) continue
+        val hex = if (trimmed.startsWith("U+", ignoreCase = true)) trimmed.substring(2) else trimmed
+        val dashIdx = hex.indexOf('-')
+        if ('?' in hex) {
+            val start = hex.replace('?', '0').toIntOrNull(16)
+            val end = hex.replace('?', 'F').toIntOrNull(16)
+            if (start != null && end != null) out.add(start..end)
+        } else if (dashIdx >= 0) {
+            val start = hex.substring(0, dashIdx).trim().toIntOrNull(16)
+            val end = hex.substring(dashIdx + 1).trim().toIntOrNull(16)
+            if (start != null && end != null && start <= end) {
+                out.add(start..end)
+            }
+        } else {
+            val point = hex.toIntOrNull(16)
+            if (point != null) {
+                out.add(point..point)
+            }
+        }
+    }
+    val merged = mutableListOf<IntRange>()
+    for (range in out.sortedBy { it.first }) {
+        val previous = merged.lastOrNull()
+        if (previous != null && range.first <= previous.last) {
+            merged[merged.lastIndex] = previous.first..maxOf(previous.last, range.last)
+        } else {
+            merged.add(range)
+        }
+    }
+    return merged
+}
 
 private fun pickFontUrl(srcRaw: String?, baseUrl: String?): String? {
     if (srcRaw == null) return null

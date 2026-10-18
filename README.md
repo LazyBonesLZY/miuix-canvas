@@ -48,15 +48,27 @@ Works with any AI coding tool that takes a prompt, such as Cursor, Claude Code, 
 | `?` | Shortcuts |
 | `Esc` | Close preview, help, or sheets |
 
+## Upstream compatibility
+
+The renderer uses published **Miuix 0.9.4**, Kotlin **2.4.21**, and Compose
+Multiplatform **1.12.2**. All Miuix artifacts share one version in
+`renderer/build.gradle.kts`. Fixed and expandable `NavigationRail` overloads
+are handled separately. Prompts target 0.9.4 APIs and their Android SDK requirements.
+
+Web fonts follow the upstream on-demand glyph loader: only required MiSans
+subsets are downloaded, with up to four concurrent requests per renderer. Local
+document saves are coalesced during dragging and flushed when leaving the page.
+
 ## Develop
 
 JDK 21 and Node.js 22+ are required. The build compiles the Compose Wasm renderer first, then exports the Next.js editor.
 
 ```bash
-npm install
+npm ci
 npm run dev        # http://localhost:3000
 npm run build      # static export to ./out
 npm test
+npm run typecheck
 ```
 
 The app is a static Next.js export. To host it under a sub-path (for example a GitHub Pages project site), set `NEXT_PUBLIC_BASE_PATH=/your-repo` at build time. `.github/workflows/deploy.yml` does this automatically and publishes `out/` to GitHub Pages on every push to `main`.
